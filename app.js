@@ -2901,7 +2901,7 @@ async function login() {
   if (!_sb) { alert('Cloud sync is not configured — fill in config.js to enable sign-in.'); return; }
   await _sb.auth.signInWithOAuth({
     provider: 'discord',
-    options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { prompt: 'none' } },
+    options: { redirectTo: window.location.origin + window.location.pathname },
   });
 }
 
@@ -2950,14 +2950,16 @@ async function loadFromCloud() {
       localStorage.setItem(CL_BP_KEY,  JSON.stringify([...clBpOwned]));
     }
 
-    if (data.custom_items) {
-      customItems = data.custom_items;
+    if (Array.isArray(data.custom_items)) {
+      customItems = data.custom_items.filter(it => it && typeof it.name === 'string' && it.name.trim());
       localStorage.setItem(CUSTOM_LS_KEY, JSON.stringify(customItems));
       for (const it of customItems) _mergeCustomItem(it);
     }
 
     if (data.ui_prefs) {
-      for (const [k, v] of Object.entries(data.ui_prefs)) localStorage.setItem(k, v);
+      for (const [k, v] of Object.entries(data.ui_prefs)) {
+        if (k.startsWith('wf-ui-') || k.startsWith('wf-filt-')) localStorage.setItem(k, v);
+      }
     }
 
     localStorage.setItem('wf-cloud-ts', String(cloudTs));
