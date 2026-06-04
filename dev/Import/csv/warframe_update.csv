@@ -1,0 +1,115 @@
+﻿Warframe,Category,Method to Obtain,Circuit Available,Tradable,Vaulted
+Ash,Base,Railjack ,Yes,FALSE,
+Atlas,Base,Quest: The Jordas Precept & Jordas Golem Assassination,Yes,FALSE,
+Banshee,Base,Clan: Tenno Lab,No,FALSE,
+Baruuk,Base,Syndicate: Vox Solaris ,Yes,FALSE,
+Caliban,Base,Narmer Bounties (Fortuna/Cetus),No,FALSE,
+Chroma,Base,Quest: The New Strange & Junctions ,Yes,FALSE,
+Citrine,Base,Mirror Defense: Tyana Pass Mars,No,FALSE,
+Cyte-09,Base,Quest: The Hex & Höllvania Bounties,No,FALSE,
+Dagath,Base,Clan: Dagath's Hollow,No,FALSE,
+Dante,Base,"Mission: Disruption (Deimos, Armatus)",No,FALSE,
+Ember,Base,Boss: Gen. Sargas Ruk (Saturn) ,Yes,FALSE,
+Equinox,Base,Boss: Tyl Regor (Uranus),No,FALSE,
+Excalibur,Base,Boss: Lt. Lech Kril (Mars) ,Yes,FALSE,
+Follie,Base,"Mission: Follie's Hunt (Venus, Vesper Relay)",No,FALSE,
+Frost,Base,Boss: Cpt. Vor & Lt. Lech Kril (Ceres) ,Yes,FALSE,
+Gara,Base,Quest: Saya's Vigil & Cetus Bounties ,Yes,FALSE,
+Garuda,Base,Quest: Vox Solaris & Fortuna Bounties ,Yes,FALSE,
+Gauss,Base,"Mission: Disruption (Sedna, Kelpie)",No,FALSE,
+Grendel,Base,"Mission: Europa, Arbitration locators needed",No,FALSE,
+Gyre,Base,Holdfast Bounties (Chrysalith),No,FALSE,
+Harrow,Base,Quest: Chains of Harrow (see note) ,Yes,FALSE,
+Hildryn,Base,Syndicate: Vox Solaris ,Yes,FALSE,
+Hydroid,Base,Boss: Councilor Vay Hek (Earth) ,Yes,FALSE,
+Inaros,Base,Quest: Sands of Inaros ,Yes,FALSE,
+Ivara,Base,Mission: Spy ,Yes,FALSE,
+Jade,Base,"Quest: Jade Shadows & Ascension (Uranus, Brutus)",No,FALSE,
+Khora,Base,Mission: Sanctuary Onslaught ,Yes,FALSE,
+Koumei,Base,Mission: Shrine Defense,No,FALSE,
+Kullervo,Base,Duviri (Anger/Sorrow/Fear): Kullervo boss,No,FALSE,
+Lavos,Base,Syndicate: Entrati,No,FALSE,
+Limbo,Base,Quest: The Limbo Theorem ,Yes,FALSE,
+Loki,Base,Boss: Hyena Pack (Neptune) ,Yes,FALSE,
+Mag,Base,Boss: The Sergeant (Phobos) ,Yes,FALSE,
+Mesa,Base,Quest: Patient Zero & Alad V Assa. ,Yes,FALSE,
+Mirage,Base,Quest: Hidden Messages ,Yes,FALSE,
+Nekros,Base,Boss: Lephantis (Deimos) ,Yes,FALSE,
+Nezha,Base,Clan: Tenno Lab,No,FALSE,
+Nidus,Base,Quest: The Glast Gambit & Infested Salvage ,Yes,FALSE,
+Nokko,Base,Deepmines Bounties,No,FALSE,
+Nova,Base,Boss: Raptors (Europa) ,Yes,FALSE,
+Nyx,Base,Boss: Phorid (Invasion) ,Yes,FALSE,
+Oberon,Base,Railjack: Grineer POIs ,Yes,FALSE,
+Octavia,Base,Quest: Octavia's Anthem (see note) ,Yes,FALSE,
+Oraxia,Base,Duviri (Isleweaver),No,FALSE,
+Protea,Base,Quest: The Deadlock Protocol & Granuum Void,No,FALSE,
+Qorvex,Base,Quest: Whispers in the wall & Sanctum An. Bounties,No,FALSE,
+Revenant,Base,Quest: Nakak's & Cetus Bounties ,Yes,FALSE,
+Rhino,Base,Boss: The Jackal (Venus) ,Yes,FALSE,
+Saryn,Base,Boss: Kela De Thaym (Sedna) ,Yes,FALSE,
+Sevagoth,Base,Quest: Call of the Tempestarii & Void Storms,No,FALSE,
+Styanax,Base,Kahls Garrison: Chipper inventory,No,FALSE,
+Temple,Base,Mission: Stage Defense (Höllvania),No,FALSE,
+Titania,Base,Quest: The Silver Grove ,Yes,FALSE,
+Trinity,Base,Boss: Ambulas (Pluto) ,Yes,FALSE,
+Uriel,Base,Quest: The Old Peace & Descendia,No,FALSE,
+Valkyr,Base,Boss: Alad V (Jupiter) ,Yes,FALSE,
+Vauban,Base,Nightwave Offerings ,Yes,FALSE,
+Volt,Base,Clan: Tenno Lab,No,FALSE,
+Voruna,Base,Mission: Conjunction Survival (Lua),No,FALSE,
+Wisp,Base,Boss: Ropalolyst (Jupiter),No,FALSE,
+Wukong,Base,Clan: Tenno Lab,No,FALSE,
+Xaku,Base,Quest: Heart of Deimos & Bounties (Necralisk),No,FALSE,
+Yareli,Base,Quest: The Waverider & Dojo (Ventkids),No,FALSE,
+Zephyr,Base,Clan: Tenno Lab,No,FALSE,
+Ash Prime,Prime,Relics,No,TRUE,TRUE
+Atlas Prime,Prime,Relics,No,TRUE,TRUE
+Banshee Prime,Prime,Relics,No,TRUE,TRUE
+Baruuk Prime,Prime,Relics,No,TRUE,TRUE
+Caliban Prime,Prime,Relics,No,TRUE,FALSE
+Chroma Prime,Prime,Relics,No,TRUE,TRUE
+Ember Prime,Prime,Relics,No,TRUE,TRUE
+Equinox Prime,Prime,Relics,No,TRUE,TRUE
+Frost Prime,Prime,Relics,No,TRUE,TRUE
+Gara Prime,Prime,Relics,No,TRUE,TRUE
+Garuda Prime,Prime,Relics,No,TRUE,TRUE
+Gauss Prime,Prime,Relics,No,TRUE,TRUE
+Grendel Prime,Prime,Relics,No,TRUE,TRUE
+Gyre Prime,Prime,Relics,No,TRUE,FALSE
+Harrow Prime,Prime,Relics,No,TRUE,TRUE
+Hildryn Prime,Prime,Relics,No,TRUE,TRUE
+Hydroid Prime,Prime,Relics,No,TRUE,TRUE
+Inaros Prime,Prime,Relics,No,TRUE,TRUE
+Ivara Prime,Prime,Relics,No,TRUE,TRUE
+Khora Prime,Prime,Relics,No,TRUE,TRUE
+Lavos Prime,Prime,Relics,No,TRUE,FALSE
+Limbo Prime,Prime,Relics,No,TRUE,TRUE
+Loki Prime,Prime,Relics,No,TRUE,TRUE
+Mag Prime,Prime,Relics,No,TRUE,TRUE
+Mesa Prime,Prime,Relics,No,TRUE,TRUE
+Mirage Prime,Prime,Relics,No,TRUE,TRUE
+Nekros Prime,Prime,Relics,No,TRUE,TRUE
+Nezha Prime,Prime,Relics,No,TRUE,TRUE
+Nidus Prime,Prime,Relics,No,TRUE,TRUE
+Nova Prime,Prime,Relics,No,TRUE,TRUE
+Nyx Prime,Prime,Relics (Perma-unvaulted),No,TRUE,FALSE
+Oberon Prime,Prime,Relics,No,TRUE,TRUE
+Octavia Prime,Prime,Relics,No,TRUE,TRUE
+Protea Prime,Prime,Relics,No,TRUE,TRUE
+Revenant Prime,Prime,Relics,No,TRUE,TRUE
+Rhino Prime,Prime,Relics,No,TRUE,TRUE
+Saryn Prime,Prime,Relics,No,TRUE,TRUE
+Sevagoth Prime,Prime,Relics,No,TRUE,FALSE
+Titania Prime,Prime,Relics,No,TRUE,TRUE
+Trinity Prime,Prime,Relics,No,TRUE,TRUE
+Valkyr Prime,Prime,Relics (Perma-unvaulted),No,TRUE,FALSE
+Vauban Prime,Prime,Relics,No,TRUE,TRUE
+Volt Prime,Prime,Relics (Baro Ki'Teer),No,TRUE,TRUE
+Voruna Prime,Prime,Relics,No,TRUE,FALSE
+Wisp Prime,Prime,Relics,No,TRUE,TRUE
+Wukong Prime,Prime,Relics,No,TRUE,TRUE
+Xaku Prime,Prime,Relics,No,TRUE,FALSE
+Yareli Prime,Prime,Relics,No,TRUE,FALSE
+Zephyr Prime,Prime,Relics,No,TRUE,TRUE
+Excalibur Umbra,Umbra,Quest: The Sacrifice,No,FALSE,

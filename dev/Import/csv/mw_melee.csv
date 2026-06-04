@@ -1,0 +1,232 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Azothane,Sword/Nikana,false,false,,30
+Broken War,Sword/Nikana,true,true,,30
+Cronus,Sword/Nikana,true,true,,30
+Dark Sword,Sword/Nikana,false,false,,30
+Dex Nikana,Sword/Nikana,true,true,,30
+Dragon Nikana,Sword/Nikana,true,true,,30
+Ether Sword,Sword/Nikana,true,true,,30
+Heat Sword,Sword/Nikana,true,true,,30
+Jaw Sword,Sword/Nikana,false,false,,30
+Krohkur,Sword/Nikana,true,true,,30
+Mire,Sword/Nikana,true,true,,30
+Nikana,Sword/Nikana,true,true,,30
+Pangolin Sword,Sword/Nikana,false,false,,30
+Pennant,Sword/Nikana,false,false,,30
+Plasma Sword,Sword/Nikana,true,true,,30
+Prisma Skana,Sword/Nikana,false,false,,30
+Skana,Sword/Nikana,true,true,,30
+Skiajati,Sword/Nikana,true,true,,30
+Sun & Moon,Sword/Nikana,true,true,,30
+Syam,Sword/Nikana,false,false,,30
+Tatsu,Sword/Nikana,true,true,,30
+Dex Dakra,Dual Sword,true,true,,30
+Dual Cleavers,Dual Sword,true,true,,30
+Dual Ether,Dual Sword,true,true,,30
+Dual Heat Swords,Dual Sword,true,true,,30
+Dual Ichor,Dual Sword,false,false,,30
+Dual Kamas,Dual Sword,true,true,,30
+Dual Keres,Dual Sword,true,false,,30
+Dual Raza,Dual Sword,true,false,,30
+Dual Skana,Dual Sword,true,true,,30
+Dual Viciss,Dual Sword,true,false,,30
+Dual Zoren,Dual Sword,true,true,,30
+Nami Skyla,Dual Sword,true,true,,30
+Prisma Dual Cleavers,Dual Sword,false,false,,30
+Twin Basolk,Dual Sword,true,true,,30
+Twin Krohkur,Dual Sword,true,true,,30
+Dark Split-Sword,Heavy Blade,true,true,,30
+Galatine,Heavy Blade,true,true,,30
+Gram,Heavy Blade,true,true,,30
+Masseter,Heavy Blade,true,true,,30
+Paracesis,Heavy Blade,false,false,,30
+ - Ranks 30 - 40,Heavy Blade,,false,,30
+Sarofang,Heavy Blade,true,true,,30
+Scindo,Heavy Blade,true,true,,30
+Vitrica,Heavy Blade,false,false,,30
+War,Heavy Blade,false,false,,30
+Zenistar,Heavy Blade,false,false,,30
+Balla,Zaw,false,false,,30
+Cyath,Zaw,false,false,,30
+Dehtat,Zaw,false,false,,30
+Dokrahm,Zaw,false,false,,30
+Kronsh,Zaw,false,false,,30
+Mewan,Zaw,false,false,,30
+Ooltha,Zaw,false,false,,30
+Plague Keewar,Zaw,false,false,,30
+Plague Kripath,Zaw,false,false,,30
+Rabvee,Zaw,false,false,,30
+Sepfahn,Zaw,false,false,,30
+Ceramic Dagger,Dagger,true,true,,30
+Dark Dagger,Dagger,false,false,,30
+Heat Dagger,Dagger,true,false,,30
+Innodem,Dagger,false,false,,30
+Karyst,Dagger,true,true,,30
+Rakta Dark Dagger,Dagger,true,true,,30
+Rumblejack,Dagger,true,true,,30
+Sheev,Dagger,false,false,,30
+Ether Daggers,Dual Dagger,true,true,,30
+Fang,Dual Dagger,true,true,,30
+Nepheri,Dual Dagger,false,false,,30
+Okina,Dual Dagger,true,true,,30
+Kama,Machete,true,true,,30
+Kreska,Machete,true,false,,30
+Machete,Machete,false,false,,30
+Machete Wraith,Machete,true,true,,30
+Nami Solo,Machete,true,true,,30
+Prisma Machete,Machete,true,true,,30
+Prova,Machete,true,true,,30
+Prova Vandal,Machete,false,false,,30
+Slaytra,Machete,true,false,,30
+Ankyros,Fist/Sparring,true,true,,30
+Furax,Fist/Sparring,true,true,,30
+Furax Wraith,Fist/Sparring,false,false,,30
+Hirudo,Fist/Sparring,true,true,,30
+Kogake,Fist/Sparring,true,true,,30
+Korrudo,Fist/Sparring,false,false,,30
+Obex,Fist/Sparring,true,true,,30
+Prisma Obex,Fist/Sparring,false,false,,30
+Ruvox,Fist/Sparring,true,false,,30
+Tekko,Fist/Sparring,true,true,,30
+Ack & Brunt,Sword-Shield,true,true,,30
+Argo & Vel,Sword-Shield,false,false,,30
+Cobra & Crane,Sword-Shield,true,true,,30
+Sigma & Octantis,Sword-Shield,false,false,,30
+Silva & Aegis,Sword-Shield,true,true,,30
+Tak & Lug,Sword-Shield,true,false,,30
+Redeemer,Gunblade,true,true,,30
+Sarpa,Gunblade,true,false,,30
+Stropha,Gunblade,true,false,,30
+Vastilok,Gunblade,false,false,,30
+Arum Spinosa,Warfan,false,false,,30
+Gunsen,Warfan,true,true,,30
+Quassus,Warfan,true,false,,30
+Vericres,Warfan,false,false,,30
+Ghoulsaw,Assault Saw,false,false,,30
+Corufell,Heavy Scythe,true,true,,30
+Hespar,Heavy Scythe,false,false,,30
+Thalys,Heavy Scythe,true,false,,30
+Amanata,Polearm/Staff,true,true,,30
+Amphis,Polearm/Staff,true,true,,30
+Bo,Polearm/Staff,true,true,,30
+Broken Scepter,Polearm/Staff,true,true,,30
+Cadus,Polearm/Staff,true,true,,30
+Cassowar,Polearm/Staff,true,true,,30
+Edun,Polearm/Staff,false,false,,30
+Guandao,Polearm/Staff,true,true,,30
+Kesheg,Polearm/Staff,true,true,,30
+Korumm,Polearm/Staff,false,false,,30
+Lesion,Polearm/Staff,true,false,,30
+Orthos,Polearm/Staff,true,true,,30
+Pupacyst,Polearm/Staff,false,false,,30
+Serro,Polearm/Staff,true,true,,30
+Sydon,Polearm/Staff,true,true,,30
+Tipedo,Polearm/Staff,true,true,,30
+Tonbo,Polearm/Staff,true,true,,30
+Vaykor Sydon,Polearm/Staff,true,true,,30
+Atterax,Whip/B.Whip,true,true,,30
+Ceti Lacera,Whip/B.Whip,true,true,,30
+Dorrclave,Whip/B.Whip,true,false,,30
+Galvacord,Whip/B.Whip,true,false,,30
+Jat Kusar,Whip/B.Whip,true,false,,30
+Lacera,Whip/B.Whip,true,true,,30
+Lecta,Whip/B.Whip,true,true,,30
+Mios,Whip/B.Whip,false,false,,30
+Scoliac,Whip/B.Whip,false,false,,30
+Secura Lecta,Whip/B.Whip,false,false,,30
+Spinnerex,Whip/B.Whip,true,false,,30
+Verdilac,Whip/B.Whip,false,false,,30
+Cerata,Glaive,false,false,,30
+Falcor,Glaive,true,true,,30
+Glaive,Glaive,false,false,,30
+Halikar,Glaive,true,true,,30
+Halikar Wraith,Glaive,false,false,,30
+Kestrel,Glaive,true,true,,30
+Orvius,Glaive,true,false,,30
+Pathocyst,Glaive,false,false,,30
+Xoris,Glaive,true,true,,30
+Boltace,Tonfa/Nunchaku,true,true,,30
+Kronen,Tonfa/Nunchaku,true,true,,30
+Ninkondi,Tonfa/Nunchaku,true,true,,30
+Ohma,Tonfa/Nunchaku,true,true,,30
+Praedos,Tonfa/Nunchaku,false,false,,30
+Prisma Ohma,Tonfa/Nunchaku,false,false,,30
+Pulmonars,Tonfa/Nunchaku,true,false,,30
+Shaku,Tonfa/Nunchaku,true,true,,30
+Tonkkatt,Tonfa/Nunchaku,true,false,,30
+Telos Boltace,Tonfa/Nunchaku,true,true,,30
+MK1-Bo,MK1,true,true,,30
+MK1-Furax,MK1,true,true,,30
+Anku,Scythe,true,true,,30
+Caustacyst,Scythe,false,false,,30
+Ether Reaper,Scythe,true,true,,30
+Harmony,Scythe,true,false,,30
+Hate,Scythe,true,true,,30
+Venato,Scythe,false,false,,30
+Arca Titron,Hammer,true,true,,30
+Ekhein,Hammer,false,false,,30
+Fragor,Hammer,true,true,,30
+Heliocor,Hammer,false,false,,30
+Jat Kittag,Hammer,true,true,,30
+Magistar,Hammer,true,true,,30
+Sampotes,Hammer,false,false,,30
+Sancti Magistar,Hammer,false,false,,30
+Sibear,Hammer,false,false,,30
+Synoid Heliocor,Hammer,false,false,,30
+Volnus,Hammer,true,true,,30
+Wolf Sledge,Hammer,false,false,,30
+Destreza,Rapier,true,true,,30
+Endura,Rapier,true,true,,30
+Ripkas,Claws,true,true,,30
+Venka,Claws,true,true,,30
+Keratinos,Claws,true,false,,30
+Ankyros Prime,Prime,false,false,,30
+Bo Prime,Prime,false,false,,30
+Cobra & Crane Prime,Prime,false,false,,30
+Dakra Prime,Prime,false,false,,30
+Destreza Prime,Prime,false,false,,30
+Dual Kamas Prime,Prime,false,false,,30
+Dual Keres Prime,Prime,false,false,,30
+Dual Zoren Prime,Prime,false,false,,30
+Fang Prime,Prime,false,false,,30
+Fragor Prime,Prime,false,false,,30
+Galatine Prime,Prime,false,false,,30
+Galariak Prime,Prime,false,false,,30
+Glaive Prime,Prime,true,true,,30
+Gram Prime,Prime,false,false,,30
+Guandao Prime,Prime,false,false,,30
+Gunsen Prime,Prime,false,false,,30
+Karyst Prime,Prime,false,false,,30
+Kestrel Prime,Prime,true,true,,30
+Kogake Prime,Prime,false,false,,30
+Kronen Prime,Prime,false,false,,30
+Masseter Prime,Prime,false,false,,30
+Nami Skyla Prime,Prime,false,false,,30
+Nikana Prime,Prime,false,false,,30
+Ninkondi Prime,Prime,false,false,,30
+Okina Prime,Prime,false,false,,30
+Orthos Prime,Prime,false,false,,30
+Pangolin Prime,Prime,false,false,,30
+Quassus Prime,Prime,false,false,,30
+Reaper Prime,Prime,false,false,,30
+Redeemer Prime,Prime,false,false,,30
+Sarofang Prime,Prime,false,false,,30
+Scindo Prime,Prime,false,false,,30
+Silva & Aegis Prime,Prime,false,false,,30
+Tatsu Prime,Prime,false,false,,30
+Tekko Prime,Prime,false,false,,30
+Tipedo Prime,Prime,false,false,,30
+Venato Prime,Prime,false,false,,30
+Venka Prime,Prime,false,false,,30
+Volnus Prime,Prime,false,false,,30
+Coda Caustacyst,Coda,false,false,false,40
+Coda Hirudo,Coda,false,false,false,40
+Coda Mire,Coda,false,false,false,40
+Coda Motovore,Coda,false,false,false,40
+Coda Pathocyst,Coda,false,false,false,40
+Kuva Ghoulsaw,Kuva,false,false,false,40
+Kuva Shildeg,Kuva,false,false,false,40
+Tenet Agendus,Tenet,false,false,false,40
+Tenet Exec,Tenet,false,false,false,40
+Tenet Grigori,Tenet,false,false,false,40
+Tenet Livia,Tenet,false,false,false,40

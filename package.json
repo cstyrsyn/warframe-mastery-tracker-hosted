@@ -1,0 +1,7 @@
+{
+  "name": "wf-mastery-tracker",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  }
+}

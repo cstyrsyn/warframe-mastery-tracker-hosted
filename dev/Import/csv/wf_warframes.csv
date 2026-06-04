@@ -1,0 +1,115 @@
+name,category,acquired,mastered
+Ash,Base,true,true
+Atlas,Base,false,false
+Banshee,Base,true,true
+Baruuk,Base,true,true
+Caliban,Base,true,true
+Chroma,Base,true,true
+Citrine,Base,true,false
+Cyte-09,Base,true,true
+Dagath,Base,true,true
+Dante,Base,true,true
+Ember,Base,true,true
+Equinox,Base,true,true
+Excalibur,Base,true,true
+Follie,Base,true,true
+Frost,Base,true,true
+Gara,Base,true,true
+Garuda,Base,true,true
+Gauss,Base,true,true
+Grendel,Base,true,true
+Gyre,Base,true,true
+Harrow,Base,true,true
+Hildryn,Base,true,true
+Hydroid,Base,true,true
+Inaros,Base,true,true
+Ivara,Base,true,true
+Jade,Base,true,true
+Khora,Base,true,true
+Koumei,Base,true,true
+Kullervo,Base,true,true
+Lavos,Base,true,true
+Limbo,Base,true,true
+Loki,Base,true,true
+Mag,Base,true,true
+Mesa,Base,true,true
+Mirage,Base,true,true
+Nekros,Base,true,true
+Nezha,Base,true,true
+Nidus,Base,true,true
+Nokko,Base,true,true
+Nova,Base,true,true
+Nyx,Base,true,true
+Oberon,Base,true,true
+Octavia,Base,false,false
+Oraxia,Base,true,true
+Protea,Base,true,true
+Qorvex,Base,true,true
+Revenant,Base,true,true
+Rhino,Base,true,true
+Saryn,Base,true,true
+Sevagoth,Base,true,true
+Styanax,Base,true,true
+Temple,Base,true,true
+Titania,Base,true,false
+Trinity,Base,true,true
+Uriel,Base,true,true
+Valkyr,Base,true,true
+Vauban,Base,true,true
+Volt,Base,true,true
+Voruna,Base,true,true
+Wisp,Base,true,true
+Wukong,Base,true,true
+Xaku,Base,true,true
+Yareli,Base,true,true
+Zephyr,Base,true,true
+Ash Prime,Prime,false,false
+Atlas Prime,Prime,false,false
+Banshee Prime,Prime,false,false
+Baruuk Prime,Prime,false,false
+Caliban Prime,Prime,false,false
+Chroma Prime,Prime,false,false
+Ember Prime,Prime,false,false
+Equinox Prime,Prime,false,false
+Frost Prime,Prime,false,false
+Gara Prime,Prime,false,false
+Garuda Prime,Prime,false,false
+Gauss Prime,Prime,true,true
+Grendel Prime,Prime,true,false
+Gyre Prime,Prime,true,true
+Harrow Prime,Prime,true,true
+Hildryn Prime,Prime,false,false
+Hydroid Prime,Prime,false,false
+Inaros Prime,Prime,false,false
+Ivara Prime,Prime,false,false
+Khora Prime,Prime,false,false
+Lavos Prime,Prime,true,true
+Limbo Prime,Prime,false,false
+Loki Prime,Prime,true,false
+Mag Prime,Prime,false,false
+Mesa Prime,Prime,true,true
+Mirage Prime,Prime,false,false
+Nekros Prime,Prime,true,true
+Nezha Prime,Prime,false,false
+Nidus Prime,Prime,false,false
+Nova Prime,Prime,true,true
+Nyx Prime,Prime,false,false
+Oberon Prime,Prime,true,false
+Octavia Prime,Prime,false,false
+Protea Prime,Prime,true,true
+Revenant Prime,Prime,true,true
+Rhino Prime,Prime,false,false
+Saryn Prime,Prime,false,false
+Sevagoth Prime,Prime,true,true
+Titania Prime,Prime,false,false
+Trinity Prime,Prime,true,true
+Valkyr Prime,Prime,false,false
+Vauban Prime,Prime,false,false
+Volt Prime,Prime,true,true
+Voruna Prime,Prime,false,false
+Wisp Prime,Prime,false,false
+Wukong Prime,Prime,true,true
+Xaku Prime,Prime,false,false
+Yaveli Prime,Prime,false,false
+Zephyr Prime,Prime,true,false
+Excalibur Umbra,Umbra,true,true

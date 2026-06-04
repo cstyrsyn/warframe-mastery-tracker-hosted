@@ -1,0 +1,14 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Amesha,Archwing,true,true,,30
+Elytron,Archwing,true,true,,30
+Itzal,Archwing,true,true,,30
+Odonata,Archwing,true,true,,30
+Bad Baby,K-Drive,false,false,,30
+Feverspine,K-Drive,false,false,,30
+Flatbelly,K-Drive,true,false,,30
+Needlenose,K-Drive,false,false,,30
+Runway,K-Drive,false,false,,30
+Voidrig,Necramech,true,true,true,40
+Bonewidow,Necramech,false,false,false,40
+Odonata Prime,Prime Archwing,false,false,,30
+Plexus,Plexus,true,true,,30

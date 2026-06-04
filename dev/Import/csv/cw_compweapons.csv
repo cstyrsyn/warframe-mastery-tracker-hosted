@@ -1,0 +1,25 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Akaten,Robotic Weapon,true,true,,30
+Artax,Robotic Weapon,true,true,,30
+Batoten,Robotic Weapon,true,true,,30
+Burst Laser,Robotic Weapon,true,true,,30
+Cryotra,Robotic Weapon,true,false,,30
+Deconstructor,Robotic Weapon,true,true,,30
+Deth Machine Rifle,Robotic Weapon,true,true,,30
+Helstrum,Robotic Weapon,true,false,,30
+Lacerten,Robotic Weapon,true,true,,30
+Laser Rifle,Robotic Weapon,true,true,,30
+Multron,Robotic Weapon,true,false,,30
+Prisma Burst Laser,Robotic Weapon,false,false,,30
+Stinger,Robotic Weapon,true,true,,30
+Sweeper,Robotic Weapon,true,true,,30
+Tazicor,Robotic Weapon,true,true,,30
+Verglas,Robotic Weapon,false,false,,30
+Vulcax,Robotic Weapon,true,true,,30
+Vulklok,Robotic Weapon,true,true,,30
+Burst Laser Prime,Prime Robotic Weapon,false,false,,30
+Deconstructor Prime,Prime Robotic Weapon,false,false,,30
+Deth Machine Rifle Prime,Prime Robotic Weapon,false,false,,30
+Prime Laser Rifle,Prime Robotic Weapon,false,false,,30
+Sweeper Prime,Prime Robotic Weapon,false,false,,30
+Verglas Prime,Prime Robotic Weapon,true,true,,30

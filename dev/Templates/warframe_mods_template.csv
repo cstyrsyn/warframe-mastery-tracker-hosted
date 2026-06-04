@@ -1,0 +1,4 @@
+Name,Description,BaseDrain,Max Rank,Polarity,IsExilus,Rarity,Type,Category,Sub-Type,Use,Acquisition,Tradable
+Example Warframe Augment,On Kill: 30% chance to deal 200% damage for 5s.,6,3,Zenurik,,Rare,Excalibur,Warframe Augment,,,Cephalon Suda;The Perrin Sequence,TRUE
+Example Weapon Mod,+15% Critical Chance,6,5,Madurai,,Common,Primary,Rifle,,,General Drop,TRUE
+Example Exilus Mod,+12% Parkour Velocity,2,3,Naramon,TRUE,Uncommon,Primary,Exilus,Rifle,,Arbitrations,TRUE

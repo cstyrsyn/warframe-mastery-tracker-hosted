@@ -1,0 +1,4 @@
+Name,Description,Max Rank,Rarity,Type,Acquisition,Tradable
+Example Warframe Arcane,On Kill: 30% chance for +50% Ability Strength for 20s.,5,Rare,Warframe,Eidolons;Orphix,TRUE
+Example Weapon Arcane,On Critical Hit: +25% Fire Rate for 6s.,5,Uncommon,Primary,Duviri,TRUE
+Example Melee Arcane,On Melee Kill: +20% Movement Speed for 8s.,5,Common,Melee,Zariman,TRUE

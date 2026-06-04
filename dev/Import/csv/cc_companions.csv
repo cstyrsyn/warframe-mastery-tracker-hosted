@@ -1,0 +1,43 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Carrier,Sentinel,true,true,,30
+Dethcube,Sentinel,true,true,,30
+Diriga,Sentinel,true,true,,30
+Djinn,Sentinel,true,true,,30
+Helios,Sentinel,true,true,,30
+Nautilus,Sentinel,false,false,,30
+Oxylus,Sentinel,true,true,,30
+Prisma Shade,Sentinel,false,false,,30
+Shade,Sentinel,true,true,,30
+Taxon,Sentinel,true,true,,30
+Wyrm,Sentinel,true,true,,30
+Carrier Prime,Prime Sentinel,false,false,,30
+Dethcube Prime,Prime Sentinel,false,false,,30
+Helios Prime,Prime Sentinel,false,false,,30
+Nautilus Prime,Prime Sentinel,true,true,,30
+Shade Prime,Prime Sentinel,false,false,,30
+Wyrm Prime,Prime Sentinel,false,false,,30
+Chesa,Kubrow,false,false,,30
+Huras,Kubrow,false,false,,30
+Raksa,Kubrow,true,true,,30
+Sahasa,Kubrow,false,false,,30
+Sunika,Kubrow,false,false,,30
+Helminth,Kubrow,true,true,,30
+Adarza,Kavat,true,true,,30
+Smeeta,Kavat,false,false,,30
+Vasca,Kavat,false,false,,30
+Venari,Kavat,true,true,,30
+Venari Prime,Kavat,false,false,,30
+Lambeo,Moa,false,false,,30
+Nychus,Moa,false,false,,30
+Oloro,Moa,false,false,,30
+Para,Moa,true,true,,30
+Predasites,Predasite,Acquired,Mastered,,30
+Medjay Predasite,Predasite,true,true,,30
+Pharaoh Predasite,Predasite,true,true,,30
+Vizier Predasite,Predasite,true,true,,30
+Crescent Vulpaphyla,Vulpaphyla,true,true,,30
+Panzer Vulpaphyla,Vulpaphyla,true,true,,30
+Sly Vulpaphyla,Vulpaphyla,true,true,,30
+Bhaira,Hound,true,true,,30
+Dorma,Hound,false,false,,30
+Hec,Hound,false,false,,30

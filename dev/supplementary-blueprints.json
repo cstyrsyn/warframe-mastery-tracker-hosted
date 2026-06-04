@@ -1,0 +1,972 @@
+{
+  "Carrier": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Alloy Plate",
+        "Count": 1000,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Circuits",
+        "Count": 400,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Nano Spores",
+        "Count": 1500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Control Module",
+        "Count": 3,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Amesha": {
+    "Credits": 25000,
+    "Time": 43200,
+    "Parts": [
+      {
+        "Name": "Harness",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Nitain Extract",
+              "Count": 2,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Circuits",
+              "Count": 900,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Polymer Bundle",
+              "Count": 3600,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Alloy Plate",
+              "Count": 5500,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Wings",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Alloy Plate",
+              "Count": 5600,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Neurodes",
+              "Count": 5,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Polymer Bundle",
+              "Count": 4200,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Nitain Extract",
+              "Count": 2,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Systems",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Control Module",
+              "Count": 1,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Nitain Extract",
+              "Count": 2,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Salvage",
+              "Count": 6700,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Circuits",
+              "Count": 2800,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Nitain Extract",
+        "Count": 4,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Voidrig": {
+    "Credits": 25000,
+    "Time": 259200,
+    "Parts": [
+      {
+        "Name": "Casing",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Adramal Alloy",
+              "Count": 60,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Faceted Tiametrite",
+              "Count": 30,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Lucent Teroglobe",
+              "Count": 140,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Engine",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Tempered Bapholite",
+              "Count": 50,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Parasitic Tethermaw",
+              "Count": 4,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Orokin Cell",
+              "Count": 10,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Capsule",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Morphics",
+              "Count": 3,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Spinal Core Section",
+              "Count": 12,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Devolved Namalon",
+              "Count": 50,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Weapon Pod",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Biotic Filter",
+              "Count": 3,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Purified Heciphron",
+              "Count": 40,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Purged Dagonic",
+              "Count": 30,
+              "Type": "Resource"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "Helios": {
+    "Credits": 5000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Fieldron",
+        "Count": 10,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Oxium",
+        "Count": 300,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Ferrite",
+        "Count": 5000,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Forma",
+        "Count": 1,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Sweeper": null,
+  "Bonewidow": {
+    "Credits": 25000,
+    "Time": 259200,
+    "Parts": [
+      {
+        "Name": "Casing",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Tempered Bapholite",
+              "Count": 100,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Thaumic Distillate",
+              "Count": 20,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Goblite Tears",
+              "Count": 15,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Engine",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Adramal Alloy",
+              "Count": 120,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Cranial Foremount",
+              "Count": 2,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Titanium",
+              "Count": 750,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Capsule",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Scintillant",
+              "Count": 4,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Biotic Filter",
+              "Count": 20,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Star Crimzian",
+              "Count": 6,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Weapon Pod",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 43200,
+          "Parts": [
+            {
+              "Name": "Spinal Core Section",
+              "Count": 6,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Devolved Namalon",
+              "Count": 80,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Scrap",
+              "Count": 45,
+              "Type": "Resource"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "Elytron": {
+    "Credits": 25000,
+    "Time": 129600,
+    "Parts": [
+      {
+        "Name": "Harness",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Ferrite",
+              "Count": 1000,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Morphics",
+              "Count": 1,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Rubedo",
+              "Count": 300,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Orokin Cell",
+              "Count": 3,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Wings",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Alloy Plate",
+              "Count": 6000,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Neural Sensors",
+              "Count": 2,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Polymer Bundle",
+              "Count": 5500,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Rubedo",
+              "Count": 1100,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Systems",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Control Module",
+              "Count": 1,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Morphics",
+              "Count": 5,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Salvage",
+              "Count": 6000,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Cryotic",
+              "Count": 3800,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Control Module",
+        "Count": 5,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Adarza": null,
+  "Akaten": null,
+  "Artax": null,
+  "Bad Baby": null,
+  "Balla": null,
+  "Batoten": null,
+  "Bhaira": null,
+  "Braton": null,
+  "Burst Laser": null,
+  "Burst Laser Prime": null,
+  "Cantic Prism": null,
+  "Carrier Prime": null,
+  "Catchmoon": null,
+  "Chesa": null,
+  "Coda Bassocyst": null,
+  "Coda Bubonico": null,
+  "Coda Catabolyst": null,
+  "Coda Caustacyst": null,
+  "Coda Hema": null,
+  "Coda Hirudo": null,
+  "Coda Mire": null,
+  "Coda Motovore": null,
+  "Coda Pathocyst": null,
+  "Coda Pox": null,
+  "Coda Sporothrix": null,
+  "Coda Synapse": null,
+  "Coda Tysis": null,
+  "Combat": null,
+  "Command": null,
+  "Crescent Vulpaphyla": null,
+  "Cyath": null,
+  "Dark Split-Sword": null,
+  "Deconstructor": null,
+  "Deconstructor Prime": null,
+  "Dehtat": null,
+  "Deth Machine Rifle": null,
+  "Deth Machine Rifle Prime": null,
+  "Dethcube": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Alloy Plate",
+        "Count": 500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Circuits",
+        "Count": 400,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Nano Spores",
+        "Count": 200,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Control Module",
+        "Count": 1,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Dex Dakra": null,
+  "Dex Furis": null,
+  "Dex Nikana": null,
+  "Dex Sybaris": null,
+  "Diriga": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Alloy Plate",
+        "Count": 600,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Argon Crystal",
+        "Count": 2,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Plastids",
+        "Count": 350,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Polymer Bundle",
+        "Count": 500,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Djinn": {
+    "Credits": 30000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Mutagen Mass",
+        "Count": 6,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Salvage",
+        "Count": 30000,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Circuits",
+        "Count": 3500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Forma",
+        "Count": 2,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Dokrahm": null,
+  "Dorma": null,
+  "Dual Coda Torxica": null,
+  "Endurance": null,
+  "Engineering": null,
+  "Feverspine": null,
+  "Flatbelly": null,
+  "Gaze": null,
+  "Glaxion Vandal": null,
+  "Gotva Prime": null,
+  "Granmu Prism": null,
+  "Gunnery": null,
+  "Halikar Wraith": null,
+  "Hec": null,
+  "Helios Prime": null,
+  "Helminth Charger": null,
+  "Helstrum": {
+    "Credits": 50000,
+    "Time": 86400,
+    "Parts": [
+      { "Name": "Star Crimzian", "Count": 10, "Type": "Resource" },
+      { "Name": "Star Amarast", "Count": 10, "Type": "Resource" },
+      { "Name": "Recaster Neural Relay", "Count": 10, "Type": "Resource" },
+      { "Name": "Synathid Ecosynth Analyzer", "Count": 1, "Type": "Resource" }
+    ]
+  },
+  "Huras": null,
+  "Itzal": {
+    "Credits": 25000,
+    "Time": 129600,
+    "Parts": [
+      {
+        "Name": "Harness",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Oxium",
+              "Count": 180,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Ferrite",
+              "Count": 700,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Rubedo",
+              "Count": 300,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Tellurium",
+              "Count": 2,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Wings",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Alloy Plate",
+              "Count": 150,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Oxium",
+              "Count": 400,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Ferrite",
+              "Count": 900,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Tellurium",
+              "Count": 2,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Systems",
+        "Count": 1,
+        "Type": "Item",
+        "Cost": {
+          "Credits": 15000,
+          "Time": 21600,
+          "Parts": [
+            {
+              "Name": "Control Module",
+              "Count": 1,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Oxium",
+              "Count": 320,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Salvage",
+              "Count": 800,
+              "Type": "Resource"
+            },
+            {
+              "Name": "Neurodes",
+              "Count": 2,
+              "Type": "Resource"
+            }
+          ]
+        }
+      },
+      {
+        "Name": "Control Module",
+        "Count": 2,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Klamora Prism": null,
+  "Kronsh": null,
+  "Kuva Ayanga": null,
+  "Kuva Brakk": null,
+  "Kuva Bramma": null,
+  "Kuva Chakkhurr": null,
+  "Kuva Drakgoon": null,
+  "Kuva Ghoulsaw": null,
+  "Kuva Grattler": null,
+  "Kuva Hek": null,
+  "Kuva Hind": null,
+  "Kuva Karak": null,
+  "Kuva Kohm": null,
+  "Kuva Kraken": null,
+  "Kuva Nukor": null,
+  "Kuva Ogris": null,
+  "Kuva Quartakk": null,
+  "Kuva Seer": null,
+  "Kuva Shildeg": null,
+  "Kuva Sobek": null,
+  "Kuva Tonkor": null,
+  "Kuva Twin Stubbas": null,
+  "Kuva Zarr": null,
+  "Lacerten": null,
+  "Lambeo": null,
+  "Laser Rifle": null,
+  "Lega Prism": null,
+  "MK1-Bo": null,
+  "MK1-Braton": null,
+  "MK1-Furax": null,
+  "MK1-Furis": null,
+  "MK1-Kunai": null,
+  "MK1-Paris": null,
+  "MK1-Strun": null,
+  "Machete Wraith": null,
+  "Mara Detron": null,
+  "Mausolon": null,
+  "Medjay Predasite": null,
+  "Mewan": null,
+  "Mote Amp": null,
+  "Multron": null,
+  "Nataruk": null,
+  "Needlenose": null,
+  "Nychus": null,
+  "Oloro": null,
+  "Ooltha": null,
+  "Opportunity": null,
+  "Opticor Vandal": null,
+  "Oxylus": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Goblite Tears",
+        "Count": 15,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Axidrol Alloy",
+        "Count": 45,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Scrap",
+        "Count": 40,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Longwinder Lathe Coagulant",
+        "Count": 10,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Panzer Vulpaphyla": null,
+  "Para": null,
+  "Pharaoh Predasite": null,
+  "Piloting": null,
+  "Plague Keewar": null,
+  "Plague Kripath": null,
+  "Plexus": null,
+  "Prime Laser Rifle": null,
+  "Prisma Angstrum": null,
+  "Prisma Burst Laser": null,
+  "Prisma Dual Cleavers": null,
+  "Prisma Gorgon": null,
+  "Prisma Grakata": null,
+  "Prisma Grinlok": null,
+  "Prisma Lenz": null,
+  "Prisma Machete": null,
+  "Prisma Obex": null,
+  "Prisma Ohma": null,
+  "Prisma Shade": null,
+  "Prisma Skana": null,
+  "Prisma Tetra": null,
+  "Prisma Twin Gremlins": null,
+  "Prisma Veritux": null,
+  "Prova Vandal": null,
+  "Quanta Vandal": null,
+  "Rabvee": null,
+  "Rahn Prism": null,
+  "Raksa": null,
+  "Rakta Ballistica": null,
+  "Rakta Cernos": null,
+  "Rakta Dark Dagger": null,
+  "Raplak Prism": null,
+  "Rattleguts": null,
+  "Riding": null,
+  "Rumblejack": null,
+  "Runway": null,
+  "Sahasa": null,
+  "Sancti Castanas": null,
+  "Sancti Magistar": null,
+  "Sancti Tigris": null,
+  "Secura Dual Cestra": null,
+  "Secura Lecta": null,
+  "Sepfahn": null,
+  "Shade": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Alloy Plate",
+        "Count": 500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Circuits",
+        "Count": 400,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Nano Spores",
+        "Count": 200,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Control Module",
+        "Count": 1,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Shwaak Prism": null,
+  "Sirocco": null,
+  "Skiajati": null,
+  "Sly Vulpaphyla": null,
+  "Smeeta": null,
+  "Sporelacer": null,
+  "Stinger": null,
+  "Strun": null,
+  "Sunika": null,
+  "Supra Vandal": null,
+  "Sweeper Prime": null,
+  "Synoid Gammacor": null,
+  "Synoid Heliocor": null,
+  "Synoid Simulor": null,
+  "Tactical": null,
+  "Taxon": {
+    "Credits": 15000,
+    "Time": 3600,
+    "Parts": [
+      {
+        "Name": "Ferrite",
+        "Count": 500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Rubedo",
+        "Count": 200,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Neurodes",
+        "Count": 1,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Telos Akbolto": null,
+  "Telos Boltace": null,
+  "Telos Boltor": null,
+  "Tenet Agendus": null,
+  "Tenet Arca Plasmor": null,
+  "Tenet Cycron": null,
+  "Tenet Detron": null,
+  "Tenet Diplos": null,
+  "Tenet Envoy": null,
+  "Tenet Exec": null,
+  "Tenet Ferrox": null,
+  "Tenet Flux Rifle": null,
+  "Tenet Glaxion": null,
+  "Tenet Grigori": null,
+  "Tenet Livia": null,
+  "Tenet Plinx": null,
+  "Tenet Spirex": null,
+  "Tenet Tetra": null,
+  "Thornbak": null,
+  "Tombfinger": null,
+  "Vasca": null,
+  "Vastilok": null,
+  "Vaykor Sydon": null,
+  "Venari": null,
+  "Venari Prime": null,
+  "Verglas": null,
+  "Verglas Prime": null,
+  "Vericres": null,
+  "Vermisplicer": null,
+  "Viper Wraith": null,
+  "Vizier Predasite": null,
+  "Vulkar Wraith": null,
+  "Vulklok": null,
+  "Wyrm": {
+    "Credits": 15000,
+    "Time": 86400,
+    "Parts": [
+      {
+        "Name": "Alloy Plate",
+        "Count": 500,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Circuits",
+        "Count": 400,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Nano Spores",
+        "Count": 200,
+        "Type": "Resource"
+      },
+      {
+        "Name": "Control Module",
+        "Count": 1,
+        "Type": "Resource"
+      }
+    ]
+  },
+  "Zylok": null
+}

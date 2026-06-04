@@ -1,0 +1,152 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Acrid,Single,false,false,,30
+Angstrum,Single,true,true,,30
+Arca Scisco,Single,true,true,,30
+Athodai,Single,true,true,,30
+Atomos,Single,true,true,,30
+Azima,Single,false,false,,30
+Ballistica,Single,true,true,,30
+Bolto,Single,true,true,,30
+Brakk,Single,false,false,,30
+Bronco,Single,true,true,,30
+Catabolyst,Single,false,false,,30
+Cestra,Single,true,true,,30
+Cyanex,Single,true,true,,30
+Cycron,Single,true,true,,30
+Detron,Single,false,false,,30
+EFV-8 Mars,Single,true,false,,30
+Embolist,Single,false,false,,30
+Epitaph,Single,false,false,,30
+Furis,Single,true,true,,30
+Gammacor,Single,true,true,,30
+Grimoire,Single,true,true,,30
+Hystrix,Single,true,true,,30
+Knell,Single,true,true,,30
+Kohmak,Single,true,true,,30
+Kompressa,Single,false,false,,30
+Kraken,Single,true,true,,30
+Kulstar,Single,true,false,,30
+Laetum,Single,true,true,,30
+Lato,Single,true,true,,30
+Lato Vandal,Single,false,false,,30
+Lex,Single,true,true,,30
+Magnus,Single,true,true,,30
+Mara Detron,Single,false,false,,30
+Marelok,Single,true,true,,30
+Nukor,Single,true,true,,30
+Ocucor,Single,true,true,,30
+Onos,Single,true,true,,30
+Pandero,Single,true,false,,30
+Plinx,Single,true,true,,30
+Prisma Angstrum,Single,true,true,,30
+Pyrana,Single,true,true,,30
+Quatz,Single,true,true,,30
+Rakta Ballistica,Single,true,true,,30
+Riot-848,Single,true,true,,30
+Seer,Single,true,false,,30
+Sepulcrum,Single,true,false,,30
+Sicarus,Single,true,true,,30
+Sonicor,Single,true,true,,30
+Spectra,Single,true,true,,30
+Spectra Vandal,Single,false,false,,30
+Stubba,Single,true,false,,30
+Stug,Single,true,true,,30
+Synoid Gammacor,Single,true,true,,30
+Tysis,Single,true,true,,30
+Vasto,Single,true,true,,30
+Vaykor Marelok,Single,true,true,,30
+Velox,Single,true,true,,30
+Vesper 77,Single,true,false,,30
+Viper,Single,true,true,,30
+Viper Wraith,Single,false,false,,30
+Zakti,Single,true,true,,30
+Zylok,Single,true,true,,30
+Zymos,Single,true,false,,30
+Afuris,Dual,true,true,,30
+Akarius,Dual,false,false,,30
+Akbolto,Dual,true,true,,30
+Akbronco,Dual,true,false,,30
+Akjagara,Dual,true,false,,30
+Aklato,Dual,true,true,,30
+Aklex,Dual,true,true,,30
+Akmagnus,Dual,true,true,,30
+Aksomati,Dual,true,false,,30
+Akstiletto,Dual,true,true,,30
+Akvasto,Dual,true,false,,30
+Akzani,Dual,true,true,,30
+Dex Furis,Dual,true,true,,30
+Dual Cestra,Dual,true,true,,30
+Dual Toxocyst,Dual,true,true,,30
+Prisma Twin Gremlins,Dual,false,false,,30
+Secura Dual Cestra,Dual,false,false,,30
+Staticor,Dual,true,true,,30
+Telos Akbolto,Dual,true,false,,30
+Twin Grakatas,Dual,true,false,,30
+Twin Gremlins,Dual,true,true,,30
+Twin Kohmak,Dual,true,false,,30
+Twin Rogga,Dual,true,true,,30
+Twin Vipers,Dual,true,false,,30
+Twin Vipers Wraith,Dual,false,false,,30
+Aegrit,Thrown,true,false,,30
+Cantare,Thrown,true,true,,30
+Castanas,Thrown,true,true,,30
+Despair,Thrown,true,true,,30
+Fusilai,Thrown,true,true,,30
+Hikou,Thrown,true,true,,30
+Kunai,Thrown,true,true,,30
+Pox,Thrown,true,true,,30
+Sancti Castanas,Thrown,false,false,,30
+Scyotid,Thrown,true,false,,30
+Spira,Thrown,true,true,,30
+Talons,Thrown,true,true,,30
+Afuris Prime,Prime,false,false,,30
+Akarius Prime,Prime,false,false,,30
+Akbolto Prime,Prime,false,false,,30
+Akbronco Prime,Prime,false,false,,30
+Akjagara Prime,Prime,false,false,,30
+Aklex Prime,Prime,false,false,,30
+Akmagnus Prime,Prime,false,false,,30
+Aksomati Prime,Prime,false,false,,30
+Akstilletto Prime,Prime,false,false,,30
+Akvasto Prime,Prime,false,false,,30
+Ballistica Prime,Prime,false,false,,30
+Bronco Prime,Prime,false,false,,30
+Epitaph Prime,Prime,true,true,,30
+Euphona Prime,Prime,false,false,,30
+Hikou Prime,Prime,false,false,,30
+Hystrix Prime,Prime,false,false,,30
+Kompressa Prime,Prime,true,true,,30
+Knell Prime,Prime,false,false,,30
+Lex Prime,Prime,false,false,,30
+Magnus Prime,Prime,false,false,,30
+Pandero Prime,Prime,false,false,,30
+Pyrana Prime,Prime,true,true,,30
+Sagek Prime,Prime,false,false,,30
+Sicarus Prime,Prime,true,true,,30
+Spira Prime,Prime,false,false,,30
+Vasto Prime,Prime,false,false,,30
+Velox Prime,Prime,false,false,,30
+Zakti Prime,Prime,false,false,,30
+Zylok Prime,Prime,false,false,,30
+MK1-Furis,MK1,true,true,,30
+MK1-Kunai,MK1,true,true,,30
+Catchmoon,Kitgun,false,false,,30
+Gaze,Kitgun,false,false,,30
+Rattleguts,Kitgun,false,false,,30
+Sporelacer,Kitgun,false,false,,30
+Tombfinger,Kitgun,false,false,,30
+Vermisplicer,Kitgun,false,false,,30
+Coda Catabolyst,Coda,false,false,false,40
+Dual Coda Torxica,Coda,true,true,true,40
+Coda Pox,Coda,false,false,false,40
+Coda Tysis,Coda,false,false,false,40
+Kuva Brakk,Kuva,false,false,false,40
+Kuva Kraken,Kuva,false,false,false,40
+Kuva Nukor,Kuva,true,true,true,40
+Kuva Seer,Kuva,false,false,false,40
+Kuva Twin Stubbas,Kuva,false,false,false,40
+Tenet Cycron,Tenet,true,true,true,40
+Tenet Detron,Tenet,false,false,false,40
+Tenet Diplos,Tenet,true,true,false,40
+Tenet Plinx,Tenet,false,false,false,40
+Tenet Spirex,Tenet,false,false,false,40

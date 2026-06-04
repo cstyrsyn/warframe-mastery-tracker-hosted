@@ -1,0 +1,29 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Corvas Prime,Prime Arch Weapon,false,false,,30
+Larkspur Prime,Prime Arch Weapon,false,false,,30
+Arbucep,Arch-Gun,true,false,,30
+Cortege,Arch-Gun,false,false,,30
+Corvas,Arch-Gun,true,false,,30
+Cyngas,Arch-Gun,false,false,,30
+Dual Decurion,Arch-Gun,true,false,,30
+Fluctus,Arch-Gun,false,false,,30
+Grattler,Arch-Gun,true,false,,30
+Imperator,Arch-Gun,true,true,,30
+Imperator Vandal,Arch-Gun,true,false,,30
+Larkspur,Arch-Gun,false,false,,30
+Mandonel,Arch-Gun,true,false,,30
+Mausolon,Arch-Gun,true,true,,30
+Morgha,Arch-Gun,false,false,,30
+Phaedra,Arch-Gun,false,false,,30
+Prisma Dual Decurion,Arch-Gun,false,false,,30
+Velocitus,Arch-Gun,false,false,,30
+Kuva Ayanga,Kuva Arch-Gun,false,false,false,40
+Kuva Grattler,Kuva Arch-Gun,false,false,false,40
+Agkuza,Arch-Melee,false,false,,30
+Centaur,Arch-Melee,false,false,,30
+Kaszas,Arch-Melee,false,false,,30
+Knux,Arch-Melee,false,false,,30
+Onorix,Arch-Melee,false,false,,30
+Prisma Veritux,Arch-Melee,false,false,,30
+Rathbone,Arch-Melee,false,false,,30
+Veritux,Arch-Melee,true,true,,30

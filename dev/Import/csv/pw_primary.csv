@@ -1,0 +1,193 @@
+name,category,acquired,mastered_30,mastered_40,maxrank
+Acceltra,Rifle,true,true,,30
+Aeolak,Rifle,true,true,,30
+Alternox,Rifle,true,true,,30
+Ambassador,Rifle,true,true,,30
+Amprex,Rifle,true,false,,30
+Argonak,Rifle,true,true,,30
+AX-52,Rifle,true,true,,30
+Basmu,Rifle,true,true,,30
+Battacor,Rifle,true,false,,30
+Baza,Rifle,true,true,,30
+Boltor,Rifle,true,true,,30
+Braton,Rifle,true,true,,30
+Braton Vandal,Rifle,false,false,,30
+Bubonico,Rifle,false,false,,30
+Burston,Rifle,true,true,,30
+Buzlok,Rifle,true,true,,30
+Dera,Rifle,true,false,,30
+Dera Vandal,Rifle,false,false,,30
+Dex Sybaris,Rifle,true,true,,30
+EFV-5 Jupiter,Rifle,true,false,,30
+Enkaus,Rifle,true,true,,30
+Flux Rifle,Rifle,true,false,,30
+Fulmin,Rifle,true,true,,30
+Glaxion,Rifle,true,false,,30
+Glaxion Vandal,Rifle,true,true,,30
+Gorgon,Rifle,true,true,,30
+Gorgon Wraith,Rifle,false,false,,30
+Grakata,Rifle,true,true,,30
+Grinlok,Rifle,true,true,,30
+Harpak,Rifle,true,true,,30
+Hema,Rifle,false,false,,30
+Higasa,Rifle,true,true,,30
+Hind,Rifle,true,true,,30
+Ignis,Rifle,true,true,,30
+Ignis Wraith,Rifle,true,true,,30
+Karak,Rifle,true,false,,30
+Karak Wraith,Rifle,false,false,,30
+Latron,Rifle,true,true,,30
+Latron Wraith,Rifle,false,false,,30
+Mutalist Quanta,Rifle,false,false,,30
+Opticor,Rifle,true,false,,30
+Opticor Vandal,Rifle,true,true,,30
+Paracyst,Rifle,false,false,,30
+Phenmore,Rifle,true,true,,30
+Prisma Gorgon,Rifle,false,false,,30
+Prisma Grakata,Rifle,false,false,,30
+Prisma Grinlok,Rifle,false,false,,30
+Prisma Tetra,Rifle,false,false,,30
+Purgator 1,Rifle,true,false,,30
+Quanta,Rifle,true,false,,30
+Quanta Vandal,Rifle,true,true,,30
+Quartakk,Rifle,true,true,,30
+Quellor,Rifle,true,true,,30
+Reconifex,Rifle,true,false,,30
+Shedu,Rifle,false,false,,30
+Soma,Rifle,true,false,,30
+Stahlta,Rifle,true,false,,30
+Stradavar,Rifle,true,false,,30
+Supra,Rifle,true,true,,30
+Supra Vandal,Rifle,false,false,,30
+Sybaris,Rifle,true,true,,30
+Synapse,Rifle,false,false,,30
+Telos Boltor,Rifle,true,true,,30
+Tenora,Rifle,true,true,,30
+Tetra,Rifle,true,false,,30
+Thornbak,Rifle,true,true,,30
+Tiberon,Rifle,true,false,,30
+Trumna,Rifle,true,false,,30
+Veldt,Rifle,true,true,,30
+Zenith,Rifle,true,true,,30
+Arca Plasmor,Shotgun,true,false,,30
+Astilla,Shotgun,true,false,,30
+Boar,Shotgun,true,true,,30
+Cedo,Shotgun,true,false,,30
+Convectrix,Shotgun,true,false,,30
+Corinth,Shotgun,true,false,,30
+Drakgoon,Shotgun,true,true,,30
+Exergis,Shotgun,true,true,,30
+Felarx,Shotgun,true,true,,30
+Hek,Shotgun,true,true,,30
+Kohm,Shotgun,true,true,,30
+Phage,Shotgun,true,false,,30
+Phantasma,Shotgun,true,false,,30
+Rauta,Shotgun,false,false,,30
+Sancti Tigris,Shotgun,false,false,,30
+Sobek,Shotgun,true,false,,30
+Steflos,Shotgun,true,false,,30
+Strun,Shotgun,true,true,,30
+Strun Wraith,Shotgun,false,false,,30
+Tigris,Shotgun,true,false,,30
+Vaykor Hek,Shotgun,true,true,,30
+Komorex,Sniper,true,false,,30
+Lanka,Sniper,true,false,,30
+Perigale,Sniper,true,true,,30
+Rubico,Sniper,true,true,,30
+Snipetron,Sniper,false,false,,30
+Snipetron Vandal,Sniper,false,false,,30
+Sporothrix,Sniper,false,false,,30
+Vectis,Sniper,true,true,,30
+Vulkar,Sniper,true,true,,30
+Vulkar Wraith,Sniper,false,false,,30
+Attica,Bow,true,true,,30
+Cernos,Bow,true,true,,30
+Cinta,Bow,false,false,,30
+Daikyu,Bow,true,true,,30
+Dread,Bow,true,true,,30
+Evensong,Bow,true,true,,30
+Lenz,Bow,true,true,,30
+Mutalist Cernos,Bow,true,true,,30
+Nagantaka,Bow,true,false,,30
+Nataruk,Bow,true,true,,30
+Paris,Bow,true,true,,30
+Prisma Lenz,Bow,false,false,,30
+Proboscis Cernos,Bow,true,false,,30
+Rakta Cernos,Bow,true,true,,30
+Zhuge,Bow,true,false,,30
+Afentis,Speargun,true,true,,30
+Ferrox,Speargun,true,false,,30
+Javlok,Speargun,true,false,,30
+Scourge,Speargun,true,true,,30
+Vinquibus,Bayonet,true,true,,30
+Carmine Penta,Launcher,false,false,,30
+Miter,Launcher,true,true,,30
+Ogris,Launcher,true,false,,30
+Panthera,Launcher,true,false,,30
+Penta,Launcher,true,true,,30
+Secura Penta,Launcher,false,false,,30
+Simulor,Launcher,false,false,,30
+Synoid Simulor,Launcher,true,false,,30
+Tonkor,Launcher,true,false,,30
+Torid,Launcher,true,true,,30
+Zarr,Launcher,true,false,,30
+Acceltra Prime,Prime,true,true,,30
+Alternox Prime,Prime,true,true,,30
+Astilla Prime,Prime,false,false,,30
+Baza Prime,Prime,false,false,,30
+Boar Prime,Prime,false,false,,30
+Boltor Prime,Prime,false,false,,30
+Braton Prime,Prime,true,true,,30
+Burston Prime,Prime,true,true,,30
+Cernos Prime,Prime,false,false,,30
+Cedo Prime,Prime,true,true,,30
+Corinth Prime,Prime,false,false,,30
+Daikyu Prime,Prime,false,false,,30
+Fulmin Prime,Prime,false,false,,30
+Gotva Prime,Prime,true,true,,30
+Latron Prime,Prime,true,false,,30
+Nagantaka Prime,Prime,false,false,,30
+Panthera Prime,Prime,false,false,,30
+Paris Prime,Prime,false,false,,30
+Perigale Prime,Prime,false,false,,30
+Phantasma Prime,Prime,false,false,,30
+Rubico Prime,Prime,false,false,,30
+Scourge Prime,Prime,false,false,,30
+Soma Prime,Prime,false,false,,30
+Stradavar Prime,Prime,false,false,,30
+Strun Prime,Prime,false,false,,30
+Sybaris Prime,Prime,false,false,,30
+Tenora Prime,Prime,false,false,,30
+Tiberon Prime,Prime,false,false,,30
+Tigris Prime,Prime,false,false,,30
+Trumna Prime,Prime,false,false,,30
+Vadarya Prime,Prime,false,false,,30
+Vectis Prime,Prime,false,false,,30
+Zhuge Prime,Prime,false,false,,30
+MK1-Braton,MK1,true,true,,30
+MK1-Paris,MK1,true,true,,30
+MK1-Strun,MK1,true,true,,30
+Coda Bassocyst,Coda,true,true,true,40
+Coda Bubonico,Coda,true,true,true,40
+Coda Hema,Coda,false,false,false,40
+Coda Sporothrix,Coda,true,false,false,40
+Coda Synapse,Coda,false,false,false,40
+Kuva Bramma,Kuva,false,false,false,40
+Kuva Chakkhur,Kuva,false,false,false,40
+Kuva Drakgoon,Kuva,false,false,false,40
+Kuva Hek,Kuva,false,false,false,40
+Kuva Hind,Kuva,false,false,false,40
+Kuva Karak,Kuva,false,false,false,40
+Kuva Kohm,Kuva,false,false,false,40
+Kuva Ogris,Kuva,false,false,false,40
+Kuva Quartakk,Kuva,false,false,false,40
+Kuva Sobek,Kuva,true,true,true,40
+Kuva Tonkor,Kuva,false,false,false,40
+Kuva Zarr,Kuva,false,false,false,40
+Tenet Arca Plasmor,Tenet,true,true,true,40
+Tenet Envoy,Tenet,false,false,false,40
+Tenet Ferrox,Tenet,false,false,false,40
+Tenet Flux Rifle,Tenet,false,false,false,40
+Tenet Glaxion,Tenet,true,true,true,40
+Tenet Quanta,Tenet,false,false,false,40
+Tenet Tetra,Tenet,true,true,true,40
