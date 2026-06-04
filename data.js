@@ -205,6 +205,20 @@ const CURRENCIES = new Map([
   ["Citrine Chassis",{"Belric Crystal Fragment":350,"Rania Crystal Fragment":350}],
   ["Citrine Neuroptics",{"Belric Crystal Fragment":350,"Rania Crystal Fragment":350}],
   ["Citrine Systems",{"Belric Crystal Fragment":300,"Rania Crystal Fragment":350}],
+  // Coda — Live Heartstring
+  ["Coda Bassocyst",{"Live Heartstring":10}],
+  ["Coda Bubonico",{"Live Heartstring":10}],
+  ["Coda Caustacyst",{"Live Heartstring":10}],
+  ["Coda Catabolyst",{"Live Heartstring":10}],
+  ["Coda Hema",{"Live Heartstring":10}],
+  ["Coda Hirudo",{"Live Heartstring":10}],
+  ["Coda Mire",{"Live Heartstring":10}],
+  ["Coda Motovore",{"Live Heartstring":10}],
+  ["Coda Pathocyst",{"Live Heartstring":10}],
+  ["Coda Pox",{"Live Heartstring":10}],
+  ["Coda Sporothrix",{"Live Heartstring":10}],
+  ["Coda Synapse",{"Live Heartstring":10}],
+  ["Coda Tysis",{"Live Heartstring":10}],
   // Corufell — Belric Crystal Fragment + Rania Crystal Fragment
   ["Corufell Blueprint",{"Belric Crystal Fragment":300,"Rania Crystal Fragment":500}],
   ["Corufell Barrel",{"Belric Crystal Fragment":150,"Rania Crystal Fragment":250}],
@@ -224,6 +238,8 @@ const CURRENCIES = new Map([
   ["Dorrclave Hilt",{"Vainthorn":20}],
   ["Dorrclave Hook",{"Vainthorn":20}],
   ["Dorrclave String",{"Vainthorn":20}],
+  // Dual Coda Torxica — Live Heartstring
+  ["Dual Coda Torxica",{"Live Heartstring":10}],
   // Edun — Pathos Clamp
   ["Edun",{"Pathos Clamp":50}],
   // Enkaus — Atramentum
@@ -312,6 +328,12 @@ const CURRENCIES = new Map([
   ["Temple Chassis",{"Beating Heartstrings":65}],
   ["Temple Neuroptics",{"Beating Heartstrings":65}],
   ["Temple Systems",{"Beating Heartstrings":65}],
+  // Tenet — Corrupted Holokey
+  ["Tenet Agendus",{"Corrupted Holokey":40}],
+  ["Tenet Exec",{"Corrupted Holokey":40}],
+  ["Tenet Ferrox",{"Corrupted Holokey":40}],
+  ["Tenet Grigori",{"Corrupted Holokey":40}],
+  ["Tenet Livia",{"Corrupted Holokey":40}],
   // Thalys — Scuttler Husk
   ["Thalys",{"Scuttler Husk":96}],
   // Uriel — Maphica
