@@ -6,7 +6,13 @@
 let _sb = null;
 try {
   if (window.WF_CONFIG && window.supabase) {
-    _sb = window.supabase.createClient(window.WF_CONFIG.supabaseUrl, window.WF_CONFIG.supabasePublishableKey);
+    _sb = window.supabase.createClient(window.WF_CONFIG.supabaseUrl, window.WF_CONFIG.supabasePublishableKey, {
+      auth: {
+        autoRefreshToken:   true,
+        persistSession:     true,
+        detectSessionInUrl: true,
+      },
+    });
   }
 } catch (e) {
   console.warn('[WF Tracker] Supabase init failed — running in offline/local mode:', e.message);
