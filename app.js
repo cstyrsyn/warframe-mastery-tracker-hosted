@@ -103,7 +103,39 @@ function clearChecklist() {
   renderChecklist();
 }
 
+function getChecklistItemResources(tab, name) {
+  if (tab === 'incarnon') {
+    const genesisName = INCARNON_WEAPONS.get(name) || (name + ' Incarnon Genesis');
+    const reqs = INCARNON_REQUIREMENTS.get(genesisName);
+    const result = {};
+    if (reqs) for (const [r, c] of reqs) result[r] = (result[r] || 0) + c;
+    return result;
+  }
+  const itemRes = flattenResources(name, 1, new Set());
+  const itemCur = flattenCurrencies(name);
+  for (const {key, costs} of getMissionDropComponents(name)) {
+    if (clBpOwned.has(key)) {
+      for (const [cur, amt] of Object.entries(costs))
+        itemCur[cur] = Math.max(0, (itemCur[cur] || 0) - amt);
+    }
+  }
+  for (const c of Object.keys(itemCur)) delete itemRes[c];
+  const result = {};
+  for (const [r, v] of Object.entries(itemRes)) if (v > 0) result[r] = v;
+  for (const [r, v] of Object.entries(itemCur)) if (v > 0) result[r] = v;
+  return result;
+}
+
 function markChecklistDone(tab, name) {
+  const contrib = getChecklistItemResources(tab, name);
+  for (const [r, cost] of Object.entries(contrib)) {
+    if (checklistOwned[r]) {
+      checklistOwned[r] = Math.max(0, checklistOwned[r] - cost);
+      if (checklistOwned[r] === 0) delete checklistOwned[r];
+    }
+  }
+  saveChecklistOwned();
+
   if (tab === 'incarnon') {
     const wTab = INCARNON_WEAPON_TAB.get(name) ?? null;
     if (wTab && !progress[incarnonKey(wTab, name)]) {
