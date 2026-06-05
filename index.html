@@ -680,7 +680,11 @@ body {
 }
 
 /* ── CHECKLIST ── */
-#checklist-view { display: none; padding: 16px; max-width: 920px; margin: 0 auto; }
+#checklist-view { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; }
+.cl-layout { display: grid; grid-template-columns: 1fr minmax(320px, 380px); gap: 16px; align-items: start; }
+.cl-col-items { min-width: 0; }
+.cl-col-resources { min-width: 0; position: sticky; top: 16px; }
+@media (max-width: 720px) { .cl-layout { grid-template-columns: 1fr; } .cl-col-resources { position: static; } }
 .cl-section { background: var(--surface2); border: 1px solid var(--border-soft); border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
 .cl-section-hdr { background: var(--surface3); padding: 7px 14px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border-soft); }
 .cl-res-row { display: grid; grid-template-columns: 1fr 70px 30px 72px 80px; align-items: center; gap: 8px; padding: 5px 14px; border-bottom: 1px solid var(--border-soft); font-size: 12px; }

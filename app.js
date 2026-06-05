@@ -1485,13 +1485,12 @@ function renderChecklist() {
   }
   const sortedRes = Object.entries(totalRes).sort((a, b) => b[1] - a[1]);
 
-  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+  const headerHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
   <span style="font-size:11px;color:var(--text-muted)">${checklistItems.size} item${checklistItems.size !== 1 ? 's' : ''}</span>
   <button class="btn" onclick="clearChecklist()">Clear All</button>
 </div>`;
 
-  if (sortedRes.length) {
-    html += `<div class="cl-section">
+  const resHtml = sortedRes.length ? `<div class="cl-section">
 <div class="cl-section-hdr">Resources Required</div>
 ${sortedRes.map(([rName, total]) => {
   const owned = checklistOwned[rName] || 0;
@@ -1504,9 +1503,9 @@ ${sortedRes.map(([rName, total]) => {
   <span class="cl-res-need${need === 0 ? ' cl-done' : ''}">Need: ${fmt(need)}</span>
 </div>`;
 }).join('\n')}
-</div>`;
-  }
+</div>` : '';
 
+  let itemsHtml = '';
   for (const tab of CL_TAB_ORDER) {
     if (!grouped.has(tab)) continue;
     const label = SUMMARY_LABELS[tab] || tab;
@@ -1580,10 +1579,10 @@ ${sortedRes.map(([rName, total]) => {
 ${bpOwnedHtml}${relicHtml}
 </div>`;
     }
-    html += `<div class="cl-section"><div class="cl-section-hdr">${esc(label)}</div>${rows}</div>`;
+    itemsHtml += `<div class="cl-section"><div class="cl-section-hdr">${esc(label)}</div>${rows}</div>`;
   }
 
-  el.innerHTML = html;
+  el.innerHTML = `<div class="cl-layout"><div class="cl-col-items">${headerHtml}${itemsHtml}</div><div class="cl-col-resources">${resHtml}</div></div>`;
 }
 
 function renderSummary() {
