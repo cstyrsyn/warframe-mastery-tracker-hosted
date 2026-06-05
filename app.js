@@ -21,7 +21,7 @@ let _cloudSyncTimer = 0;
 const LS_KEY = 'wf-mastery-v1';
 let progress = {};
 let activeTab = 'summary';
-let filters = { notStarted: false, inProgress: false, maxed: false, incarnon: false };
+let filters = { status: '', incarnon: false };
 const searchIndex = {}; // tab → Map<name, lowercased searchable text>
 
 function buildSearchIndex(tab) {
@@ -597,7 +597,7 @@ function switchTab(tabEl) {
   activeTab = tabEl.dataset.tab;
   localStorage.setItem('wf-ui-tab', activeTab);
   document.getElementById('search').value = '';
-  filters = { notStarted: false, inProgress: false, maxed: false, incarnon: false };
+  filters = { status: '', incarnon: false };
   activeCategory = '';
   activeType = '';
   activeUse = '';
@@ -606,7 +606,7 @@ function switchTab(tabEl) {
   activeArcaneCategory = '';
   collapsedGroups.clear();
   restoreViewPrefs();
-  restoreFilters();
+  restoreStatus();
   populateCatFilter();
   const isChart   = activeTab === 'starChart';
   const isSummary = activeTab === 'summary';
@@ -620,9 +620,7 @@ function switchTab(tabEl) {
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = isSpecial ? 'none' : '';
   document.getElementById('search').style.display   = isCl ? 'none' : '';
-  document.getElementById('fb-ns').style.display    = isSpecial ? 'none' : '';
-  document.getElementById('fb-ip').style.display    = isSpecial ? 'none' : '';
-  document.getElementById('fb-mx').style.display    = isSpecial ? 'none' : '';
+  document.getElementById('status-dd').style.display = isSpecial ? 'none' : '';
   const isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = isIncarnon ? '' : 'none';
   const _cwInd = document.getElementById('circuit-week-ind');
@@ -672,23 +670,12 @@ function populateCatFilter() {
   const showGroup = cats.length > 1 && activeTab !== 'intrinsics';
   document.getElementById('fb-grp').style.display = showGroup ? '' : 'none';
   if (cats.length <= 1) return;
-  [['', 'All'], ...cats.map(c => [c, c])].forEach(([val, label]) => {
-    const btn = document.createElement('button');
-    btn.className = 'filt-btn cat-btn' + (activeCategory === val ? ' on' : '');
-    btn.dataset.cat = val;
-    btn.textContent = label;
-    btn.onclick = () => setCatFilter(val);
-    container.appendChild(btn);
-  });
+  container.appendChild(makeDd('dd-cat', 'Category', cats, activeCategory, setCatFilter));
 }
 
 function setCatFilter(val) {
   activeCategory = val;
-  if (activeTab === 'mods') {
-    buildModDropdowns();
-  } else {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('on', b.dataset.cat === val));
-  }
+  populateCatFilter();
   render();
 }
 
@@ -799,12 +786,12 @@ function buildModDropdowns() {
   container.appendChild(wrap);
 }
 
-function makeDd(id, label, options, activeVal, onSelect) {
+function makeDd(id, label, options, activeVal, onSelect, noSearch = false) {
   const sdd = document.createElement('div');
   sdd.className = 'sdd';
   sdd.id = id;
 
-  const pluralLabel = label === 'Category' ? 'Categories' : label + 's';
+  const pluralLabel = label === 'Category' ? 'Categories' : label === 'Status' ? 'Statuses' : label + 's';
   const displayLabel = activeVal || ('All ' + pluralLabel);
   const trigger = document.createElement('button');
   trigger.type = 'button';
@@ -816,15 +803,18 @@ function makeDd(id, label, options, activeVal, onSelect) {
   panel.className = 'sdd-panel';
   panel.id = id + '-panel';
 
-  const searchWrap = document.createElement('div');
-  searchWrap.className = 'sdd-search-wrap';
-  const inp = document.createElement('input');
-  inp.className = 'sdd-search';
-  inp.placeholder = 'Search ' + pluralLabel.toLowerCase() + '…';
-  inp.autocomplete = 'off';
-  inp.addEventListener('input', () => filterDdOpts(inp, id + '-panel'));
-  inp.addEventListener('click', e => e.stopPropagation());
-  searchWrap.appendChild(inp);
+  if (!noSearch) {
+    const searchWrap = document.createElement('div');
+    searchWrap.className = 'sdd-search-wrap';
+    const inp = document.createElement('input');
+    inp.className = 'sdd-search';
+    inp.placeholder = 'Search ' + pluralLabel.toLowerCase() + '…';
+    inp.autocomplete = 'off';
+    inp.addEventListener('input', () => filterDdOpts(inp, id + '-panel'));
+    inp.addEventListener('click', e => e.stopPropagation());
+    searchWrap.appendChild(inp);
+    panel.appendChild(searchWrap);
+  }
 
   const opts = document.createElement('div');
   opts.className = 'sdd-opts';
@@ -843,7 +833,6 @@ function makeDd(id, label, options, activeVal, onSelect) {
     opts.appendChild(opt);
   }
 
-  panel.appendChild(searchWrap);
   panel.appendChild(opts);
   sdd.appendChild(trigger);
   sdd.appendChild(panel);
@@ -891,13 +880,31 @@ function toggleFilt(key, btn) {
   render();
 }
 
-const FILT_BTNS = { notStarted: 'fb-ns', inProgress: 'fb-ip', maxed: 'fb-mx', incarnon: 'fb-incarnon' };
-function restoreFilters() {
-  for (const [key, id] of Object.entries(FILT_BTNS)) {
-    filters[key] = !!localStorage.getItem('wf-filt-' + key + '-' + activeTab);
-    const btn = document.getElementById(id);
-    if (btn) btn.classList.toggle('on', filters[key]);
-  }
+const STATUS_KEYS   = { 'Unowned': 'unowned', 'Not Started': 'notStarted', 'In Progress': 'inProgress', 'Maxed': 'maxed' };
+const STATUS_LABELS = { 'unowned': 'Unowned', 'notStarted': 'Not Started', 'inProgress': 'In Progress', 'maxed': 'Maxed' };
+
+function buildStatusDropdown() {
+  const container = document.getElementById('status-dd');
+  container.innerHTML = '';
+  const showNotStarted = AQ_TABS.has(activeTab) || activeTab === 'mods' || activeTab === 'arcanes';
+  const opts = showNotStarted
+    ? ['Unowned', 'Not Started', 'In Progress', 'Maxed']
+    : ['Unowned', 'In Progress', 'Maxed'];
+  container.appendChild(makeDd('dd-status', 'Status', opts,
+    STATUS_LABELS[filters.status] || '',
+    label => setStatusFilter(STATUS_KEYS[label] || ''), true));
+}
+
+function setStatusFilter(val) {
+  filters.status = val;
+  localStorage.setItem('wf-filt-status-' + activeTab, val);
+  buildStatusDropdown();
+  render();
+}
+
+function restoreStatus() {
+  filters.status = localStorage.getItem('wf-filt-status-' + activeTab) || '';
+  buildStatusDropdown();
 }
 
 function toggleGroupView() {
@@ -1289,9 +1296,15 @@ function getVisibleItems() {
     if (q && !(idx?.get(name) ?? '').includes(q)) return false;
     if (cat && category !== cat) return false;
     const rank = getItemRank(activeTab, name);
-    if (filters.notStarted && rank !== 0) return false;
-    if (filters.inProgress && (rank === 0 || rank === maxRank)) return false;
-    if (filters.maxed && rank !== maxRank) return false;
+    const status = filters.status;
+    if (status) {
+      const isAcqTab = AQ_TABS.has(activeTab);
+      const isAcq = isAcqTab && !!progress[aqKey(activeTab, name)];
+      if (status === 'unowned'    && (rank > 0 || isAcq)) return false;
+      if (status === 'notStarted' && !(rank === 0 && isAcq)) return false;
+      if (status === 'inProgress' && (rank === 0 || rank === maxRank)) return false;
+      if (status === 'maxed'      && rank !== maxRank) return false;
+    }
     if (filters.incarnon && !INCARNON_WEAPONS.has(name)) return false;
     return true;
   });
@@ -1314,9 +1327,11 @@ function getVisibleMods() {
     const rank  = getModRank(name);
     const isOwn = rank > 0 || !!progress[modAqKey(name)];
     const isMax = maxRank === 0 ? isOwn : rank >= maxRank;
-    if (filters.notStarted && isOwn) return false;
-    if (filters.inProgress && (isMax || !isOwn)) return false;
-    if (filters.maxed && !isMax) return false;
+    const status = filters.status;
+    if (status === 'unowned'    && isOwn) return false;
+    if (status === 'notStarted' && !(isOwn && !isMax && rank === 0)) return false;
+    if (status === 'inProgress' && (!isOwn || isMax || rank === 0)) return false;
+    if (status === 'maxed'      && !isMax) return false;
     return true;
   });
 }
@@ -1861,9 +1876,12 @@ function getVisibleArcanes() {
     const copies = getArcaneCopies(name);
     const isOwn  = copies >= 1;
     const isMax  = isArcaneMaxed(name, maxRank);
-    if (filters.notStarted && isOwn)             return false;
-    if (filters.inProgress && (isMax || !isOwn)) return false;
-    if (filters.maxed && !isMax)                 return false;
+    const arcRank = derivedArcaneRank(copies, maxRank);
+    const status = filters.status;
+    if (status === 'unowned'    && isOwn) return false;
+    if (status === 'notStarted' && !(isOwn && arcRank === 0)) return false;
+    if (status === 'inProgress' && (!isOwn || isMax || arcRank === 0)) return false;
+    if (status === 'maxed'      && !isMax) return false;
     return true;
   });
 }
@@ -3050,9 +3068,7 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = _isSpecial ? 'none' : '';
   document.getElementById('search').style.display   = _isCl ? 'none' : '';
-  document.getElementById('fb-ns').style.display    = _isSpecial ? 'none' : '';
-  document.getElementById('fb-ip').style.display    = _isSpecial ? 'none' : '';
-  document.getElementById('fb-mx').style.display    = _isSpecial ? 'none' : '';
+  document.getElementById('status-dd').style.display = _isSpecial ? 'none' : '';
   const _isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = _isIncarnon ? '' : 'none';
   const _cwInd2 = document.getElementById('circuit-week-ind');
@@ -3071,7 +3087,7 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   _wfBgBtn.classList.toggle('on', wfBgImages);
 }
 restoreViewPrefs();
-restoreFilters();
+restoreStatus();
 populateCatFilter();
 updateHeader();
 updateTabStat();
