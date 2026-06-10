@@ -694,6 +694,12 @@ function switchTab(tabEl) {
   wfBgBtn.style.display   = activeTab === 'intrinsics' ? '' : 'none';
   wfTileBtn.classList.toggle('on', wfTileImages);
   wfBgBtn.classList.toggle('on', wfBgImages);
+  const hasAnyFilter = !(isSpecial && !isDucats);
+  const _btnF = document.getElementById('btn-filters');
+  const _ctrlF = document.getElementById('ctrl-filters');
+  if(_btnF) _btnF.style.display = hasAnyFilter ? '' : 'none';
+  if(_ctrlF) _ctrlF.style.display = hasAnyFilter ? '' : 'none';
+  if(typeof updateStickyOffset === 'function') updateStickyOffset();
   render();
 }
 
@@ -3427,6 +3433,12 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   _wfBgBtn.style.display   = activeTab === 'intrinsics' ? '' : 'none';
   _wfTileBtn.classList.toggle('on', wfTileImages);
   _wfBgBtn.classList.toggle('on', wfBgImages);
+  const _hasAnyFilter = !(_isSpecial && !_isDucats);
+  const __btnF = document.getElementById('btn-filters');
+  const __ctrlF = document.getElementById('ctrl-filters');
+  if(__btnF) __btnF.style.display = _hasAnyFilter ? '' : 'none';
+  if(__ctrlF) __ctrlF.style.display = _hasAnyFilter ? '' : 'none';
+  if(typeof updateStickyOffset === 'function') updateStickyOffset();
 }
 restoreViewPrefs();
 restoreStatus();

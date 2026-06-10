@@ -92,7 +92,7 @@ body {
   border-right: 1px solid var(--border);
 }
 #main-col { flex: 1; min-width: 0; }
-#ctrl-filters { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 16px 8px; }
+#ctrl-filters { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 0; }
 #ctrl-filters.open { display: flex; }
 
 /* ── TOPBAR MODE (manual toggle or auto on small screens) ── */
@@ -1024,6 +1024,9 @@ function updateStickyOffset(){
   }
   applyLayout();
   window.addEventListener('resize', applyLayout);
+  if('ResizeObserver' in window){
+    new ResizeObserver(updateStickyOffset).observe(document.getElementById('sticky-top'));
+  }
   if(localStorage.getItem('filtersOpen')==='1'){
     const cf=document.getElementById('ctrl-filters');
     if(cf){ cf.classList.add('open'); const bf=document.getElementById('btn-filters'); if(bf) bf.textContent='Filters ▴'; }
