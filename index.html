@@ -75,7 +75,16 @@ body {
 #pb-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
 #pb-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 #pb-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width 0.4s ease; }
-#hdr-btns { display: flex; gap: 6px; flex-wrap: wrap; order: -1; flex-basis: 100%; justify-content: flex-end; }
+#hdr-btns { position: relative; display: flex; }
+#hdr-menu {
+  display: none; flex-direction: column; gap: 4px;
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px; min-width: 160px; z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+#hdr-menu.open { display: flex; }
+#hdr-menu .btn { width: 100%; text-align: left; }
 
 /* ── SIDEBAR LAYOUT ── */
 #app-body { display: flex; align-items: flex-start; }
@@ -830,13 +839,16 @@ body.topbar-mode .sidebar-divider { display: none; }
     <div id="pb-bg"><div id="pb-fill" style="width:0%"></div></div>
   </div>
   <div id="hdr-btns">
-    <button class="btn" id="btn-layout" onclick="toggleLayout()">Top Nav</button>
-    <button class="btn" id="btn-backup" onclick="setBackupFile()">Auto-backup</button>
-    <button class="btn" onclick="openImport()">Import</button>
-    <button class="btn" onclick="openExport()">Export</button>
-    <button class="btn" onclick="openAddModal()">+ Item</button>
-    <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="askReset()">Reset All</button>
-    <button class="btn" id="btn-auth" onclick="currentUser ? logout() : login()">Sign in</button>
+    <button class="btn" id="btn-menu" onclick="toggleMenu(event)">☰</button>
+    <div id="hdr-menu">
+      <button class="btn" id="btn-layout" onclick="toggleLayout()">Top Nav</button>
+      <button class="btn" id="btn-backup" onclick="setBackupFile()">Auto-backup</button>
+      <button class="btn" onclick="openImport()">Import</button>
+      <button class="btn" onclick="openExport()">Export</button>
+      <button class="btn" onclick="openAddModal()">+ Item</button>
+      <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="askReset()">Reset All</button>
+      <button class="btn" id="btn-auth" onclick="currentUser ? logout() : login()">Sign in</button>
+    </div>
   </div>
 </div>
 <div id="ctrl">
@@ -1050,6 +1062,16 @@ function toggleLayout(){
   moveSidebar(topbar);
   updateStickyOffset();
 }
+function toggleMenu(e){
+  e.stopPropagation();
+  document.getElementById('hdr-menu').classList.toggle('open');
+}
+document.addEventListener('click', function(e){
+  const menu = document.getElementById('hdr-menu');
+  if(!menu || !menu.classList.contains('open')) return;
+  if(e.target.closest('#btn-menu')) return;
+  menu.classList.remove('open');
+});
 function toggleFilterRow(){
   const open=document.getElementById('ctrl-filters').classList.toggle('open');
   document.getElementById('btn-filters').textContent=open?'Filters ▴':'Filters ▾';
