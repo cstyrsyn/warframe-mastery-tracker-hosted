@@ -699,7 +699,16 @@ function switchTab(tabEl) {
   const _btnF = document.getElementById('btn-filters');
   const _ctrlF = document.getElementById('ctrl-filters');
   if(_btnF) _btnF.style.display = hasAnyFilter ? '' : 'none';
-  if(_ctrlF) _ctrlF.style.display = hasAnyFilter ? '' : 'none';
+  if(_ctrlF) {
+    if(!hasAnyFilter) {
+      _ctrlF.style.display = 'none';
+    } else {
+      const panelOpen = localStorage.getItem('filtersOpen-' + activeTab) === '1';
+      _ctrlF.classList.toggle('open', panelOpen);
+      _ctrlF.style.display = '';
+      if(_btnF) _btnF.textContent = panelOpen ? 'Filters ▴' : 'Filters ▾';
+    }
+  }
   render();
   if(typeof updateStickyOffset === 'function') requestAnimationFrame(updateStickyOffset);
 }
@@ -3454,7 +3463,16 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const __btnF = document.getElementById('btn-filters');
   const __ctrlF = document.getElementById('ctrl-filters');
   if(__btnF) __btnF.style.display = _hasAnyFilter ? '' : 'none';
-  if(__ctrlF) __ctrlF.style.display = _hasAnyFilter ? '' : 'none';
+  if(__ctrlF) {
+    if(!_hasAnyFilter) {
+      __ctrlF.style.display = 'none';
+    } else {
+      const _panelOpen = localStorage.getItem('filtersOpen-' + activeTab) === '1';
+      __ctrlF.classList.toggle('open', _panelOpen);
+      __ctrlF.style.display = '';
+      if(__btnF) __btnF.textContent = _panelOpen ? 'Filters ▴' : 'Filters ▾';
+    }
+  }
 }
 restoreViewPrefs();
 restoreStatus();

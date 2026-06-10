@@ -1027,11 +1027,6 @@ function updateStickyOffset(){
   if('ResizeObserver' in window){
     new ResizeObserver(updateStickyOffset).observe(document.getElementById('sticky-top'));
   }
-  if(localStorage.getItem('filtersOpen')==='1'){
-    const cf=document.getElementById('ctrl-filters');
-    if(cf){ cf.classList.add('open'); const bf=document.getElementById('btn-filters'); if(bf) bf.textContent='Filters ▴'; }
-    updateStickyOffset();
-  }
 })();
 function toggleLayout(){
   const topbar=document.body.classList.toggle('topbar-mode');
@@ -1042,7 +1037,8 @@ function toggleLayout(){
 function toggleFilterRow(){
   const open=document.getElementById('ctrl-filters').classList.toggle('open');
   document.getElementById('btn-filters').textContent=open?'Filters ▴':'Filters ▾';
-  localStorage.setItem('filtersOpen',open?'1':'0');
+  const tab=typeof activeTab!=='undefined'?activeTab:'default';
+  localStorage.setItem('filtersOpen-'+tab,open?'1':'0');
   updateStickyOffset();
 }
 // Block slider track-taps on touch devices; allow thumb drags
