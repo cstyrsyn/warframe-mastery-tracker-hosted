@@ -3146,7 +3146,7 @@ function updateAuthUI() {
 // DUCAT CALCULATOR
 // ─────────────────────────────────────────────
 const DUCAT_VALUES  = [15, 45, 100]; // 0=Common, 1=Uncommon, 2=Rare
-const DUCAT_EXCLUDE = new Set(['Forma', 'Exilus Weapon Adapter']);
+const DUCAT_EXCLUDE = new Set(['Forma', 'Exilus Weapon Adapter', 'Kavasa Prime']);
 // Parts whose ducat value differs from what their minimum drop rarity would imply
 const DUCAT_EXCEPTIONS = new Map([
   ['Akstiletto Prime\tReceiver',         45],
@@ -3216,8 +3216,9 @@ function _getDucatCategoryMap() {
     const arr = TAB_DATA[tabKey];
     if (!arr) continue;
     for (const item of arr) {
-      const prime = item[0] + ' Prime';
-      if (!_ducatCatMap.has(prime)) _ducatCatMap.set(prime, label);
+      const name = item[0];
+      const key = name.endsWith(' Prime') ? name : name + ' Prime';
+      if (!_ducatCatMap.has(key)) _ducatCatMap.set(key, label);
     }
   }
   return _ducatCatMap;
