@@ -1003,11 +1003,19 @@ body.topbar-mode #ctrl { top: 136px; }
 
 <script>
 (function(){
-  if(localStorage.getItem('navLayout')==='topbar'){
-    document.body.classList.add('topbar-mode');
+  function applyLayout(){
+    const mobile=window.innerWidth<=700;
     const btn=document.getElementById('btn-layout');
-    if(btn) btn.textContent='Side Nav';
+    if(mobile){
+      document.body.classList.add('topbar-mode');
+    } else {
+      const pref=localStorage.getItem('navLayout');
+      document.body.classList.toggle('topbar-mode', pref==='topbar');
+      if(btn) btn.textContent=pref==='topbar'?'Side Nav':'Top Nav';
+    }
   }
+  applyLayout();
+  window.addEventListener('resize', applyLayout);
 })();
 function toggleLayout(){
   const topbar=document.body.classList.toggle('topbar-mode');
