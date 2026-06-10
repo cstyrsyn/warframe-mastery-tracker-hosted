@@ -699,8 +699,8 @@ function switchTab(tabEl) {
   const _ctrlF = document.getElementById('ctrl-filters');
   if(_btnF) _btnF.style.display = hasAnyFilter ? '' : 'none';
   if(_ctrlF) _ctrlF.style.display = hasAnyFilter ? '' : 'none';
-  if(typeof updateStickyOffset === 'function') updateStickyOffset();
   render();
+  if(typeof updateStickyOffset === 'function') requestAnimationFrame(updateStickyOffset);
 }
 
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => switchTab(t)));
@@ -3438,7 +3438,6 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const __ctrlF = document.getElementById('ctrl-filters');
   if(__btnF) __btnF.style.display = _hasAnyFilter ? '' : 'none';
   if(__ctrlF) __ctrlF.style.display = _hasAnyFilter ? '' : 'none';
-  if(typeof updateStickyOffset === 'function') updateStickyOffset();
 }
 restoreViewPrefs();
 restoreStatus();
@@ -3446,3 +3445,4 @@ populateCatFilter();
 updateHeader();
 updateTabStat();
 render();
+if(typeof updateStickyOffset === 'function') requestAnimationFrame(updateStickyOffset);
