@@ -658,6 +658,7 @@ function switchTab(tabEl) {
   collapsedGroups.clear();
   restoreViewPrefs();
   restoreStatus();
+  restoreFilters();
   populateCatFilter();
   const isChart   = activeTab === 'starChart';
   const isSummary = activeTab === 'summary';
@@ -746,20 +747,36 @@ function populateCatFilter() {
 
 function setCatFilter(val) {
   activeCategory = val;
+  localStorage.setItem('wf-filt-cat-' + activeTab, val);
   populateCatFilter();
   render();
 }
 
 function setTypeFilter(val) {
   activeType = val;
+  localStorage.setItem('wf-filt-type-mods', val);
   buildModDropdowns();
   render();
 }
 
 function setUseFilter(val) {
   activeUse = val;
+  localStorage.setItem('wf-filt-use-mods', val);
   buildModDropdowns();
   render();
+}
+
+function restoreFilters() {
+  activeCategory = localStorage.getItem('wf-filt-cat-' + activeTab) || '';
+  if (activeTab === 'mods') {
+    activeType = localStorage.getItem('wf-filt-type-mods') || '';
+    activeUse  = localStorage.getItem('wf-filt-use-mods')  || '';
+  }
+  if (activeTab === 'arcanes') {
+    activeArcaneType     = localStorage.getItem('wf-filt-arc-type')    || '';
+    activeArcaneRarity   = localStorage.getItem('wf-filt-arc-rarity')  || '';
+    activeArcaneCategory = localStorage.getItem('wf-filt-arc-cat')     || '';
+  }
 }
 
 function toggleGroupCollapse(tab, grpCat) {
@@ -834,9 +851,9 @@ function buildArcaneDropdowns() {
   const types    = [...new Set(ARCANES.map(a => a[1]))].sort();
   const rarities = [...new Set(ARCANES.map(a => a[4]))].sort();
   const cats     = [...new Set(ARCANES.map(a => a[6]).filter(Boolean))].sort();
-  wrap.appendChild(makeDd('dd-arc-type',   'Type',     types,    activeArcaneType,     val => { activeArcaneType     = val; buildArcaneDropdowns(); render(); }));
-  wrap.appendChild(makeDd('dd-arc-rarity', 'Rarity',   rarities, activeArcaneRarity,   val => { activeArcaneRarity   = val; buildArcaneDropdowns(); render(); }));
-  wrap.appendChild(makeDd('dd-arc-cat',    'Category', cats,     activeArcaneCategory, val => { activeArcaneCategory = val; buildArcaneDropdowns(); render(); }));
+  wrap.appendChild(makeDd('dd-arc-type',   'Type',     types,    activeArcaneType,     val => { activeArcaneType     = val; localStorage.setItem('wf-filt-arc-type',    val); buildArcaneDropdowns(); render(); }));
+  wrap.appendChild(makeDd('dd-arc-rarity', 'Rarity',   rarities, activeArcaneRarity,   val => { activeArcaneRarity   = val; localStorage.setItem('wf-filt-arc-rarity',  val); buildArcaneDropdowns(); render(); }));
+  wrap.appendChild(makeDd('dd-arc-cat',    'Category', cats,     activeArcaneCategory, val => { activeArcaneCategory = val; localStorage.setItem('wf-filt-arc-cat',      val); buildArcaneDropdowns(); render(); }));
   container.appendChild(wrap);
 }
 
@@ -3441,6 +3458,7 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
 }
 restoreViewPrefs();
 restoreStatus();
+restoreFilters();
 populateCatFilter();
 updateHeader();
 updateTabStat();
