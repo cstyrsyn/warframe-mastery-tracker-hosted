@@ -27,7 +27,7 @@ let _cloudSyncTimer = 0;
 const LS_KEY = 'wf-mastery-v1';
 let progress = {};
 let activeTab = 'summary';
-let filters = { status: '', incarnon: false };
+let filters = { status: '', incarnon: false, hasParts: false };
 const searchIndex = {}; // tab → Map<name, lowercased searchable text>
 
 function buildSearchIndex(tab) {
@@ -272,10 +272,12 @@ function setItemRank(tab, name, rank) {
 
 function toggleAcquired(tab, name) {
   const k = aqKey(tab, name);
+  const wasAcquired = !!progress[k];
   progress[k] = !progress[k];
   saveProgress();
   updateHeader();
   render();
+  if (!wasAcquired) _checkDucatAcquiredPrompt(name);
 }
 
 function incarnonKey(tab, name) { return 'inc:' + itemKey(tab, name); }
@@ -455,11 +457,21 @@ function renderRecipeParts(parentName, parts) {
       subPartsData = subCost ? subCost[2] : BLUEPRINTS.get(bpKey)[2];
       subParentName = bpKey || parentName;
     }
-    const nameHtml = (craftable || pType !== 'Resource') ? esc(pName) : wikiLink(pName);
+    let nameHtml;
     let relicHtml = '';
     if (pType === 'PrimePart' || pType === 'Item') {
       const drops = relicDropsForPart(parentName, pName, pType);
-      if (drops) relicHtml = relicChipsHtml(drops);
+      if (drops) {
+        relicHtml = relicChipsHtml(drops);
+        let ducPart = pName;
+        if (pType === 'Item' && pName.startsWith('Prime ')) ducPart = pName.slice(6) + ' Blueprint';
+        const acqBadge = getDucatQty(parentName, ducPart) > 0 ? ' <span class="recipe-acq-badge">Acq</span>' : '';
+        nameHtml = `<span class="recipe-duc-name" data-item="${esc(parentName)}" data-part="${esc(ducPart)}" onclick="ducatAcqAdd(this)">${esc(pName)}</span>${acqBadge}`;
+      } else {
+        nameHtml = esc(pName);
+      }
+    } else {
+      nameHtml = (craftable || pType !== 'Resource') ? esc(pName) : wikiLink(pName);
     }
     html += `<div class="recipe-item"><span class="recipe-res${cls}">${nameHtml}${badge}</span><span class="recipe-count">×${fmt(pCount)}</span></div>${relicHtml}`;
     if (subPartsData && subPartsData.some(([,,t]) => t === 'Item')) {
@@ -483,8 +495,9 @@ function buildRecipeBack(name) {
   // Relic drop row for the main blueprint itself
   const itemRelicEntry = typeof RELIC_DROPS !== 'undefined' ? RELIC_DROPS.get(name) : null;
   const bpDrops = itemRelicEntry ? itemRelicEntry[1]['Blueprint'] : null;
+  const bpAcqBadge = bpDrops && getDucatQty(name, 'Blueprint') > 0 ? ' <span class="recipe-acq-badge">Acq</span>' : '';
   const bpRow = bpDrops
-    ? `<div class="recipe-item"><span class="recipe-res prime">Blueprint</span><span class="recipe-count">×1</span></div>${relicChipsHtml(bpDrops)}`
+    ? `<div class="recipe-item"><span class="recipe-res prime"><span class="recipe-duc-name" data-item="${esc(name)}" data-part="Blueprint" onclick="ducatAcqAdd(this)">Blueprint</span>${bpAcqBadge}</span><span class="recipe-count">×1</span></div>${relicChipsHtml(bpDrops)}`
     : '';
 
   let hasCraftable = false;
@@ -635,7 +648,7 @@ function switchTab(tabEl) {
   activeTab = tabEl.dataset.tab;
   localStorage.setItem('wf-ui-tab', activeTab);
   document.getElementById('search').value = '';
-  filters = { status: '', incarnon: false };
+  filters = { status: '', incarnon: false, hasParts: false };
   activeCategory = '';
   activeType = '';
   activeUse = '';
@@ -650,17 +663,23 @@ function switchTab(tabEl) {
   const isSummary = activeTab === 'summary';
   const isMods    = activeTab === 'mods';
   const isCl      = activeTab === 'checklist';
-  const isSpecial = isChart || isSummary || isCl;
+  const isDucats  = activeTab === 'ducats';
+  const isSpecial = isChart || isSummary || isCl || isDucats;
   document.getElementById('summary').classList.toggle('open', isSummary);
   document.getElementById('checklist-view').style.display = isCl ? 'block' : 'none';
+  document.getElementById('ducats-view').style.display    = isDucats ? 'block' : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
-  document.getElementById('cat-btns').style.display = isSpecial ? 'none' : '';
+  document.getElementById('cat-btns').style.display = (isSpecial && !isDucats) ? 'none' : '';
   document.getElementById('search').style.display   = isCl ? 'none' : '';
   document.getElementById('status-dd').style.display = isSpecial ? 'none' : '';
   const isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = isIncarnon ? '' : 'none';
+  const isAqTab = AQ_TABS.has(activeTab);
+  const hpBtn = document.getElementById('fb-hasparts');
+  hpBtn.style.display = isAqTab ? '' : 'none';
+  hpBtn.classList.toggle('on', false);
   const _cwInd = document.getElementById('circuit-week-ind');
   _cwInd.textContent = 'Circuit: Week ' + CIRCUIT_WEEK_NOW;
   _cwInd.style.display = isIncarnon ? '' : 'none';
@@ -697,6 +716,14 @@ function populateCatFilter() {
     document.getElementById('ctrl-row2').style.display = '';
     document.getElementById('fb-grp').style.display = '';
     buildArcaneDropdowns();
+    return;
+  }
+  if (activeTab === 'ducats') {
+    document.getElementById('ctrl-row2').style.display = 'none';
+    const availCats = _ducatAvailableCategories();
+    if (availCats.length > 1) {
+      container.appendChild(makeDd('dd-cat', 'Category', availCats, activeCategory, setCatFilter, true));
+    }
     return;
   }
   if (!TAB_DATA[activeTab]) {
@@ -1074,6 +1101,7 @@ function render() {
   if (activeTab === 'mods')      { renderMods();      return; }
   if (activeTab === 'arcanes')   { renderArcanes();   return; }
   if (activeTab === 'checklist') { renderChecklist(); return; }
+  if (activeTab === 'ducats')    { renderDucats();    return; }
   const items = TAB_DATA[activeTab] || [];
   const visible = getVisibleItems();
 
@@ -1272,11 +1300,13 @@ function sliderInput(el, tab, name, maxRank) {
 }
 
 function setRank(tab, name, rank) {
+  const wasAcq = AQ_TABS.has(tab) && !!progress[aqKey(tab, name)];
   progress[itemKey(tab, name)] = rank;
   if (rank > 0 && AQ_TABS.has(tab)) progress[aqKey(tab, name)] = true;
   saveProgress();
   updateHeader();
   render();
+  if (rank > 0 && AQ_TABS.has(tab) && !wasAcq) _checkDucatAcquiredPrompt(name);
 }
 
 function updateTabStat() {
@@ -1344,6 +1374,7 @@ function getVisibleItems() {
       if (status === 'maxed'      && rank !== maxRank) return false;
     }
     if (filters.incarnon && !INCARNON_WEAPONS.has(name)) return false;
+    if (filters.hasParts && !_hasAnyDucatParts(name)) return false;
     return true;
   });
 }
@@ -3080,6 +3111,274 @@ function updateAuthUI() {
 }
 
 // ─────────────────────────────────────────────
+// DUCAT CALCULATOR
+// ─────────────────────────────────────────────
+const DUCAT_VALUES  = [15, 45, 100]; // 0=Common, 1=Uncommon, 2=Rare
+const DUCAT_EXCLUDE = new Set(['Forma', 'Exilus Weapon Adapter']);
+// Parts whose ducat value differs from what their minimum drop rarity would imply
+const DUCAT_EXCEPTIONS = new Map([
+  ['Akstiletto Prime\tReceiver',         45],
+  ['Braton Prime\tReceiver',             45],
+  ['Bronco Prime\tBarrel',               45],
+  ['Fang Prime\tBlueprint',              15],
+  ['Gauss Prime\tBlueprint',             25],
+  ['Khora Prime\tBlueprint',             65],
+  ['Knell Prime\tReceiver',              45],
+  ['Limbo Prime\tNeuroptics Blueprint', 100],
+  ['Mesa Prime\tSystems Blueprint',     100],
+  ['Panthera Prime\tReceiver',          100],
+  ['Rubico Prime\tStock',                45],
+  ['Saryn Prime\tNeuroptics Blueprint',  45],
+  ['Soma Prime\tBlueprint',              15],
+]);
+
+function ducatKey(item, part) { return 'duc:' + item + '\t' + part; }
+function getDucatQty(item, part) { return progress[ducatKey(item, part)] || 0; }
+
+function _ducatPartRarity(drops) {
+  let min = 2;
+  for (const drop of drops) { if (drop[1] < min) min = drop[1]; }
+  return min;
+}
+
+function _ducatPartValue(item, part, drops) {
+  const ex = DUCAT_EXCEPTIONS.get(item + '\t' + part);
+  return ex !== undefined ? ex : DUCAT_VALUES[_ducatPartRarity(drops)];
+}
+
+function _ducatGrandTotal() {
+  let total = 0;
+  for (const [k, v] of Object.entries(progress)) {
+    if (!k.startsWith('duc:') || typeof v !== 'number' || v <= 0) continue;
+    const sep = k.indexOf('\t');
+    if (sep < 0) continue;
+    const item = k.slice(4, sep);
+    const part = k.slice(sep + 1);
+    if (DUCAT_EXCLUDE.has(item)) continue;
+    const entry = typeof RELIC_DROPS !== 'undefined' ? RELIC_DROPS.get(item) : null;
+    if (!entry) continue;
+    const drops = entry[1][part];
+    if (!drops) continue;
+    total += v * _ducatPartValue(item, part, drops);
+  }
+  return total;
+}
+
+let _ducatCatMap = null;
+function _getDucatCategoryMap() {
+  if (_ducatCatMap) return _ducatCatMap;
+  _ducatCatMap = new Map();
+  if (typeof TAB_DATA === 'undefined') return _ducatCatMap;
+  const TABS = [
+    ['warframes',   'Warframes'],
+    ['primary',     'Primary'],
+    ['secondary',   'Secondary'],
+    ['melee',       'Melee'],
+    ['companions',  'Companions'],
+    ['compWeapons', 'Companion Weapons'],
+    ['archWeapons', 'Arch-Weapons'],
+    ['vehicles',    'Vehicles'],
+    ['amps',        'Amps'],
+  ];
+  for (const [tabKey, label] of TABS) {
+    const arr = TAB_DATA[tabKey];
+    if (!arr) continue;
+    for (const item of arr) {
+      const prime = item[0] + ' Prime';
+      if (!_ducatCatMap.has(prime)) _ducatCatMap.set(prime, label);
+    }
+  }
+  return _ducatCatMap;
+}
+
+const DUCAT_CAT_ORDER = ['Warframes', 'Primary', 'Secondary', 'Melee', 'Companions', 'Companion Weapons', 'Arch-Weapons', 'Vehicles', 'Amps', 'Other'];
+
+function _ducatAvailableCategories() {
+  if (typeof RELIC_DROPS === 'undefined') return [];
+  const catMap = _getDucatCategoryMap();
+  const seen = new Set();
+  for (const [itemName] of RELIC_DROPS) {
+    if (!DUCAT_EXCLUDE.has(itemName)) seen.add(catMap.get(itemName) || 'Other');
+  }
+  return DUCAT_CAT_ORDER.filter(c => seen.has(c));
+}
+
+function buildDucatSets(searchTerm) {
+  if (typeof RELIC_DROPS === 'undefined') return [];
+  const catMap = _getDucatCategoryMap();
+  const q = (searchTerm || '').toLowerCase();
+  const sets = [];
+  for (const [itemName, entry] of RELIC_DROPS) {
+    if (DUCAT_EXCLUDE.has(itemName)) continue;
+    if (q && !itemName.toLowerCase().includes(q)) continue;
+    const cat = catMap.get(itemName) || 'Other';
+    if (activeCategory && cat !== activeCategory) continue;
+    const partsObj = entry[1];
+    const parts = [];
+    for (const [partName, drops] of Object.entries(partsObj)) {
+      const rarity = _ducatPartRarity(drops);
+      parts.push({ name: partName, rarity, value: _ducatPartValue(itemName, partName, drops) });
+    }
+    parts.sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name));
+    sets.push({ name: itemName, vaulted: entry[0] === 1, parts, category: cat });
+  }
+  sets.sort((a, b) => a.name.localeCompare(b.name));
+  return sets;
+}
+
+function ducatInput(el) {
+  const row   = el.closest('.dc-part-row');
+  const setEl = el.closest('.dc-set');
+  const qty   = Math.max(0, parseInt(el.value) || 0);
+  el.value    = qty;
+  const item  = row.dataset.item;
+  const part  = row.dataset.part;
+  const value = parseInt(row.dataset.value);
+  const k = ducatKey(item, part);
+  if (qty > 0) progress[k] = qty; else delete progress[k];
+  deferSave();
+  const partDucats = qty * value;
+  row.querySelector('.dc-part-total').textContent = partDucats > 0 ? fmt(partDucats) : '—';
+  let setTotal = 0;
+  for (const r of setEl.querySelectorAll('.dc-part-row')) {
+    setTotal += (parseInt(r.querySelector('.dc-qty').value) || 0) * parseInt(r.dataset.value);
+  }
+  setEl.querySelector('.dc-set-sub').textContent = setTotal > 0 ? fmt(setTotal) + ' D' : '—';
+  const totalEl = document.getElementById('dc-total-val');
+  if (totalEl) totalEl.textContent = fmt(_ducatGrandTotal());
+}
+
+function ducatAcqAdd(el) {
+  const item = el.dataset.item;
+  const part = el.dataset.part;
+  const k = ducatKey(item, part);
+  if ((progress[k] || 0) > 0) return;
+  progress[k] = 1;
+  deferSave();
+  if (!el.nextElementSibling?.classList.contains('recipe-acq-badge')) {
+    const badge = document.createElement('span');
+    badge.className = 'recipe-acq-badge';
+    badge.textContent = 'Acq';
+    el.insertAdjacentElement('afterend', badge);
+  }
+  if (activeTab === 'ducats') {
+    const view = document.getElementById('ducats-view');
+    if (view) {
+      for (const row of view.querySelectorAll('.dc-part-row')) {
+        if (row.dataset.item === item && row.dataset.part === part) {
+          const inp = row.querySelector('.dc-qty');
+          if (inp) { inp.value = '1'; ducatInput(inp); }
+          break;
+        }
+      }
+    }
+  }
+}
+
+function _checkDucatAcquiredPrompt(itemName) {
+  if (typeof RELIC_DROPS === 'undefined') return;
+  const entry = RELIC_DROPS.get(itemName);
+  if (!entry) return;
+  const affected = [];
+  for (const partName of Object.keys(entry[1])) {
+    const qty = getDucatQty(itemName, partName);
+    if (qty > 0) affected.push({ partName, qty });
+  }
+  if (affected.length === 0) return;
+  const lines = affected.map(a => `  • ${a.partName}: ${a.qty} → ${Math.max(0, a.qty - 1)}`).join('\n');
+  if (!confirm(`"${itemName}" marked as acquired.\n\nSubtract 1 from these Ducat trade-in entries?\n\n${lines}`)) return;
+  for (const { partName } of affected) {
+    const k = ducatKey(itemName, partName);
+    const cur = progress[k] || 0;
+    if (cur <= 1) delete progress[k]; else progress[k] = cur - 1;
+  }
+  saveProgress();
+  render();
+}
+
+function _hasAnyDucatParts(name) {
+  if (typeof RELIC_DROPS === 'undefined') return false;
+  const entry = RELIC_DROPS.get(name);
+  if (!entry) return false;
+  for (const partName of Object.keys(entry[1])) {
+    if (getDucatQty(name, partName) > 0) return true;
+  }
+  return false;
+}
+
+function clearDucats() {
+  for (const k of Object.keys(progress)) {
+    if (k.startsWith('duc:')) delete progress[k];
+  }
+  saveProgress();
+  renderDucats();
+}
+
+function renderDucats() {
+  const view = document.getElementById('ducats-view');
+  if (!view) return;
+  const searchTerm = document.getElementById('search')?.value || '';
+  const sets = buildDucatSets(searchTerm);
+  const grand = _ducatGrandTotal();
+  const R_CLS = ['dc-rarity-0', 'dc-rarity-1', 'dc-rarity-2'];
+
+  let html = `<div class="dc-hdr">
+  <span class="dc-total-label">Total Ducats</span>
+  <span id="dc-total-val" class="dc-total-val">${fmt(grand)}</span>
+  <button class="btn" style="margin-left:auto;font-size:10px;padding:3px 9px;color:var(--red)" onclick="clearDucats()">Clear All</button>
+</div>`;
+
+  if (sets.length === 0) {
+    html += '<div class="empty">No prime sets match your search.</div>';
+    view.innerHTML = html;
+    return;
+  }
+
+  const byCategory = new Map();
+  for (const set of sets) {
+    if (!byCategory.has(set.category)) byCategory.set(set.category, []);
+    byCategory.get(set.category).push(set);
+  }
+
+  for (const cat of DUCAT_CAT_ORDER) {
+    const catSets = byCategory.get(cat);
+    if (!catSets || catSets.length === 0) continue;
+    const collapsed = collapsedGroups.has('ducats:' + cat);
+    html += `<div class="dc-section"><div class="dc-section-hdr" onclick="toggleGroupCollapse('ducats','${jsStr(cat)}')"><span class="sc-group-title"><span class="grp-arrow">${collapsed ? '▶' : '▼'}</span>${esc(cat)}</span></div>`;
+    if (!collapsed) {
+      html += '<div class="dc-grid">';
+      for (const set of catSets) {
+        let setTotal = 0;
+        let partsHtml = '';
+        for (const part of set.parts) {
+          const qty = getDucatQty(set.name, part.name);
+          const partDucats = qty * part.value;
+          setTotal += partDucats;
+          partsHtml += `<div class="dc-part-row" data-item="${esc(set.name)}" data-part="${esc(part.name)}" data-value="${part.value}">
+  <span class="dc-part-name">${esc(part.name)}</span>
+  <span class="dc-rarity ${R_CLS[part.rarity]}">${part.value}D</span>
+  <input class="dc-qty" type="number" min="0" max="999" value="${qty}" oninput="ducatInput(this)">
+  <span class="dc-part-total">${partDucats > 0 ? fmt(partDucats) : '—'}</span>
+</div>`;
+        }
+        html += `<div class="dc-set">
+  <div class="dc-set-hdr">
+    <span class="dc-set-name"><a href="${esc(wikiUrl(set.name))}" target="_blank" rel="noopener">${esc(set.name)}</a></span>
+    ${set.vaulted ? '<span class="dc-vaulted-tag">Vaulted</span>' : ''}
+    <a class="card-tradable" href="${esc(marketUrl(set.name))}" target="_blank" rel="noopener">Market</a>
+    <span class="dc-set-sub">${setTotal > 0 ? fmt(setTotal) + ' D' : '—'}</span>
+  </div>
+  ${partsHtml}
+</div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  view.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 loadProgress();
@@ -3097,17 +3396,23 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isSummary = activeTab === 'summary';
   const _isMods    = activeTab === 'mods';
   const _isCl      = activeTab === 'checklist';
-  const _isSpecial = _isChart || _isSummary || _isCl;
+  const _isDucats  = activeTab === 'ducats';
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats;
   document.getElementById('summary').classList.toggle('open', _isSummary);
   document.getElementById('checklist-view').style.display = _isCl ? 'block' : 'none';
+  document.getElementById('ducats-view').style.display    = _isDucats ? 'block' : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
-  document.getElementById('cat-btns').style.display = _isSpecial ? 'none' : '';
+  document.getElementById('cat-btns').style.display = (_isSpecial && !_isDucats) ? 'none' : '';
   document.getElementById('search').style.display   = _isCl ? 'none' : '';
   document.getElementById('status-dd').style.display = _isSpecial ? 'none' : '';
   const _isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = _isIncarnon ? '' : 'none';
+  const _isAqTab = AQ_TABS.has(activeTab);
+  const _hpBtn = document.getElementById('fb-hasparts');
+  _hpBtn.style.display = _isAqTab ? '' : 'none';
+  _hpBtn.classList.toggle('on', false);
   const _cwInd2 = document.getElementById('circuit-week-ind');
   _cwInd2.textContent = 'Circuit: Week ' + CIRCUIT_WEEK_NOW;
   _cwInd2.style.display = _isIncarnon ? '' : 'none';
