@@ -39,8 +39,8 @@ body {
 }
 
 /* ── HEADER ── */
+#sticky-top { position: sticky; top: 0; z-index: 200; }
 #hdr {
-  position: sticky; top: 0; z-index: 200;
   background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
   border-bottom: 1px solid var(--gold-dim);
   padding: 12px 20px;
@@ -82,9 +82,9 @@ body {
   width: max-content;
   flex-shrink: 0;
   position: sticky;
-  top: 100px;
+  top: 140px;
   align-self: flex-start;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 140px);
   overflow-y: auto;
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -104,7 +104,6 @@ body.topbar-mode .tab { border-left: none; border-bottom: 2px solid transparent;
 body.topbar-mode .tab:hover { background: transparent; }
 body.topbar-mode .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
 body.topbar-mode .sidebar-divider { display: none; }
-body.topbar-mode #ctrl { top: 136px; }
 @media (max-width: 700px) {
   #app-body { display: block; }
   #sidebar { width: 100%; height: auto; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; border-right: none; border-bottom: 1px solid var(--border); }
@@ -113,7 +112,6 @@ body.topbar-mode #ctrl { top: 136px; }
   .tab:hover { background: transparent; }
   .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
   .sidebar-divider { display: none; }
-  #ctrl { top: 136px; }
   #btn-layout { display: none; }
 }
 
@@ -142,9 +140,6 @@ body.topbar-mode #ctrl { top: 136px; }
 
 /* ── CONTROLS ── */
 #ctrl {
-  position: sticky;
-  top: 100px;
-  z-index: 100;
   background: var(--surface);
   border-bottom: 1px solid var(--border-soft);
   padding: 8px 16px;
@@ -810,6 +805,7 @@ body.topbar-mode #ctrl { top: 136px; }
 
 <div id="warn-bar"></div>
 
+<div id="sticky-top">
 <div id="hdr">
   <div id="mr-badge">
     <div id="mr-rank">MR 0</div>
@@ -838,6 +834,28 @@ body.topbar-mode #ctrl { top: 136px; }
     <button class="btn" id="btn-auth" onclick="currentUser ? logout() : login()">Sign in</button>
   </div>
 </div>
+<div id="ctrl">
+  <div id="ctrl-row1">
+    <input id="search" type="text" placeholder="Search…" oninput="render()">
+    <div id="cat-btns"></div>
+    <div id="status-dd"></div>
+    <button class="filt-btn" id="fb-incarnon" style="display:none" onclick="toggleFilt('incarnon',this)">Incarnon</button>
+    <button class="filt-btn" id="fb-hasparts" style="display:none" onclick="toggleFilt('hasParts',this)">Has Prime Parts</button>
+    <span id="circuit-week-ind" class="circuit-week-ind" style="display:none"></span>
+    <span id="circuit-wf-week-ind" class="circuit-week-ind" style="display:none"></span>
+    <button class="filt-btn" id="fb-conclave" style="display:none" onclick="toggleConclaveFilter(this)">Conclave</button>
+    <button class="filt-btn" id="fb-flawed"   style="display:none" onclick="toggleFlawedFilter(this)">Flawed</button>
+    <div id="tab-stat"></div>
+  </div>
+  <div id="ctrl-row2" style="display:none">
+    <button class="filt-btn on" id="fb-tile" onclick="setListView(false)">Tile</button>
+    <button class="filt-btn" id="fb-list" onclick="setListView(true)">List</button>
+    <button class="filt-btn" id="fb-grp" onclick="toggleGroupView()">Group</button>
+    <button class="filt-btn" id="fb-wftile" style="display:none" onclick="toggleWfTileImages(this)">Tile Art</button>
+    <button class="filt-btn" id="fb-wfbg"   style="display:none" onclick="toggleWfBgImages(this)">BG Art</button>
+  </div>
+</div>
+</div>
 
 <div id="app-body">
 <div id="sidebar">
@@ -863,28 +881,6 @@ body.topbar-mode #ctrl { top: 136px; }
 </div>
 
 <div id="main-col">
-<div id="ctrl">
-  <div id="ctrl-row1">
-    <input id="search" type="text" placeholder="Search…" oninput="render()">
-    <div id="cat-btns"></div>
-    <div id="status-dd"></div>
-    <button class="filt-btn" id="fb-incarnon" style="display:none" onclick="toggleFilt('incarnon',this)">Incarnon</button>
-    <button class="filt-btn" id="fb-hasparts" style="display:none" onclick="toggleFilt('hasParts',this)">Has Prime Parts</button>
-    <span id="circuit-week-ind" class="circuit-week-ind" style="display:none"></span>
-    <span id="circuit-wf-week-ind" class="circuit-week-ind" style="display:none"></span>
-    <button class="filt-btn" id="fb-conclave" style="display:none" onclick="toggleConclaveFilter(this)">Conclave</button>
-    <button class="filt-btn" id="fb-flawed"   style="display:none" onclick="toggleFlawedFilter(this)">Flawed</button>
-    <div id="tab-stat"></div>
-  </div>
-  <div id="ctrl-row2" style="display:none">
-    <button class="filt-btn on" id="fb-tile" onclick="setListView(false)">Tile</button>
-    <button class="filt-btn" id="fb-list" onclick="setListView(true)">List</button>
-    <button class="filt-btn" id="fb-grp" onclick="toggleGroupView()">Group</button>
-    <button class="filt-btn" id="fb-wftile" style="display:none" onclick="toggleWfTileImages(this)">Tile Art</button>
-    <button class="filt-btn" id="fb-wfbg"   style="display:none" onclick="toggleWfBgImages(this)">BG Art</button>
-  </div>
-</div>
-
 <div id="content">
   <div id="bulk-bar">
     <span id="bulk-label">Showing all items</span>
