@@ -1132,8 +1132,8 @@ function render() {
   if (activeTab === 'starChart') { renderStarChart(); return; }
   if (activeTab === 'mods')      { renderMods();      return; }
   if (activeTab === 'arcanes')   { renderArcanes();   return; }
-  if (activeTab === 'checklist') { renderChecklist(); return; }
-  if (activeTab === 'ducats')    { renderDucats();    return; }
+  if (activeTab === 'checklist') { renderChecklist(); updateTabStat(); return; }
+  if (activeTab === 'ducats')    { renderDucats();    updateTabStat(); return; }
   const items = TAB_DATA[activeTab] || [];
   const visible = getVisibleItems();
 
