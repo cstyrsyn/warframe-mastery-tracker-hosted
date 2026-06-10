@@ -362,7 +362,6 @@ body.topbar-mode #ctrl { top: 136px; }
   touch-action: pan-y;
   background: linear-gradient(to right, var(--gold-dim) 0%, var(--gold-dim) var(--pct, 0%), var(--border) var(--pct, 0%));
 }
-@media (pointer: coarse) { .rank-slider { pointer-events: none; } }
 .rank-max { font-size: 9px; color: var(--text-muted); min-width: 18px; }
 .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 11px; }
 .card-xp { font-size: 10px; color: var(--text-muted); }
@@ -1023,6 +1022,27 @@ function toggleLayout(){
   document.getElementById('btn-layout').textContent=topbar?'Side Nav':'Top Nav';
   localStorage.setItem('navLayout',topbar?'topbar':'sidebar');
 }
+// Block slider track-taps on touch devices; allow thumb drags
+(function(){
+  if(!('ontouchstart' in window)) return;
+  let blocked=false, savedVal=null;
+  document.addEventListener('touchstart', function(e){
+    blocked=false;
+    const s=e.target.closest('.rank-slider');
+    if(!s) return;
+    const rect=s.getBoundingClientRect();
+    const tx=e.touches[0].clientX - rect.left;
+    const pct=(parseFloat(s.value)-parseFloat(s.min))/(parseFloat(s.max)-parseFloat(s.min));
+    if(Math.abs(tx - pct*rect.width) > 24){ blocked=true; savedVal=s.value; }
+  },{passive:true});
+  document.addEventListener('input', function(e){
+    const s=e.target.closest('.rank-slider');
+    if(!s||!blocked) return;
+    s.value=savedVal;
+    e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener('touchend', function(){ blocked=false; },{passive:true});
+})();
 </script>
 <script src="data.js"></script>
 <script src="relics.js"></script>
