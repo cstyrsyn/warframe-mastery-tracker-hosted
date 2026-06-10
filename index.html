@@ -41,6 +41,7 @@ body {
 
 /* ── HEADER ── */
 #sticky-top { position: sticky; top: 0; z-index: 200; }
+#topbar-img { width: 100%; height: 80px; display: block; object-fit: cover; object-position: center; }
 #hdr {
   background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
   border-bottom: 1px solid var(--gold-dim);
@@ -820,6 +821,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 <div id="warn-bar"></div>
 
 <div id="sticky-top">
+<img id="topbar-img" src="Images/topbar.png" alt="Warframe Tracker">
 <div id="hdr">
   <div id="mr-badge">
     <div id="mr-rank">MR 0</div>
