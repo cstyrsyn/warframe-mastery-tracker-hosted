@@ -1342,7 +1342,7 @@ function setRank(tab, name, rank) {
 }
 
 function updateTabStat() {
-  if (activeTab === 'starChart' || activeTab === 'summary') { document.getElementById('tab-stat').innerHTML = ''; return; }
+  if (['starChart','summary','checklist','ducats'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
     for (const [name,, , maxRank] of MODS) {
