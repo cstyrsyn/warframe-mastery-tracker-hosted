@@ -44,7 +44,7 @@ body {
   background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
   border-bottom: 1px solid var(--gold-dim);
   padding: 12px 20px;
-  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  display: flex; align-items: center; column-gap: 20px; row-gap: 8px; flex-wrap: wrap;
 }
 #mr-badge {
   display: flex; flex-direction: column; align-items: center;
@@ -74,7 +74,7 @@ body {
 #pb-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
 #pb-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 #pb-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width 0.4s ease; }
-#hdr-btns { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+#hdr-btns { display: flex; gap: 6px; flex-wrap: wrap; order: -1; flex-basis: 100%; justify-content: flex-end; }
 
 /* ── SIDEBAR LAYOUT ── */
 #app-body { display: flex; align-items: flex-start; }
@@ -82,9 +82,9 @@ body {
   width: max-content;
   flex-shrink: 0;
   position: sticky;
-  top: 52px;
+  top: 100px;
   align-self: flex-start;
-  height: calc(100vh - 52px);
+  height: calc(100vh - 100px);
   overflow-y: auto;
   background: var(--surface);
   border-right: 1px solid var(--border);
@@ -104,7 +104,7 @@ body.topbar-mode .tab { border-left: none; border-bottom: 2px solid transparent;
 body.topbar-mode .tab:hover { background: transparent; }
 body.topbar-mode .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
 body.topbar-mode .sidebar-divider { display: none; }
-body.topbar-mode #ctrl { top: 88px; }
+body.topbar-mode #ctrl { top: 136px; }
 @media (max-width: 700px) {
   #app-body { display: block; }
   #sidebar { width: 100%; height: auto; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; border-right: none; border-bottom: 1px solid var(--border); }
@@ -113,7 +113,7 @@ body.topbar-mode #ctrl { top: 88px; }
   .tab:hover { background: transparent; }
   .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
   .sidebar-divider { display: none; }
-  #ctrl { top: 88px; }
+  #ctrl { top: 136px; }
   #btn-layout { display: none; }
 }
 
@@ -143,7 +143,7 @@ body.topbar-mode #ctrl { top: 88px; }
 /* ── CONTROLS ── */
 #ctrl {
   position: sticky;
-  top: 52px;
+  top: 100px;
   z-index: 100;
   background: var(--surface);
   border-bottom: 1px solid var(--border-soft);
