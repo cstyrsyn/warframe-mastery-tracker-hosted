@@ -39,8 +39,8 @@ body {
 }
 
 /* ── HEADER ── */
-#sticky-hdr { position: sticky; top: 0; z-index: 200; }
 #hdr {
+  position: sticky; top: 0; z-index: 200;
   background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
   border-bottom: 1px solid var(--gold-dim);
   padding: 12px 20px;
@@ -76,34 +76,75 @@ body {
 #pb-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; transition: width 0.4s ease; }
 #hdr-btns { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
 
-/* ── TABS ── */
-#tabs {
-  display: flex; gap: 0;
+/* ── SIDEBAR LAYOUT ── */
+#app-body { display: flex; align-items: flex-start; }
+#sidebar {
+  width: max-content;
+  flex-shrink: 0;
+  position: sticky;
+  top: 52px;
+  align-self: flex-start;
+  height: calc(100vh - 52px);
+  overflow-y: auto;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 12px;
+  border-right: 1px solid var(--border);
 }
-#tabs::-webkit-scrollbar { height: 2px; }
+#main-col { flex: 1; min-width: 0; }
+
+/* ── TOPBAR MODE (manual toggle or auto on small screens) ── */
+body.topbar-mode #app-body { display: block; }
+body.topbar-mode #sidebar {
+  width: 100%; height: auto;
+  overflow-x: auto; overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  border-right: none; border-bottom: 1px solid var(--border);
+}
+body.topbar-mode #tabs { flex-direction: row; padding: 0 12px; }
+body.topbar-mode .tab { border-left: none; border-bottom: 2px solid transparent; flex-shrink: 0; }
+body.topbar-mode .tab:hover { background: transparent; }
+body.topbar-mode .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
+body.topbar-mode .sidebar-divider { display: none; }
+body.topbar-mode #ctrl { top: 88px; }
+@media (max-width: 700px) {
+  #app-body { display: block; }
+  #sidebar { width: 100%; height: auto; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; border-right: none; border-bottom: 1px solid var(--border); }
+  #tabs { flex-direction: row; padding: 0 12px; }
+  .tab { border-left: none; border-bottom: 2px solid transparent; flex-shrink: 0; }
+  .tab:hover { background: transparent; }
+  .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
+  .sidebar-divider { display: none; }
+  #ctrl { top: 88px; }
+  #btn-layout { display: none; }
+}
+
+/* ── TABS (vertical sidebar) ── */
+#tabs {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  padding: 6px 0;
+}
 .tab {
   padding: 9px 14px;
   cursor: pointer;
   color: var(--text-muted);
-  border-bottom: 2px solid transparent;
+  border-left: 2px solid transparent;
   white-space: nowrap;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
   user-select: none;
-  flex-shrink: 0;
 }
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.tab.active { color: var(--gold); border-left-color: var(--gold); background: rgba(200,170,110,0.06); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 6px 12px; }
 
 /* ── CONTROLS ── */
 #ctrl {
+  position: sticky;
+  top: 52px;
+  z-index: 100;
   background: var(--surface);
   border-bottom: 1px solid var(--border-soft);
   padding: 8px 16px;
@@ -318,6 +359,7 @@ body {
 .rank-slider {
   flex: 1; height: 3px; border-radius: 2px;
   accent-color: var(--gold); cursor: pointer;
+  touch-action: pan-y;
   background: linear-gradient(to right, var(--gold-dim) 0%, var(--gold-dim) var(--pct, 0%), var(--border) var(--pct, 0%));
 }
 .rank-max { font-size: 9px; color: var(--text-muted); min-width: 18px; }
@@ -768,7 +810,6 @@ body {
 
 <div id="warn-bar"></div>
 
-<div id="sticky-hdr">
 <div id="hdr">
   <div id="mr-badge">
     <div id="mr-rank">MR 0</div>
@@ -788,6 +829,7 @@ body {
     <div id="pb-bg"><div id="pb-fill" style="width:0%"></div></div>
   </div>
   <div id="hdr-btns">
+    <button class="btn" id="btn-layout" onclick="toggleLayout()">Top Nav</button>
     <button class="btn" id="btn-backup" onclick="setBackupFile()">Auto-backup</button>
     <button class="btn" onclick="openImport()">Import</button>
     <button class="btn" onclick="openExport()">Export</button>
@@ -797,6 +839,8 @@ body {
   </div>
 </div>
 
+<div id="app-body">
+<div id="sidebar">
 <div id="tabs">
   <div class="tab active" data-tab="summary">Summary</div>
   <div class="tab" data-tab="warframes">Warframes</div>
@@ -810,12 +854,15 @@ body {
   <div class="tab" data-tab="amps">Amps</div>
   <div class="tab" data-tab="intrinsics">Intrinsics</div>
   <div class="tab" data-tab="starChart">Star Chart</div>
+  <div class="sidebar-divider"></div>
   <div class="tab" data-tab="mods">Mods</div>
   <div class="tab" data-tab="arcanes">Arcanes</div>
   <div class="tab" data-tab="checklist">Checklist</div>
   <div class="tab" data-tab="ducats">Ducats</div>
 </div>
+</div>
 
+<div id="main-col">
 <div id="ctrl">
   <div id="ctrl-row1">
     <input id="search" type="text" placeholder="Search…" oninput="render()">
@@ -837,7 +884,6 @@ body {
     <button class="filt-btn" id="fb-wfbg"   style="display:none" onclick="toggleWfBgImages(this)">BG Art</button>
   </div>
 </div>
-</div>
 
 <div id="content">
   <div id="bulk-bar">
@@ -850,6 +896,8 @@ body {
   <div id="sc"></div>
   <div id="checklist-view"></div>
   <div id="ducats-view"></div>
+</div>
+</div>
 </div>
 
 <!-- Export/Import Modal -->
@@ -953,6 +1001,20 @@ body {
   </div>
 </div>
 
+<script>
+(function(){
+  if(localStorage.getItem('navLayout')==='topbar'){
+    document.body.classList.add('topbar-mode');
+    const btn=document.getElementById('btn-layout');
+    if(btn) btn.textContent='Side Nav';
+  }
+})();
+function toggleLayout(){
+  const topbar=document.body.classList.toggle('topbar-mode');
+  document.getElementById('btn-layout').textContent=topbar?'Side Nav':'Top Nav';
+  localStorage.setItem('navLayout',topbar?'topbar':'sidebar');
+}
+</script>
 <script src="data.js"></script>
 <script src="relics.js"></script>
 
