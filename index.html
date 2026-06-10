@@ -26,6 +26,7 @@
   --red: #c04040;
   --blue: #4a80c8;
   --tag-bg: #1e1e2a;
+  --sticky-offset: 140px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -82,14 +83,17 @@ body {
   width: max-content;
   flex-shrink: 0;
   position: sticky;
-  top: 140px;
+  top: var(--sticky-offset);
+  z-index: 100;
   align-self: flex-start;
-  height: calc(100vh - 140px);
+  height: calc(100vh - var(--sticky-offset));
   overflow-y: auto;
   background: var(--surface);
   border-right: 1px solid var(--border);
 }
 #main-col { flex: 1; min-width: 0; }
+#ctrl-filters { display: none; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 16px 8px; }
+#ctrl-filters.open { display: flex; }
 
 /* ── TOPBAR MODE (manual toggle or auto on small screens) ── */
 body.topbar-mode #app-body { display: block; }
@@ -837,6 +841,10 @@ body.topbar-mode .sidebar-divider { display: none; }
 <div id="ctrl">
   <div id="ctrl-row1">
     <input id="search" type="text" placeholder="Search…" oninput="render()">
+    <button class="filt-btn" id="btn-filters" onclick="toggleFilterRow()">Filters ▾</button>
+    <div id="tab-stat"></div>
+  </div>
+  <div id="ctrl-filters">
     <div id="cat-btns"></div>
     <div id="status-dd"></div>
     <button class="filt-btn" id="fb-incarnon" style="display:none" onclick="toggleFilt('incarnon',this)">Incarnon</button>
@@ -845,7 +853,6 @@ body.topbar-mode .sidebar-divider { display: none; }
     <span id="circuit-wf-week-ind" class="circuit-week-ind" style="display:none"></span>
     <button class="filt-btn" id="fb-conclave" style="display:none" onclick="toggleConclaveFilter(this)">Conclave</button>
     <button class="filt-btn" id="fb-flawed"   style="display:none" onclick="toggleFlawedFilter(this)">Flawed</button>
-    <div id="tab-stat"></div>
   </div>
   <div id="ctrl-row2" style="display:none">
     <button class="filt-btn on" id="fb-tile" onclick="setListView(false)">Tile</button>
@@ -998,6 +1005,10 @@ body.topbar-mode .sidebar-divider { display: none; }
 </div>
 
 <script>
+function updateStickyOffset(){
+  const el=document.getElementById('sticky-top');
+  if(el) document.documentElement.style.setProperty('--sticky-offset', el.offsetHeight+'px');
+}
 (function(){
   function applyLayout(){
     const mobile=window.innerWidth<=700;
@@ -1009,14 +1020,27 @@ body.topbar-mode .sidebar-divider { display: none; }
       document.body.classList.toggle('topbar-mode', pref==='topbar');
       if(btn) btn.textContent=pref==='topbar'?'Side Nav':'Top Nav';
     }
+    updateStickyOffset();
   }
   applyLayout();
   window.addEventListener('resize', applyLayout);
+  if(localStorage.getItem('filtersOpen')==='1'){
+    const cf=document.getElementById('ctrl-filters');
+    if(cf){ cf.classList.add('open'); const bf=document.getElementById('btn-filters'); if(bf) bf.textContent='Filters ▴'; }
+    updateStickyOffset();
+  }
 })();
 function toggleLayout(){
   const topbar=document.body.classList.toggle('topbar-mode');
   document.getElementById('btn-layout').textContent=topbar?'Side Nav':'Top Nav';
   localStorage.setItem('navLayout',topbar?'topbar':'sidebar');
+  updateStickyOffset();
+}
+function toggleFilterRow(){
+  const open=document.getElementById('ctrl-filters').classList.toggle('open');
+  document.getElementById('btn-filters').textContent=open?'Filters ▴':'Filters ▾';
+  localStorage.setItem('filtersOpen',open?'1':'0');
+  updateStickyOffset();
 }
 // Block slider track-taps on touch devices; allow thumb drags
 (function(){
