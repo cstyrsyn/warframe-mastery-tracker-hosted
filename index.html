@@ -362,6 +362,7 @@ body.topbar-mode #ctrl { top: 136px; }
   touch-action: pan-y;
   background: linear-gradient(to right, var(--gold-dim) 0%, var(--gold-dim) var(--pct, 0%), var(--border) var(--pct, 0%));
 }
+@media (pointer: coarse) { .rank-slider { pointer-events: none; } }
 .rank-max { font-size: 9px; color: var(--text-muted); min-width: 18px; }
 .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 11px; }
 .card-xp { font-size: 10px; color: var(--text-muted); }
