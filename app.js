@@ -439,14 +439,16 @@ ${sortedRes.map(([rName, total]) => {
 <div class="cl-col-items">
   <div class="kg-hdr">
     <span style="font-size:11px;color:var(--text-muted)">${countLabel}</span>
-    <div style="display:flex;gap:8px">
-      <button class="btn" onclick="addKitgunBuild()">+ Add Kitgun</button>
-      <button class="btn" onclick="addZawBuild()">+ Add Zaw</button>
-    </div>
   </div>
-  <div class="kg-type-label" style="font-size:11px;font-weight:600;color:var(--text-muted);padding:6px 14px 2px;text-transform:uppercase;letter-spacing:.06em">Kitguns</div>
+  <div class="kg-type-label" style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--text-muted);padding:6px 14px 2px;text-transform:uppercase;letter-spacing:.06em">
+    <span>Kitguns</span>
+    <button class="btn" onclick="addKitgunBuild()">+ Add Kitgun</button>
+  </div>
   ${kitgunSection}
-  <div class="kg-type-label" style="font-size:11px;font-weight:600;color:var(--text-muted);padding:10px 14px 2px;text-transform:uppercase;letter-spacing:.06em">Zaws</div>
+  <div class="kg-type-label" style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:600;color:var(--text-muted);padding:10px 14px 2px;text-transform:uppercase;letter-spacing:.06em">
+    <span>Zaws</span>
+    <button class="btn" onclick="addZawBuild()">+ Add Zaw</button>
+  </div>
   ${zawSection}
 </div>
 <div class="cl-col-resources">${resSection}</div>
