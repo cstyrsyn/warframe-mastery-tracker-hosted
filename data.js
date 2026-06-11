@@ -5830,3 +5830,54 @@ const ARCANE_DESC = {
   'Virtuos Surge':'On Hit: Converts 98% Void Damage to Electricity Damage.',
   'Virtuos Trojan':'On Hit: Converts 98% Void Damage to Viral Damage.',
 };
+
+// ─────────────────────────────────────────────
+// KITGUN COMPONENT DATA
+// Format: [vendor, syndicate, bpCost, craftCredits, [[resource, qty], ...]]
+// bpCost = standing to buy blueprint from vendor
+// craftCredits = credits to build in Foundry (always 5000)
+// ─────────────────────────────────────────────
+const KITGUN_CHAMBERS = new Map([
+  ['Catchmoon',    ['Rude Zuud','Solaris United',  500, 5000, [['Mytocardia Spore',15],['Travocyte Alloy',20],['Scrubber Exa Brain',10],['Alloy Plate',1700]]]],
+  ['Gaze',         ['Rude Zuud','Solaris United',  500, 5000, [['Tepa Nodule',15],['Venerdo Alloy',40],['Kriller Thermal Laser',40],['Cryotic',1200]]]],
+  ['Rattleguts',   ['Rude Zuud','Solaris United',  500, 5000, [['Gorgaricus Spore',15],['Venerdo Alloy',20],['Eye-Eye Rotoblade',10],['Rubedo',900]]]],
+  ['Sporelacer',   ['Father',   'Entrati',         500, 5000, [['Pustulite',15],['Adramal Alloy',20],['Benign Infested Tumor',25],['Sporulate Sac',10]]]],
+  ['Tombfinger',   ['Rude Zuud','Solaris United',  500, 5000, [['Thermal Sludge',15],['Axidrol Alloy',20],['Tink Dissipator Coil',10],['Circuits',900]]]],
+  ['Vermisplicer', ['Father',   'Entrati',         500, 5000, [['Ganglion',15],['Tempered Bapholite',20],['Benign Infested Tumor',25],['Dendrite Blastoma',10]]]],
+]);
+
+const KITGUN_GRIPS = new Map([
+  ['Brash',      ['Rude Zuud','Solaris United', 1000, 5000, [['Smooth Phasmin',5],['Axidrol Alloy',20],['Scrap',25],['Echowinder Anoscopic Sensor',10]]]],
+  ['Gibber',     ['Rude Zuud','Solaris United', 1000, 5000, [['Goblite Tears',5],['Axidrol Alloy',30],['Scrap',20],['Eye-Eye Rotoblade',10]]]],
+  ['Haymaker',   ['Rude Zuud','Solaris United', 1000, 5000, [['Goblite Tears',5],['Travocyte Alloy',30],['Scrap',20],['Recaster Neural Relay',10]]]],
+  ['Lovetap',    ['Rude Zuud','Solaris United',  500, 5000, [['Heart Noctrul',5],['Travocyte Alloy',30],['Scrap',20],['Sapcaddy Venedo Case',10]]]],
+  ['Palmaris',   ['Father',   'Entrati',         500, 5000, [['Benign Infested Tumor',20],['Dendrite Blastoma',10],['Adramal Alloy',20],['Purged Dagonic',5]]]],
+  ['Ramble',     ['Rude Zuud','Solaris United',  750, 5000, [['Smooth Phasmin',5],['Axidrol Alloy',30],['Scrap',20],['Echowinder Anoscopic Sensor',10]]]],
+  ['Shrewd',     ['Rude Zuud','Solaris United', 1000, 5000, [['Heart Noctrul',5],['Travocyte Alloy',30],['Scrap',20],['Sapcaddy Venedo Case',10]]]],
+  ['Steadyslam', ['Rude Zuud','Solaris United', 2000, 5000, [['Goblite Tears',5],['Travocyte Alloy',30],['Scrap',20],['Recaster Neural Relay',10]]]],
+  ['Tremor',     ['Rude Zuud','Solaris United', 2000, 5000, [['Goblite Tears',5],['Axidrol Alloy',30],['Scrap',20],['Eye-Eye Rotoblade',10]]]],
+  ['Ulnaris',    ['Father',   'Entrati',         500, 5000, [['Faceted Tiametrite',5],['Tempered Bapholite',20],['Benign Infested Tumor',20],['Spinal Core Section',10]]]],
+]);
+
+const KITGUN_LOADERS = new Map([
+  ['Arcroid',       ['Father',   'Entrati',        1000, 5000, [['Scintillant',3],['Purged Dagonic',20],['Ganglion',20],['Tubercular Gill System',15]]]],
+  ['Bashrack',      ['Rude Zuud','Solaris United', 2000, 5000, [['Venerdo Alloy',30],['Circuits',1000],['Scrap',20],['Mirewinder Parallel Biode',5]]]],
+  ['Bellows',       ['Rude Zuud','Solaris United', 1000, 5000, [['Thermal Sludge',20],['Axidrol Alloy',30],['Scrap',20],['Echowinder Anoscopic Sensor',5]]]],
+  ['Deepbreath',    ['Rude Zuud','Solaris United',  500, 5000, [['Mytocardia Spore',20],['Travocyte Alloy',30],['Scrap',20],['Scrubber Exa Brain',5]]]],
+  ['Flutterfire',   ['Rude Zuud','Solaris United', 4000, 5000, [['Marquise Veridos',10],['Goblite Tears',10],['Scrap',20],['Tromyzon Entroplasma',5]]]],
+  ['Killstream',    ['Rude Zuud','Solaris United', 4000, 5000, [['Fersteel Alloy',40],['Goblite Tears',10],['Scrap',20],['Longwinder Lathe Coagulant',5]]]],
+  ['Macro Arcroid', ['Father',   'Entrati',         500, 5000, [['Scintillant',3],['Faceted Tiametrite',20],['Ganglion',20],['Tubercular Gill System',15]]]],
+  ['Macro Thymoid', ['Father',   'Entrati',        1000, 5000, [['Scintillant',3],['Purged Dagonic',20],['Pustulite',20],['Ferment Bladder',15]]]],
+  ['Ramflare',      ['Rude Zuud','Solaris United', 4000, 5000, [['Star Crimzian',10],['Star Amarast',10],['Scrap',20],['Charamote Sagan Module',5]]]],
+  ['Slap',          ['Rude Zuud','Solaris United',  500, 5000, [['Gorgaricus Spore',20],['Travocyte Alloy',30],['Scrap',20],['Sapcaddy Venedo Case',5]]]],
+  ['Slapneedle',    ['Rude Zuud','Solaris United', 2000, 5000, [['Coprite Alloy',40],['Heart Noctrul',20],['Scrap',20],['Kriller Thermal Laser',5]]]],
+  ['Sparkfire',     ['Rude Zuud','Solaris United', 2000, 5000, [['Venerdo Alloy',30],['Plastids',1000],['Scrap',20],['Brickie Muon Battery',5]]]],
+  ['Splat',         ['Rude Zuud','Solaris United', 4000, 5000, [['Auroxium Alloy',40],['Star Amarast',10],['Scrap',20],['Synathid Ecosynth Analyzer',5]]]],
+  ['Stitch',        ['Rude Zuud','Solaris United', 2000, 5000, [['Hespazym Alloy',30],['Plastids',1000],['Scrap',20],['Recaster Neural Relay',5]]]],
+  ['Swiftfire',     ['Rude Zuud','Solaris United', 2000, 5000, [['Esher Devar',10],['Heart Noctrul',10],['Scrap',20],['Kriller Thermal Laser',5]]]],
+  ['Thunderdrum',   ['Rude Zuud','Solaris United', 3000, 5000, [['Hespazym Alloy',30],['Rubedo',1000],['Scrap',20],['Recaster Neural Relay',5]]]],
+  ['Thymoid',       ['Father',   'Entrati',         500, 5000, [['Scintillant',3],['Faceted Tiametrite',20],['Pustulite',20],['Ferment Bladder',15]]]],
+  ['Zip',           ['Rude Zuud','Solaris United', 1000, 5000, [['Tepa Nodule',20],['Axidrol Alloy',30],['Scrap',20],['Tink Dissipator Coil',5]]]],
+  ['Zipfire',       ['Rude Zuud','Solaris United', 3000, 5000, [['Tear Azurite',10],['Smooth Phasmin',10],['Scrap',20],['Eye-Eye Rotoblade',5]]]],
+  ['Zipneedle',     ['Rude Zuud','Solaris United', 3000, 5000, [['Pyrotic Alloy',40],['Smooth Phasmin',10],['Scrap',20],['Eye-Eye Rotoblade',5]]]],
+]);

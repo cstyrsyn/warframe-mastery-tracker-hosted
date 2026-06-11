@@ -189,6 +189,177 @@ function updateChecklistOwned(resource, rawVal) {
   }
 }
 
+// ─────────────────────────────────────────────
+// KITGUN BUILDER STATE
+// ─────────────────────────────────────────────
+let modularBuilds = [];  // [{id, chamber, grip, loader, gildAt}]
+let modularOwned  = {};  // {resourceName: qty} — "have" amounts for resource summary
+const MOD_BUILDS_KEY = 'wf-modular-builds';
+const MOD_OWNED_KEY  = 'wf-modular-owned';
+
+function loadModularBuilds() {
+  try { modularBuilds = JSON.parse(localStorage.getItem(MOD_BUILDS_KEY) || '[]'); } catch { modularBuilds = []; }
+  try { modularOwned  = JSON.parse(localStorage.getItem(MOD_OWNED_KEY)  || '{}'); } catch { modularOwned  = {}; }
+}
+function saveModularBuilds() { localStorage.setItem(MOD_BUILDS_KEY, JSON.stringify(modularBuilds)); deferCloudSync(); }
+function saveModularOwned()  { localStorage.setItem(MOD_OWNED_KEY,  JSON.stringify(modularOwned));  deferCloudSync(); }
+
+function addKitgunBuild() {
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  modularBuilds.push({ id, chamber: null, grip: null, loader: null, gildAt: null });
+  saveModularBuilds();
+  renderKitgunBuilder();
+}
+
+function removeKitgunBuild(id) {
+  modularBuilds = modularBuilds.filter(b => b.id !== id);
+  saveModularBuilds();
+  renderKitgunBuilder();
+}
+
+function updateKitgunBuild(id, field, value) {
+  const b = modularBuilds.find(b => b.id === id);
+  if (!b) return;
+  b[field] = value || null;
+  saveModularBuilds();
+  renderKitgunBuilder();
+}
+
+function updateModularOwned(resource, rawVal) {
+  const qty = Math.max(0, parseInt(rawVal, 10) || 0);
+  if (qty === 0) delete modularOwned[resource];
+  else modularOwned[resource] = qty;
+  saveModularOwned();
+  for (const row of document.querySelectorAll('#kitgun-view .cl-res-row')) {
+    if (row.dataset.kgRes !== resource) continue;
+    const total = parseInt(row.dataset.kgTotal, 10);
+    const need  = Math.max(0, total - qty);
+    const needEl = row.querySelector('.cl-res-need');
+    needEl.textContent = 'Need: ' + fmt(need);
+    needEl.classList.toggle('cl-done', need === 0);
+    row.classList.toggle('cl-res-done', need === 0);
+  }
+}
+
+function getKitgunBuildResources(build) {
+  const res = {};
+  const add = (r, q) => { res[r] = (res[r] || 0) + q; };
+  const addComponent = (data) => {
+    if (!data) return;
+    const [, syndicate, bpCost, craftCredits, parts] = data;
+    add(syndicate + ' Standing', bpCost);
+    add('Credits', craftCredits);
+    for (const [r, q] of parts) add(r, q);
+  };
+  if (build.chamber) addComponent(KITGUN_CHAMBERS.get(build.chamber));
+  if (build.grip)    addComponent(KITGUN_GRIPS.get(build.grip));
+  if (build.loader)  addComponent(KITGUN_LOADERS.get(build.loader));
+  if (build.gildAt === 'zuud') {
+    add('Solaris United Standing', 5000);
+    add('Shelter-Debt Bond', 10);
+  } else if (build.gildAt === 'father') {
+    add('Entrati Standing', 5000);
+    add('Father Token', 25);
+  }
+  return res;
+}
+
+function renderKitgunBuilder() {
+  const el = document.getElementById('kitgun-view');
+  if (!el) return;
+
+  const totalRes = {};
+  for (const build of modularBuilds) {
+    for (const [r, q] of Object.entries(getKitgunBuildResources(build)))
+      totalRes[r] = (totalRes[r] || 0) + q;
+  }
+
+  const STANDING_NAMES = new Set(['Solaris United Standing', 'Entrati Standing']);
+  const sortedRes = Object.entries(totalRes).sort((a, b) => {
+    const rank = r => STANDING_NAMES.has(r) ? 0 : r === 'Credits' ? 1 : 2;
+    const dr = rank(a[0]) - rank(b[0]);
+    return dr !== 0 ? dr : b[1] - a[1];
+  });
+
+  let buildsHtml = '';
+  for (const build of modularBuilds) {
+    const { id, chamber, grip, loader, gildAt } = build;
+    const eid = jsStr(id);
+    const parts = [chamber, grip, loader].filter(Boolean);
+    const displayName = parts.length ? parts.join(' / ') : 'New Kitgun';
+
+    const chamberOpts = [...KITGUN_CHAMBERS.keys()].map(n =>
+      `<option value="${esc(n)}"${chamber === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    const gripOpts = [...KITGUN_GRIPS.keys()].map(n =>
+      `<option value="${esc(n)}"${grip === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    const loaderOpts = [...KITGUN_LOADERS.keys()].map(n =>
+      `<option value="${esc(n)}"${loader === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+
+    buildsHtml += `<div class="kg-build">
+<div class="kg-build-hdr">
+  <span class="kg-build-name">${esc(displayName)}</span>
+  <button class="qbtn zr" onclick="removeKitgunBuild('${eid}')">✕</button>
+</div>
+<div class="kg-build-body">
+  <div class="kg-selects">
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','chamber',this.value)">
+      <option value="">— Chamber —</option>${chamberOpts}
+    </select>
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','grip',this.value)">
+      <option value="">— Grip —</option>${gripOpts}
+    </select>
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','loader',this.value)">
+      <option value="">— Loader —</option>${loaderOpts}
+    </select>
+  </div>
+  <div class="kg-gild-row">
+    <span class="kg-gild-lbl">Gild at:</span>
+    <label class="kg-gild-opt">
+      <input type="radio" name="gild_${eid}" value="zuud"${gildAt === 'zuud' ? ' checked' : ''} onchange="updateKitgunBuild('${eid}','gildAt','zuud')">
+      Rude Zuud <span class="kg-gild-cost">(5,000 Solaris United Standing + 10 Shelter-Debt Bonds)</span>
+    </label>
+    <label class="kg-gild-opt">
+      <input type="radio" name="gild_${eid}" value="father"${gildAt === 'father' ? ' checked' : ''} onchange="updateKitgunBuild('${eid}','gildAt','father')">
+      Father <span class="kg-gild-cost">(5,000 Entrati Standing + 25 Father Tokens)</span>
+    </label>
+  </div>
+</div>
+</div>`;
+  }
+
+  const buildsSection = modularBuilds.length === 0
+    ? '<div class="empty" style="padding:40px;text-align:center">No Kitguns tracked yet.<br>Use <b>+ Add Kitgun</b> to start building.</div>'
+    : `<div class="cl-section">${buildsHtml}</div>`;
+
+  const resSection = sortedRes.length
+    ? `<div class="cl-section">
+<div class="cl-section-hdr">Resources Required</div>
+${sortedRes.map(([rName, total]) => {
+  const owned = modularOwned[rName] || 0;
+  const need  = Math.max(0, total - owned);
+  return `<div class="cl-res-row${need === 0 ? ' cl-res-done' : ''}" data-kg-res="${esc(rName)}" data-kg-total="${total}">
+  <span class="cl-res-name">${esc(rName)}</span>
+  <span class="cl-res-total">×${fmt(total)}</span>
+  <span class="cl-res-lbl">Have</span>
+  <input class="cl-res-input" type="number" min="0" value="${owned}" oninput="updateModularOwned('${jsStr(rName)}',this.value)">
+  <span class="cl-res-need${need === 0 ? ' cl-done' : ''}">Need: ${fmt(need)}</span>
+</div>`;
+}).join('\n')}
+</div>`
+    : `<div class="cl-section"><div class="cl-section-hdr" style="color:var(--text-muted);text-align:center;padding:12px">Select components to see resource totals</div></div>`;
+
+  el.innerHTML = `<div class="cl-layout">
+<div class="cl-col-items">
+  <div class="kg-hdr">
+    <span style="font-size:11px;color:var(--text-muted)">${modularBuilds.length} kitgun${modularBuilds.length !== 1 ? 's' : ''}</span>
+    <button class="btn" onclick="addKitgunBuild()">+ Add Kitgun</button>
+  </div>
+  ${buildsSection}
+</div>
+<div class="cl-col-resources">${resSection}</div>
+</div>`;
+}
+
 let activeCategory = '';
 let activeType = '';
 let activeUse = '';
@@ -665,15 +836,17 @@ function switchTab(tabEl) {
   const isMods    = activeTab === 'mods';
   const isCl      = activeTab === 'checklist';
   const isDucats  = activeTab === 'ducats';
-  const isSpecial = isChart || isSummary || isCl || isDucats;
+  const isKitgun  = activeTab === 'kitgunBuilder';
+  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun;
   document.getElementById('summary').classList.toggle('open', isSummary);
-  document.getElementById('checklist-view').style.display = isCl ? 'block' : 'none';
-  document.getElementById('ducats-view').style.display    = isDucats ? 'block' : 'none';
+  document.getElementById('checklist-view').style.display = isCl     ? 'block' : 'none';
+  document.getElementById('ducats-view').style.display    = isDucats  ? 'block' : 'none';
+  document.getElementById('kitgun-view').style.display    = isKitgun  ? 'block' : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (isSpecial && !isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = isCl ? 'none' : '';
+  document.getElementById('search').style.display   = (isCl || isKitgun) ? 'none' : '';
   document.getElementById('status-dd').style.display = isSpecial ? 'none' : '';
   const isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = isIncarnon ? '' : 'none';
@@ -1132,8 +1305,9 @@ function render() {
   if (activeTab === 'starChart') { renderStarChart(); return; }
   if (activeTab === 'mods')      { renderMods();      return; }
   if (activeTab === 'arcanes')   { renderArcanes();   return; }
-  if (activeTab === 'checklist') { renderChecklist(); updateTabStat(); return; }
-  if (activeTab === 'ducats')    { renderDucats();    updateTabStat(); return; }
+  if (activeTab === 'checklist')     { renderChecklist();     updateTabStat(); return; }
+  if (activeTab === 'ducats')        { renderDucats();        updateTabStat(); return; }
+  if (activeTab === 'kitgunBuilder') { renderKitgunBuilder(); updateTabStat(); return; }
   const items = TAB_DATA[activeTab] || [];
   const visible = getVisibleItems();
 
@@ -1342,7 +1516,7 @@ function setRank(tab, name, rank) {
 }
 
 function updateTabStat() {
-  if (['starChart','summary','checklist','ducats'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
+  if (['starChart','summary','checklist','ducats','kitgunBuilder'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
     for (const [name,, , maxRank] of MODS) {
@@ -2203,6 +2377,8 @@ function buildSave() {
     checklist: [...checklistItems],
     checklistOwned: checklistOwned,
     customItems: customItems,
+    modularBuilds: modularBuilds,
+    modularOwned: modularOwned,
   };
 }
 
@@ -2245,6 +2421,15 @@ function applySave(bundle) {
       typeof it.tab === 'string' && VALID_CUSTOM_TABS.has(it.tab)
     );
     for (const it of customItems) { _mergeCustomItem(it); delete searchIndex[it.tab]; }
+    if (Array.isArray(bundle.modularBuilds)) {
+      modularBuilds = bundle.modularBuilds.filter(b =>
+        b && typeof b === 'object' && typeof b.id === 'string');
+      saveModularBuilds();
+    }
+    if (bundle.modularOwned && typeof bundle.modularOwned === 'object' && !Array.isArray(bundle.modularOwned)) {
+      modularOwned = bundle.modularOwned;
+      saveModularOwned();
+    }
     saveProgress();
     saveChecklist();
     saveChecklistOwned();
@@ -3045,7 +3230,7 @@ async function loadFromCloud() {
   try {
     const { data, error } = await _sb
       .from('saves')
-      .select('progress, checklist, ui_prefs, custom_items, updated_at')
+      .select('progress, checklist, ui_prefs, custom_items, modular_builds, updated_at')
       .eq('user_id', currentUser.id)
       .single();
 
@@ -3072,6 +3257,17 @@ async function loadFromCloud() {
       customItems = data.custom_items.filter(it => it && typeof it.name === 'string' && it.name.trim());
       localStorage.setItem(CUSTOM_LS_KEY, JSON.stringify(customItems));
       for (const it of customItems) _mergeCustomItem(it);
+    }
+
+    if (data.modular_builds) {
+      if (Array.isArray(data.modular_builds.builds)) {
+        modularBuilds = data.modular_builds.builds.filter(b => b && typeof b.id === 'string');
+        localStorage.setItem(MOD_BUILDS_KEY, JSON.stringify(modularBuilds));
+      }
+      if (data.modular_builds.owned && typeof data.modular_builds.owned === 'object') {
+        modularOwned = data.modular_builds.owned;
+        localStorage.setItem(MOD_OWNED_KEY, JSON.stringify(modularOwned));
+      }
     }
 
     if (data.ui_prefs) {
@@ -3115,6 +3311,7 @@ async function syncToCloud() {
       },
       ui_prefs,
       custom_items: customItems,
+      modular_builds: { builds: modularBuilds, owned: modularOwned },
       updated_at:   new Date().toISOString(),
     });
 
@@ -3417,6 +3614,7 @@ function renderDucats() {
 loadProgress();
 loadCustomItems();
 loadChecklist();
+loadModularBuilds();
 initAuth();
 const _savedTab = localStorage.getItem('wf-ui-tab');
 if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
@@ -3430,15 +3628,17 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isMods    = activeTab === 'mods';
   const _isCl      = activeTab === 'checklist';
   const _isDucats  = activeTab === 'ducats';
-  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats;
+  const _isKitgun  = activeTab === 'kitgunBuilder';
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun;
   document.getElementById('summary').classList.toggle('open', _isSummary);
-  document.getElementById('checklist-view').style.display = _isCl ? 'block' : 'none';
-  document.getElementById('ducats-view').style.display    = _isDucats ? 'block' : 'none';
+  document.getElementById('checklist-view').style.display = _isCl     ? 'block' : 'none';
+  document.getElementById('ducats-view').style.display    = _isDucats  ? 'block' : 'none';
+  document.getElementById('kitgun-view').style.display    = _isKitgun  ? 'block' : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (_isSpecial && !_isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = _isCl ? 'none' : '';
+  document.getElementById('search').style.display   = (_isCl || _isKitgun) ? 'none' : '';
   document.getElementById('status-dd').style.display = _isSpecial ? 'none' : '';
   const _isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = _isIncarnon ? '' : 'none';
