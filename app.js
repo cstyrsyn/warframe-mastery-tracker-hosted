@@ -206,7 +206,7 @@ function saveModularOwned()  { localStorage.setItem(MOD_OWNED_KEY,  JSON.stringi
 
 function addKitgunBuild() {
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-  modularBuilds.push({ id, chamber: null, grip: null, loader: null, gildAt: null });
+  modularBuilds.push({ id, type: 'kitgun', chamber: null, grip: null, loader: null, gildAt: null });
   saveModularBuilds();
   renderKitgunBuilder();
 }
@@ -264,25 +264,60 @@ function getKitgunBuildResources(build) {
   return res;
 }
 
+function addZawBuild() {
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  modularBuilds.push({ id, type: 'zaw', strike: null, grip: null, link: null, gildAt: null });
+  saveModularBuilds();
+  renderKitgunBuilder();
+}
+
+function getZawBuildResources(build) {
+  const res = {};
+  const add = (r, q) => { res[r] = (res[r] || 0) + q; };
+  const addComponent = (data) => {
+    if (!data) return;
+    const [, syndicate, bpCost, craftCredits, parts] = data;
+    add(syndicate + ' Standing', bpCost);
+    add('Credits', craftCredits);
+    for (const [r, q] of parts) add(r, q);
+  };
+  if (build.strike) addComponent(ZAW_STRIKES.get(build.strike));
+  if (build.grip)   addComponent(ZAW_GRIPS.get(build.grip));
+  if (build.link)   addComponent(ZAW_LINKS.get(build.link));
+  if (build.gildAt) {
+    add('Ostron Standing', 5000);
+    add('Cetus Wisp', 2);
+  }
+  return res;
+}
+
 function renderKitgunBuilder() {
   const el = document.getElementById('kitgun-view');
   if (!el) return;
 
+  const kitgunBuilds = modularBuilds.filter(b => b.type !== 'zaw');
+  const zawBuilds    = modularBuilds.filter(b => b.type === 'zaw');
+
   const totalRes = {};
-  for (const build of modularBuilds) {
+  for (const build of kitgunBuilds) {
     for (const [r, q] of Object.entries(getKitgunBuildResources(build)))
       totalRes[r] = (totalRes[r] || 0) + q;
   }
+  for (const build of zawBuilds) {
+    for (const [r, q] of Object.entries(getZawBuildResources(build)))
+      totalRes[r] = (totalRes[r] || 0) + q;
+  }
 
-  const STANDING_NAMES = new Set(['Solaris United Standing', 'Entrati Standing']);
+  const STANDING_NAMES = new Set(['Solaris United Standing', 'Entrati Standing', 'Ostron Standing', 'Plague Star Standing']);
   const sortedRes = Object.entries(totalRes).sort((a, b) => {
     const rank = r => STANDING_NAMES.has(r) ? 0 : r === 'Credits' ? 1 : 2;
     const dr = rank(a[0]) - rank(b[0]);
     return dr !== 0 ? dr : b[1] - a[1];
   });
 
-  let buildsHtml = '';
-  for (const build of modularBuilds) {
+  // ── Kitgun builds ──
+  let kitgunHtml = '';
+  for (const build of kitgunBuilds) {
     const { id, chamber, grip, loader, gildAt } = build;
     const eid = jsStr(id);
     const parts = [chamber, grip, loader].filter(Boolean);
@@ -295,7 +330,7 @@ function renderKitgunBuilder() {
     const loaderOpts = [...KITGUN_LOADERS.keys()].map(n =>
       `<option value="${esc(n)}"${loader === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
 
-    buildsHtml += `<div class="kg-build">
+    kitgunHtml += `<div class="kg-build">
 <div class="kg-build-hdr">
   <span class="kg-build-name">${esc(displayName)}</span>
   <button class="qbtn zr" onclick="removeKitgunBuild('${eid}')">✕</button>
@@ -327,9 +362,56 @@ function renderKitgunBuilder() {
 </div>`;
   }
 
-  const buildsSection = modularBuilds.length === 0
-    ? '<div class="empty" style="padding:40px;text-align:center">No Kitguns tracked yet.<br>Use <b>+ Add Kitgun</b> to start building.</div>'
-    : `<div class="cl-section">${buildsHtml}</div>`;
+  // ── Zaw builds ──
+  let zawHtml = '';
+  for (const build of zawBuilds) {
+    const { id, strike, grip, link, gildAt } = build;
+    const eid = jsStr(id);
+    const parts = [strike, grip, link].filter(Boolean);
+    const displayName = parts.length ? parts.join(' / ') : 'New Zaw';
+
+    const strikeOpts = [...ZAW_STRIKES.keys()].map(n =>
+      `<option value="${esc(n)}"${strike === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    const zawGripOpts = [...ZAW_GRIPS.keys()].map(n =>
+      `<option value="${esc(n)}"${grip === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    const linkOpts = [...ZAW_LINKS.keys()].map(n =>
+      `<option value="${esc(n)}"${link === n ? ' selected' : ''}>${esc(n)}</option>`).join('');
+
+    zawHtml += `<div class="kg-build">
+<div class="kg-build-hdr">
+  <span class="kg-build-name">${esc(displayName)}</span>
+  <button class="qbtn zr" onclick="removeKitgunBuild('${eid}')">✕</button>
+</div>
+<div class="kg-build-body">
+  <div class="kg-selects">
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','strike',this.value)">
+      <option value="">— Strike —</option>${strikeOpts}
+    </select>
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','grip',this.value)">
+      <option value="">— Grip —</option>${zawGripOpts}
+    </select>
+    <select class="kg-sel" onchange="updateKitgunBuild('${eid}','link',this.value)">
+      <option value="">— Link —</option>${linkOpts}
+    </select>
+  </div>
+  <div class="kg-gild-row">
+    <span class="kg-gild-lbl">Gild at Hok:</span>
+    <label class="kg-gild-opt">
+      <input type="checkbox"${gildAt ? ' checked' : ''} onchange="updateKitgunBuild('${eid}','gildAt',this.checked?'hok':null)">
+      <span class="kg-gild-cost">5,000 Ostron Standing + 2 Cetus Wisp</span>
+    </label>
+  </div>
+</div>
+</div>`;
+  }
+
+  const kitgunSection = kitgunBuilds.length === 0
+    ? '<div class="empty" style="padding:24px;text-align:center">No Kitguns tracked yet.</div>'
+    : `<div class="cl-section">${kitgunHtml}</div>`;
+
+  const zawSection = zawBuilds.length === 0
+    ? '<div class="empty" style="padding:24px;text-align:center">No Zaws tracked yet.</div>'
+    : `<div class="cl-section">${zawHtml}</div>`;
 
   const resSection = sortedRes.length
     ? `<div class="cl-section">
@@ -348,13 +430,24 @@ ${sortedRes.map(([rName, total]) => {
 </div>`
     : `<div class="cl-section"><div class="cl-section-hdr" style="color:var(--text-muted);text-align:center;padding:12px">Select components to see resource totals</div></div>`;
 
+  const countLabel = [
+    kitgunBuilds.length ? `${kitgunBuilds.length} kitgun${kitgunBuilds.length !== 1 ? 's' : ''}` : '',
+    zawBuilds.length    ? `${zawBuilds.length} zaw${zawBuilds.length !== 1 ? 's' : ''}` : '',
+  ].filter(Boolean).join(' · ') || '0 builds';
+
   el.innerHTML = `<div class="cl-layout">
 <div class="cl-col-items">
   <div class="kg-hdr">
-    <span style="font-size:11px;color:var(--text-muted)">${modularBuilds.length} kitgun${modularBuilds.length !== 1 ? 's' : ''}</span>
-    <button class="btn" onclick="addKitgunBuild()">+ Add Kitgun</button>
+    <span style="font-size:11px;color:var(--text-muted)">${countLabel}</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn" onclick="addKitgunBuild()">+ Add Kitgun</button>
+      <button class="btn" onclick="addZawBuild()">+ Add Zaw</button>
+    </div>
   </div>
-  ${buildsSection}
+  <div class="kg-type-label" style="font-size:11px;font-weight:600;color:var(--text-muted);padding:6px 14px 2px;text-transform:uppercase;letter-spacing:.06em">Kitguns</div>
+  ${kitgunSection}
+  <div class="kg-type-label" style="font-size:11px;font-weight:600;color:var(--text-muted);padding:10px 14px 2px;text-transform:uppercase;letter-spacing:.06em">Zaws</div>
+  ${zawSection}
 </div>
 <div class="cl-col-resources">${resSection}</div>
 </div>`;

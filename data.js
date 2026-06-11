@@ -5859,6 +5859,57 @@ const KITGUN_GRIPS = new Map([
   ['Ulnaris',    ['Father',   'Entrati',         500, 5000, [['Faceted Tiametrite',5],['Tempered Bapholite',20],['Benign Infested Tumor',20],['Spinal Core Section',10]]]],
 ]);
 
+// ─────────────────────────────────────────────
+// ZAW COMPONENT DATA
+// Format: [vendor, syndicate, bpCost, craftCredits, [[resource, qty], ...]]
+// Plague Star items use syndicate 'Plague Star' — their standing is event-specific.
+// ─────────────────────────────────────────────
+const ZAW_STRIKES = new Map([
+  ['Balla',         ['Hok','Ostron',      1000, 5000, [['Nistlepod',20],['Fish Scales',15],['Tear Azurite',10],['Pyrotic Alloy',60]]]],
+  ['Cyath',         ['Hok','Ostron',      1000, 5000, [['Breath of the Eidolon',1],['Fish Scales',55],['Marquise Veridos',6],['Fersteel Alloy',20]]]],
+  ['Dehtat',        ['Hok','Ostron',      1000, 5000, [['Maprico',2],['Fish Scales',45],['Marquise Veridos',8],['Fersteel Alloy',40]]]],
+  ['Dokrahm',       ['Hok','Ostron',      1000, 5000, [['Nistlepod',25],['Fish Scales',45],['Marquise Veridos',7],['Pyrotic Alloy',60]]]],
+  ['Kronsh',        ['Hok','Ostron',      1000, 5000, [['Grokdrul',20],['Fish Scales',45],['Esher Devar',10],['Coprite Alloy',60]]]],
+  ['Mewan',         ['Hok','Ostron',      1000, 5000, [['Cetus Wisp',1],['Fish Scales',55],['Fersteel Alloy',20],['Marquise Veridos',6]]]],
+  ['Ooltha',        ['Hok','Ostron',      1000, 5000, [['Iradite',20],['Fish Scales',25],['Tear Azurite',10],['Pyrotic Alloy',60]]]],
+  ['Rabvee',        ['Hok','Ostron',      1000, 5000, [['Grokdrul',35],['Fish Scales',50],['Esher Devar',10],['Fersteel Alloy',20]]]],
+  ['Sepfahn',       ['Hok','Ostron',      1000, 5000, [['Condroc Wing',15],['Fish Scales',55],['Tear Azurite',10],['Coprite Alloy',60]]]],
+  ['Plague Keewar', ['Nakak','Plague Star',2000, 5000, [['Nano Spores',1600],['Plastids',700],['Esher Devar',10],['Coprite Alloy',60]]]],
+  ['Plague Kripath',['Nakak','Plague Star',2000, 5000, [['Nano Spores',1600],['Plastids',700],['Tear Azurite',10],['Pyrotic Alloy',60]]]],
+]);
+
+const ZAW_GRIPS = new Map([
+  ['Jayap',        ['Hok','Ostron',       1000, 5000, [['Maprico',5],['Fish Oil',50],['Rubedo',600],['Fersteel Alloy',40]]]],
+  ['Korb',         ['Hok','Ostron',       1000, 5000, [['Iradite',25],['Fish Oil',50],['Pyrotic Alloy',60],['Rubedo',650]]]],
+  ['Kroostra',     ['Hok','Ostron',       1000, 5000, [['Breath of the Eidolon',1],['Fish Oil',50],['Fersteel Alloy',20],['Circuits',500]]]],
+  ['Kwath',        ['Hok','Ostron',       1000, 5000, [['Cetus Wisp',1],['Fish Oil',50],['Fersteel Alloy',20],['Plastids',700]]]],
+  ['Laka',         ['Hok','Ostron',       1000, 5000, [['Nistlepod',20],['Coprite Alloy',60],['Fish Oil',50],['Cryotic',750]]]],
+  ['Peye',         ['Hok','Ostron',       1000, 5000, [['Iradite',20],['Fish Oil',50],['Alloy Plate',850],['Pyrotic Alloy',60]]]],
+  ['Seekalla',     ['Hok','Ostron',       1000, 5000, [['Grokdrul',20],['Fish Oil',50],['Salvage',900],['Pyrotic Alloy',60]]]],
+  ['Shtung',       ['Hok','Ostron',       1000, 5000, [['Grokdrul',25],['Fish Scales',55],['Pyrotic Alloy',60],['Ferrite',850]]]],
+  ['Plague Akwin', ['Nakak','Plague Star', 2000, 5000, [['Iradite',20],['Fish Scales',15],['Pyrotic Alloy',30],['Plastids',1100]]]],
+  ['Plague Bokwin',['Nakak','Plague Star', 2000, 5000, [['Grokdrul',20],['Fish Scales',15],['Coprite Alloy',30],['Plastids',1100]]]],
+]);
+
+const ZAW_LINKS = new Map([
+  ['Jai',              ['Hok','Ostron',  1000, 5000, [['Nistlepod',10],['Pyrotic Alloy',20],['Condroc Wing',2],['Khut-Khut Venom Sac',5]]]],
+  ['Jai II',           ['Hok','Ostron',  2000, 5000, [['Nistlepod',20],['Pyrotic Alloy',20],['Condroc Wing',2],['Yogwun Stomach',5]]]],
+  ['Vargeet Jai',      ['Hok','Ostron',  5000, 5000, [['Nistlepod',30],['Coprite Alloy',20],['Kuaka Spinal Claw',5],['Goopolla Spleen',5]]]],
+  ['Ekwana Jai',       ['Hok','Ostron',  5000, 5000, [['Nistlepod',30],['Coprite Alloy',20],['Condroc Wing',5],['Goopolla Spleen',5]]]],
+  ['Vargeet II Jai',   ['Hok','Ostron',  7500, 5000, [['Maprico',5],['Fersteel Alloy',20],['Kuaka Spinal Claw',5],['Mortus Horn',5]]]],
+  ['Ekwana II Jai',    ['Hok','Ostron',  7500, 5000, [['Maprico',5],['Fersteel Alloy',20],['Condroc Wing',5],['Mortus Horn',5]]]],
+  ['Vargeet Jai II',   ['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Kuaka Spinal Claw',5],['Cetus Wisp',2]]]],
+  ['Ekwana Jai II',    ['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Condroc Wing',5],['Cetus Wisp',2]]]],
+  ['Ruhang',           ['Hok','Ostron',  1000, 5000, [['Nistlepod',10],['Pyrotic Alloy',20],['Kuaka Spinal Claw',2],['Mawfish Bones',5]]]],
+  ['Ruhang II',        ['Hok','Ostron',  2000, 5000, [['Nistlepod',20],['Pyrotic Alloy',20],['Kuaka Spinal Claw',2],['Yogwun Stomach',5]]]],
+  ['Vargeet Ruhang',   ['Hok','Ostron',  5000, 5000, [['Nistlepod',30],['Coprite Alloy',20],['Kuaka Spinal Claw',5],['Charc Electroplax',5]]]],
+  ['Ekwana Ruhang',    ['Hok','Ostron',  5000, 5000, [['Nistlepod',30],['Coprite Alloy',20],['Condroc Wing',5],['Charc Electroplax',5]]]],
+  ['Vargeet II Ruhang',['Hok','Ostron',  7500, 5000, [['Maprico',5],['Fersteel Alloy',20],['Kuaka Spinal Claw',5],['Tralok Eyes',5]]]],
+  ['Ekwana II Ruhang', ['Hok','Ostron',  7500, 5000, [['Maprico',5],['Fersteel Alloy',20],['Condroc Wing',5],['Tralok Eyes',5]]]],
+  ['Vargeet Ruhang II',['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Kuaka Spinal Claw',5],['Cetus Wisp',2]]]],
+  ['Ekwana Ruhang II', ['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Condroc Wing',5],['Cetus Wisp',2]]]],
+]);
+
 const KITGUN_LOADERS = new Map([
   ['Arcroid',       ['Father',   'Entrati',        1000, 5000, [['Scintillant',3],['Purged Dagonic',20],['Ganglion',20],['Tubercular Gill System',15]]]],
   ['Bashrack',      ['Rude Zuud','Solaris United', 2000, 5000, [['Venerdo Alloy',30],['Circuits',1000],['Scrap',20],['Mirewinder Parallel Biode',5]]]],
