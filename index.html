@@ -935,26 +935,33 @@ body.topbar-mode .sidebar-divider { display: none; }
   font-size: 9px; padding: 2px 6px; border-radius: 3px;
   background: rgba(74,150,210,0.15); color: var(--blue); border: 1px solid rgba(74,150,210,0.4);
 }
+#blp-of-wrap { position: relative; margin-bottom: 14px; }
 #blp-of-btn {
   font-size: 11px; padding: 5px 12px; border-radius: 4px; cursor: pointer;
   border: 1px solid var(--border); background: var(--bg); color: var(--text);
-  font-family: inherit; margin-bottom: 10px;
+  font-family: inherit; width: 100%; text-align: left;
 }
 #blp-of-btn:hover { border-color: var(--blue); color: var(--blue); }
-#blp-of-list { margin-bottom: 14px; }
+#blp-of-btn.open  { border-color: var(--blue); color: var(--blue); }
+#blp-of-list {
+  position: absolute; top: calc(100% + 3px); left: 0; right: 0; z-index: 300;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.blp-of-search-wrap { padding: 6px; border-bottom: 1px solid var(--border); }
 .blp-of-search {
-  width: 100%; box-sizing: border-box; margin-bottom: 8px;
+  width: 100%; box-sizing: border-box;
   background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
-  color: var(--text); padding: 5px 8px; font-size: 11px; outline: none; font-family: inherit;
+  color: var(--text); padding: 4px 8px; font-size: 11px; outline: none; font-family: inherit;
 }
 .blp-of-search:focus { border-color: var(--blue); }
+#blp-of-results { max-height: 260px; overflow-y: auto; padding: 4px 0; }
 .blp-of-build {
-  padding: 8px 12px; border-radius: 5px; cursor: pointer;
-  border: 1px solid var(--border); margin-bottom: 4px; transition: background 0.1s;
+  padding: 6px 10px; cursor: pointer; transition: background 0.1s;
 }
-.blp-of-build:hover { background: var(--bg); border-color: var(--blue); }
-.blp-of-build-title { font-size: 12px; color: var(--text); margin-bottom: 3px; font-weight: 500; }
-.blp-of-build-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 10px; }
+.blp-of-build:hover { background: var(--surface2); }
+.blp-of-build-title { font-size: 11px; color: var(--text); font-weight: 500; }
+.blp-of-build-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 10px; margin-top: 2px; }
 .blp-of-score { color: var(--green); }
 .blp-section-label {
   font-size: 10px; color: var(--text-muted); text-transform: uppercase;

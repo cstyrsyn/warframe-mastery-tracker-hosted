@@ -523,8 +523,10 @@ function blpRenderEditor() {
 
   const showOFBrowser = !!blpCurrentOFItemId();
   const ofBrowserHtml = showOFBrowser
-    ? `<button id="blp-of-btn" onclick="blpToggleOFBrowser()">Browse Overframe Builds ▾</button>
-       <div id="blp-of-list" style="display:none"></div>`
+    ? `<div id="blp-of-wrap">
+        <button id="blp-of-btn" onclick="blpToggleOFBrowser()">Browse Overframe Builds ▾</button>
+        <div id="blp-of-list" style="display:none" onclick="event.stopPropagation()"></div>
+       </div>`
     : '';
 
   const baseBarHtml = build.baseBuildTitle
@@ -842,8 +844,19 @@ function blpToggleOFBrowser() {
   if (!list || !btn) return;
   const opening = list.style.display === 'none';
   list.style.display = opening ? 'block' : 'none';
+  btn.classList.toggle('open', opening);
   btn.textContent = opening ? 'Browse Overframe Builds ▴' : 'Browse Overframe Builds ▾';
   if (opening && _blpOFBuilds === null) blpFetchOFBuilds();
+  if (opening) {
+    setTimeout(() => document.addEventListener('click', blpCloseOFBrowser, { once: true }), 0);
+  }
+}
+
+function blpCloseOFBrowser() {
+  const list = document.getElementById('blp-of-list');
+  const btn  = document.getElementById('blp-of-btn');
+  if (list) list.style.display = 'none';
+  if (btn)  { btn.classList.remove('open'); btn.textContent = 'Browse Overframe Builds ▾'; }
 }
 
 async function blpFetchOFBuilds() {
@@ -857,8 +870,10 @@ async function blpFetchOFBuilds() {
     const data = await res.json();
     _blpOFBuilds = data.results || [];
     list.innerHTML = `
-      <input id="blp-of-search" class="blp-of-search" type="text" placeholder="Search by name or author…"
-        value="${esc(_blpOFSearch)}" oninput="blpOFSearch(this.value)">
+      <div class="blp-of-search-wrap">
+        <input id="blp-of-search" class="blp-of-search" type="text" placeholder="Search by name or author…"
+          value="${esc(_blpOFSearch)}" oninput="blpOFSearch(this.value)">
+      </div>
       <div id="blp-of-results"></div>
     `;
     blpRenderOFList();
@@ -1004,6 +1019,7 @@ async function blpLoadOFBuild(buildId) {
     };
     saveMyBuilds();
     _blpOFBuilds = null; // reset so next browse re-fetches fresh list
+    _blpOFSearch  = '';
     blpRenderEditor();
     blpFilterItems();
   } catch (e) {
