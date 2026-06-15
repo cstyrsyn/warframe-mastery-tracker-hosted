@@ -22,6 +22,15 @@ let currentUser     = null;
 let _cloudSyncTimer = 0;
 
 // ─────────────────────────────────────────────
+// OVERFRAME API
+// ─────────────────────────────────────────────
+// Local dev:  node dev/overframe_proxy.js  (proxies any path to overframe.gg)
+// Production: CF Pages Function at /of-proxy/ forwards to /api/v1/
+const OF_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3001/api/v1'
+  : '/of-proxy';
+
+// ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 const LS_KEY = 'wf-mastery-v1';
@@ -65,6 +74,38 @@ let clBpOwned = new Set();
 const CL_KEY     = 'wf-checklist';
 const CL_OWN_KEY = 'wf-checklist-owned';
 const CL_BP_KEY  = 'wf-checklist-bp-owned';
+
+// ─────────────────────────────────────────────
+// BUILD PICKS STATE
+// ─────────────────────────────────────────────
+const BP_PICKS_KEY = 'wf-build-picks';
+let buildPicks = {};
+let _bpItemName = '';
+let _bpOfId     = null;
+let _bpBuilds   = [];
+let _bpBuild    = null; // currently displayed detail build
+
+function loadBuildPicks() {
+  try { buildPicks = JSON.parse(localStorage.getItem(BP_PICKS_KEY) || '{}'); } catch { buildPicks = {}; }
+}
+function saveBuildPicks() { localStorage.setItem(BP_PICKS_KEY, JSON.stringify(buildPicks)); }
+
+// ─────────────────────────────────────────────
+// MY BUILDS STATE (Builds page)
+// ─────────────────────────────────────────────
+const MY_BUILDS_KEY = 'wf-my-builds';
+let myBuilds = {}; // { [itemName]: { baseBuildId, baseBuildTitle, baseBuildUrl, baseAuthor, slots, isModified } }
+let _blpTab        = 'warframes';
+let _blpItem       = null;
+let _blpOFId       = null;
+let _blpOFBuilds   = null; // null=not fetched, false=loading, array=loaded
+let _blpActiveSlot = null;
+let _blpSubForm    = null; // null = main warframe build, string = exalted sub-form name
+
+function loadMyBuilds() {
+  try { myBuilds = JSON.parse(localStorage.getItem(MY_BUILDS_KEY) || '{}'); } catch { myBuilds = {}; }
+}
+function saveMyBuilds() { localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds)); }
 
 function clKey(tab, name)         { return tab + '\t' + name; }
 function isInChecklist(tab, name) { return checklistItems.has(clKey(tab, name)); }
@@ -168,6 +209,769 @@ function toggleIncarnonChecklist(name) {
   saveChecklist();
   render();
 }
+
+function closeChecklistMenu() {
+  const el = document.getElementById('cl-menu');
+  if (el) el.remove();
+}
+
+function openChecklistMenu(evt, tab, name) {
+  evt.stopPropagation();
+  closeChecklistMenu();
+  const inCl    = isInChecklist(tab, name);
+  const inIncCl = isInIncarnonChecklist(name);
+  const menu = document.createElement('div');
+  menu.id = 'cl-menu';
+  menu.className = 'cl-menu';
+  const opts = [
+    { label: (inCl ? '✓ ' : '') + 'Add weapon to checklist',   action: () => { toggleChecklist(tab, name); closeChecklistMenu(); } },
+    { label: (inIncCl ? '✓ ' : '') + 'Add incarnon to checklist', action: () => { toggleIncarnonChecklist(name); closeChecklistMenu(); } },
+    { label: 'Add both to checklist', action: () => { if (!inCl) toggleChecklist(tab, name); if (!inIncCl) toggleIncarnonChecklist(name); closeChecklistMenu(); } },
+  ];
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'cl-menu-item';
+    btn.textContent = opt.label;
+    btn.onclick = (e) => { e.stopPropagation(); opt.action(); };
+    menu.appendChild(btn);
+  });
+  document.body.appendChild(menu);
+  const rect = evt.currentTarget.getBoundingClientRect();
+  menu.style.top   = (rect.bottom + 4) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  setTimeout(() => document.addEventListener('click', closeChecklistMenu, { once: true }), 0);
+}
+
+function openAcqMenu(evt, tab, name) {
+  evt.stopPropagation();
+  closeChecklistMenu();
+  const isAcq    = !!progress[aqKey(tab, name)];
+  const isIncAcq = !!progress[incarnonKey(tab, name)];
+  const menu = document.createElement('div');
+  menu.id = 'cl-menu';
+  menu.className = 'cl-menu';
+  const opts = [
+    { label: (isAcq ? '✓ ' : '') + 'Weapon acquired',  action: () => { toggleAcquired(tab, name); closeChecklistMenu(); } },
+    { label: (isIncAcq ? '✓ ' : '') + 'Incarnon acquired', action: () => { toggleIncarnon(tab, name); closeChecklistMenu(); } },
+    { label: 'Both acquired', action: () => { if (!progress[aqKey(tab, name)]) toggleAcquired(tab, name); if (!progress[incarnonKey(tab, name)]) toggleIncarnon(tab, name); closeChecklistMenu(); } },
+  ];
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'cl-menu-item';
+    btn.textContent = opt.label;
+    btn.onclick = (e) => { e.stopPropagation(); opt.action(); };
+    menu.appendChild(btn);
+  });
+  document.body.appendChild(menu);
+  const rect = evt.currentTarget.getBoundingClientRect();
+  menu.style.top   = (rect.bottom + 4) + 'px';
+  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  setTimeout(() => document.addEventListener('click', closeChecklistMenu, { once: true }), 0);
+}
+
+// ─────────────────────────────────────────────
+// BUILDS PANEL
+// ─────────────────────────────────────────────
+
+function openBuildsPanel(name, ofId) {
+  _bpItemName = name;
+  _bpOfId     = ofId;
+  _bpBuilds   = [];
+  _bpBuild    = null;
+  document.getElementById('bp-item-name').textContent = name;
+  document.getElementById('bp-of-link').href = `https://overframe.gg/items/arsenal/${parseInt(ofId)}/`;
+  document.getElementById('bp-body').innerHTML = '<div id="bp-status">Loading builds…</div>';
+  document.getElementById('bp-overlay').classList.add('open');
+  fetchBuildList();
+}
+
+function closeBuildsPanel() {
+  document.getElementById('bp-overlay').classList.remove('open');
+}
+
+function bpOverlayClick(evt) {
+  if (evt.target.id === 'bp-overlay') closeBuildsPanel();
+}
+
+async function fetchBuildList() {
+  const body = document.getElementById('bp-body');
+  try {
+    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_bpOfId)}&ordering=-score&limit=20`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    _bpBuilds = data.results || [];
+    renderBuildList();
+  } catch (e) {
+    body.innerHTML = `<div id="bp-status">Failed to load builds: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderBuildList() {
+  const body = document.getElementById('bp-body');
+  if (!_bpBuilds.length) { body.innerHTML = '<div id="bp-status">No builds found.</div>'; return; }
+  const pickedId = buildPicks[_bpItemName];
+  body.innerHTML = _bpBuilds.map(b => {
+    const isPicked = b.id === pickedId;
+    return `<div class="bp-build${isPicked ? ' picked' : ''}" onclick="fetchBuildDetail(${b.id})">
+      <div class="bp-build-title">${esc(b.title)}</div>
+      <div class="bp-build-meta">
+        <span class="bp-score">▲ ${b.score.toLocaleString()}</span>
+        <span>${b.formas} forma</span>
+        <span>by ${esc(b.author.username)}</span>
+      </div>
+      ${isPicked ? '<div class="bp-tracking">★ Currently using</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+async function fetchBuildDetail(buildId) {
+  const body = document.getElementById('bp-body');
+  body.innerHTML = '<div id="bp-status">Loading build…</div>';
+  try {
+    const res = await fetch(`${OF_API}/builds/${buildId}/`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    _bpBuild = await res.json();
+    renderBuildDetail();
+  } catch (e) {
+    body.innerHTML = `<div id="bp-status">Failed to load build: ${esc(e.message)}</div>
+      <button id="bp-back" onclick="renderBuildList()">← Back to builds</button>`;
+  }
+}
+
+function renderBuildDetail() {
+  const build    = _bpBuild;
+  const pickedId = buildPicks[_bpItemName];
+  const isPicked = build.id === pickedId;
+
+  const slots = (build.slots || [])
+    .slice().sort((a, b) => a.slot_id - b.slot_id)
+    .map(s => {
+      const modName = (typeof OVERFRAME_MODS !== 'undefined' && OVERFRAME_MODS.get(s.mod)) || `Mod #${s.mod}`;
+      const rank    = s.rank > 0 ? `R${s.rank}` : 'Unranked';
+      const drain   = s.drain !== 0 ? `${s.drain > 0 ? '+' : ''}${s.drain}` : '0';
+      return `<div class="bp-slot">
+        <span class="bp-slot-name">${esc(modName)}</span>
+        <span class="bp-slot-right"><span>${rank}</span><span>${drain} cap</span></span>
+      </div>`;
+    }).join('');
+
+  document.getElementById('bp-body').innerHTML = `
+    <button id="bp-back" onclick="renderBuildList()">← Back to builds</button>
+    <div id="bp-detail-title">${esc(build.title)}</div>
+    <div id="bp-detail-meta">▲ ${build.score.toLocaleString()} · ${build.formas} forma · by ${esc(build.author.username)}</div>
+    <div class="bp-slots">${slots || '<div id="bp-status">No mod data.</div>'}</div>
+    <button id="bp-use-btn" class="${isPicked ? 'picked' : ''}" onclick="toggleBuildPick(${build.id})">
+      ${isPicked ? '★ Currently using this build' : 'Use this build'}
+    </button>
+    <a id="bp-of-build-link" href="https://overframe.gg${esc(build.url)}" target="_blank" rel="noopener">View full build on Overframe ↗</a>
+  `;
+}
+
+function toggleBuildPick(buildId) {
+  if (buildPicks[_bpItemName] === buildId) delete buildPicks[_bpItemName];
+  else buildPicks[_bpItemName] = buildId;
+  saveBuildPicks();
+  renderBuildDetail();
+}
+
+// ─────────────────────────────────────────────
+// BUILDS PAGE
+// ─────────────────────────────────────────────
+
+const BLP_TABS = [
+  { key: 'warframes',   label: 'Warframes'  },
+  { key: 'primary',     label: 'Primary'    },
+  { key: 'secondary',   label: 'Secondary'  },
+  { key: 'melee',       label: 'Melee'      },
+  { key: 'companions',  label: 'Companions' },
+  { key: 'compWeapons', label: 'Comp.Wpns'  },
+  { key: 'vehicles',    label: 'Vehicles'   },
+  { key: 'archWeapons', label: 'Arch.Wpns'  },
+];
+
+function renderBuildsPage() {
+  document.getElementById('blp-tab-bar').innerHTML = BLP_TABS.map(t =>
+    `<button class="blp-tab${t.key === _blpTab ? ' active' : ''}" onclick="blpSetTab('${t.key}')">${t.label}</button>`
+  ).join('');
+  blpFilterItems();
+}
+
+function blpSetTab(tabKey) {
+  _blpTab      = tabKey;
+  _blpItem     = null;
+  _blpOFId     = null;
+  _blpOFBuilds = null;
+  _blpSubForm  = null;
+  renderBuildsPage();
+  document.getElementById('blp-editor-inner').innerHTML =
+    '<div id="blp-editor-empty">Select an item on the left to view or create a build.</div>';
+}
+
+function blpGetItems() {
+  const items  = TAB_DATA[_blpTab] || [];
+  const search = (document.getElementById('blp-search')?.value || '').toLowerCase();
+  return items
+    .filter(item => {
+      if (!OVERFRAME_MAP.get(item[0])) return false;
+      if (search && !item[0].toLowerCase().includes(search)) return false;
+      return true;
+    })
+    .sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function blpFilterItems() {
+  const items = blpGetItems();
+  const list  = document.getElementById('blp-item-list');
+  if (!list) return;
+  if (!items.length) {
+    list.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-muted)">No items found.</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const name     = item[0];
+    const hasBuild = blpHasAnyBuild(name);
+    const isActive = name === _blpItem;
+    return `<div class="blp-item${isActive ? ' active' : ''}" onclick="blpSelectItem('${jsStr(name)}')">${hasBuild ? '<span class="blp-item-dot"></span>' : ''}${esc(name)}</div>`;
+  }).join('');
+}
+
+function blpSelectItem(name) {
+  _blpItem       = name;
+  _blpOFId       = OVERFRAME_MAP.get(name) || null;
+  _blpOFBuilds   = null;
+  _blpActiveSlot = null;
+  _blpSubForm    = null;
+  blpFilterItems();
+  blpRenderEditor();
+}
+
+// Returns the category string (index 1 in TAB_DATA row) for the currently selected item
+function blpItemCat() {
+  if (!_blpItem) return '';
+  return (TAB_DATA[_blpTab]?.find(([n]) => n === _blpItem) || [])[1] || '';
+}
+
+function blpEmptyBuild() {
+  const s    = type => ({ type, modId: null, modName: '', rank: 0 });
+  const reg8 = () => Array(8).fill(null).map(() => s('regular'));
+  let slots;
+
+  const exType = blpCurrentExaltedType();
+  if (exType) {
+    // Exalted weapon / shadow form — slot structure based on weapon type
+    if (exType === 'warframe') {
+      slots = [s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
+    } else if (exType === 'melee') {
+      slots = [...reg8(), s('arcane-melee')];
+    } else if (exType === 'primary') {
+      slots = [...reg8(), s('arcane-primary')];
+    } else if (exType === 'secondary') {
+      slots = [...reg8(), s('arcane-secondary')];
+    } else if (exType === 'companion') {
+      slots = Array(10).fill(null).map((_, i) => s(COMPANION_PRECEPT_SLOTS.has(i) ? 'precept' : 'regular'));
+    } else {
+      slots = reg8();
+    }
+    return { baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null, baseAuthor: null, slots, isModified: false };
+  }
+
+  const cat = blpItemCat();
+  if (_blpTab === 'warframes') {
+    slots = [s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
+  } else if (_blpTab === 'primary') {
+    slots = [s('exilus'), ...reg8(), s('arcane-primary')];
+  } else if (_blpTab === 'secondary') {
+    slots = [s('exilus'), ...reg8(), s('arcane-secondary')];
+    if (cat === 'Kitgun') slots.push(s('arcane-pax'));
+  } else if (_blpTab === 'melee') {
+    slots = [s('stance'), s('exilus'), ...reg8(), s('arcane-melee')];
+    if (cat === 'Zaw') slots.push(s('arcane-exodia'));
+  } else if (_blpTab === 'companions') {
+    slots = Array(10).fill(null).map((_, i) => s(COMPANION_PRECEPT_SLOTS.has(i) ? 'precept' : 'regular'));
+  } else if (_blpTab === 'archWeapons') {
+    slots = reg8();
+    if (cat === 'Arch-Gun') { slots.push(s('arcane-primary')); slots.push(s('arcane-secondary')); }
+  } else {
+    slots = reg8();
+  }
+  return { baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null, baseAuthor: null, slots, isModified: false };
+}
+
+function blpRenderEditor() {
+  const inner = document.getElementById('blp-editor-inner');
+  if (!_blpItem) {
+    inner.innerHTML = '<div id="blp-editor-empty">Select an item on the left to view or create a build.</div>';
+    return;
+  }
+
+  const exalted    = _blpTab === 'warframes' ? blpGetExalted(_blpItem) : null;
+  const buildKey   = blpBuildKey();
+  const build      = myBuilds[buildKey] || blpEmptyBuild();
+  const slots      = build.slots;
+
+  const subFormHtml = exalted
+    ? `<div id="blp-subform-strip">
+        <button class="blp-subform-btn${_blpSubForm === null ? ' active' : ''}" onclick="blpSetSubForm(null)">Warframe</button>
+        ${exalted.map(e =>
+          `<button class="blp-subform-btn${_blpSubForm === e.name ? ' active' : ''}" onclick="blpSetSubForm('${jsStr(e.name)}')">${esc(e.name)}</button>`
+        ).join('')}
+       </div>`
+    : '';
+
+  // Only show OF browser for main warframe build (we don't have OF IDs for exalteds)
+  const showOFBrowser = !_blpSubForm && _blpOFId;
+  const ofBrowserHtml = showOFBrowser
+    ? `<button id="blp-of-btn" onclick="blpToggleOFBrowser()">Browse Overframe Builds ▾</button>
+       <div id="blp-of-list" style="display:none"></div>`
+    : '';
+
+  const baseBarHtml = build.baseBuildTitle
+    ? `<div id="blp-base-bar">
+        <span class="blp-base-label">Base:</span>
+        <span id="blp-base-title">${esc(build.baseBuildTitle)}</span>
+        <span>by ${esc(build.baseAuthor || '')}</span>
+        <a id="blp-base-link" href="https://overframe.gg${esc(build.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
+        ${build.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
+       </div>`
+    : `<div id="blp-base-bar"><span class="blp-base-label">No base build${showOFBrowser ? ' — browse Overframe below or' : ' —'} fill slots manually</span></div>`;
+
+  inner.innerHTML = `
+    <div id="blp-item-title">${esc(_blpItem)}</div>
+    ${subFormHtml}
+    ${baseBarHtml}
+    ${ofBrowserHtml}
+    <div class="blp-section-label">Mod Slots</div>
+    <div id="blp-slots">${slots.map((s, i) => blpSlotHtml(i, s)).join('')}</div>
+    <div id="blp-actions">
+      <button class="blp-action-btn" onclick="blpAddSlot()">+ Add Slot</button>
+      <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Build</button>
+    </div>
+  `;
+}
+
+// Number of contiguous special prefix slots per tab (used for regular slot label arithmetic)
+const BLP_PREFIX = { warframes: 2, primary: 1, secondary: 1, melee: 2 };
+// Companion precept slot indices (0-based): slots 1,5,6,10 in 1-based = 0,4,5,9
+const COMPANION_PRECEPT_SLOTS = new Set([0, 4, 5, 9]);
+
+// Warframes that have separately-moddable exalted weapons or shadow forms.
+// type drives slot structure: 'melee'|'primary'|'secondary'|'companion'|'warframe'
+const WARFRAME_EXALTED = new Map([
+  ['Ash',       [{name: 'Shadow Clones',      type: 'melee'}]],
+  ['Atlas',     [{name: 'Landslide',          type: 'melee'}]],
+  ['Baruuk',    [{name: 'Desert Wind',        type: 'melee'}]],
+  ['Bonewidow', [{name: 'Ironbride',          type: 'melee'}]],
+  ['Cyte-09',   [{name: 'Neutralizer',         type: 'primary'}]],
+  ['Dante',     [{name: 'Noctua',             type: 'primary'}]],
+  ['Excalibur', [{name: 'Exalted Blade',      type: 'melee'}]],
+  ['Gara',      [{name: 'Shattered Lash',     type: 'melee'}]],
+  ['Garuda',    [{name: "Garuda's Talons",    type: 'melee'}]],
+  ['Hildryn',   [{name: 'Balefire Charger',   type: 'secondary'}]],
+  ['Ivara',     [{name: 'Artemis Bow',         type: 'primary'}]],
+  ['Jade',      [{name: 'Glory',                type: 'primary'}]],
+  ['Khora',     [{name: 'Venari',              type: 'companion'}, {name: 'Whipclaw', type: 'melee'}]],
+  ['Mesa',      [{name: 'Regulators',          type: 'secondary'}]],
+  ['Sevagoth',  [{name: "Sevagoth's Shadow",   type: 'warframe'}, {name: 'Shadow Claws', type: 'melee'}]],
+  ['Temple',    [{name: 'Lizzie',               type: 'primary'}]],
+  ['Titania',   [{name: 'Dex Pixia',           type: 'secondary'}, {name: 'Diwata', type: 'melee'}]],
+  ['Valkyr',    [{name: 'Valkyr Talons',       type: 'melee'}]],
+  ['Voidrig',   [{name: 'Arquebex',            type: 'primary'}]],
+  ['Wukong',    [{name: 'Iron Staff',           type: 'melee'}]],
+]);
+
+// Look up exalted weapons for a warframe name.
+// For Prime/Umbra variants the suffix is appended to weapon names (e.g. "Exalted Blade Prime").
+// Shadow-form entries (type:'warframe') keep their original name unchanged.
+function blpGetExalted(name) {
+  if (!name) return null;
+  if (WARFRAME_EXALTED.has(name)) return WARFRAME_EXALTED.get(name);
+  const m = name.match(/\s+(Prime|Umbra)$/i);
+  if (!m) return null;
+  const suffix      = m[1];
+  const base        = name.slice(0, -(suffix.length + 1));
+  const baseExalted = WARFRAME_EXALTED.get(base);
+  if (!baseExalted) return null;
+  return baseExalted.map(e =>
+    e.type === 'warframe' ? e : { ...e, name: e.name + ' ' + suffix }
+  );
+}
+
+// Storage key for the current build (compound key for exalted sub-forms)
+function blpBuildKey() {
+  return _blpSubForm ? _blpItem + '\x00' + _blpSubForm : _blpItem;
+}
+
+// Returns the exalted type string ('melee','primary','secondary','companion','warframe') for current sub-form, or null if main
+function blpCurrentExaltedType() {
+  if (!_blpSubForm) return null;
+  const exalted = blpGetExalted(_blpItem);
+  return (exalted && exalted.find(e => e.name === _blpSubForm)?.type) || null;
+}
+
+// Switch to a sub-form (null = main build, string = exalted name)
+function blpSetSubForm(name) {
+  _blpSubForm   = name;
+  _blpOFBuilds  = null;
+  _blpActiveSlot = null;
+  blpRenderEditor();
+}
+
+function blpSlotHtml(i, slot) {
+  const modName  = slot?.modName || '';
+  const rank     = slot?.rank ?? 0;
+  const slotType = slot?.type || 'regular';
+  let label;
+  if (slotType === 'aura')                label = 'Aura';
+  else if (slotType === 'exilus')         label = 'Exilus';
+  else if (slotType === 'stance')         label = 'Stance';
+  else if (slotType === 'precept')        label = 'Precept';
+  else if (slotType === 'arcane-warframe') label = 'Arcane';
+  else if (slotType === 'arcane-primary')  label = _blpTab === 'archWeapons' ? 'Arc.Prim' : 'Arcane';
+  else if (slotType === 'arcane-secondary') label = _blpTab === 'archWeapons' ? 'Arc.Sec' : 'Arcane';
+  else if (slotType === 'arcane-melee')   label = 'Arcane';
+  else if (slotType === 'arcane-pax')     label = 'Pax';
+  else if (slotType === 'arcane-exodia')  label = 'Exodia';
+  else if (_blpTab === 'companions' || blpCurrentExaltedType() === 'companion') {
+    // Count regular (non-precept) slots from index 0 up to i to get sequential label
+    let n = 0;
+    for (let j = 0; j <= i; j++) if (!COMPANION_PRECEPT_SLOTS.has(j)) n++;
+    label = String(n);
+  }
+  else {
+    // Exalted weapon builds have no prefix slots; normal builds use BLP_PREFIX
+    const prefix = (_blpSubForm && blpCurrentExaltedType() !== 'warframe') ? 0 : (BLP_PREFIX[_blpTab] || 0);
+    label = String(i - prefix + 1);
+  }
+  return `<div class="blp-slot-row" data-slot="${i}" data-slot-type="${slotType}">
+    <span class="blp-slot-num">${label}</span>
+    <div class="blp-mod-picker">
+      <input class="blp-mod-input" type="text" value="${esc(modName)}" placeholder="Search mod…"
+        onfocus="blpOpenModPicker(${i})" oninput="blpSearchMod(${i}, this.value)"
+        onblur="setTimeout(()=>blpCloseModPicker(${i}),150)">
+      <div class="blp-mod-dropdown" id="blp-dd-${i}" style="display:none"></div>
+    </div>
+    <input class="blp-rank-input" type="number" min="0" max="10" value="${rank}" title="Rank"
+      onchange="blpSetRank(${i}, this.value)">
+    <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear slot">✕</button>
+  </div>`;
+}
+
+function blpOpenModPicker(slotIdx) {
+  if (_blpActiveSlot !== null && _blpActiveSlot !== slotIdx) blpCloseModPicker(_blpActiveSlot);
+  _blpActiveSlot = slotIdx;
+  const input = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"] .blp-mod-input`);
+  blpSearchMod(slotIdx, input?.value || '');
+}
+
+// Tab key → category keys accepted in regular mod slots
+const BLP_TAB_MOD_CATS = {
+  warframes:   ['warframe', 'universal'],
+  primary:     ['primary', 'universal'],
+  secondary:   ['secondary', 'universal'],
+  melee:       ['melee', 'universal'],
+  companions:  ['companion', 'universal'],
+  compWeapons: ['primary', 'secondary', 'melee', 'universal'],
+  vehicles:    ['vehicle', 'universal'],
+  archWeapons: ['archweapon', 'universal'],
+};
+
+function blpSearchMod(slotIdx, query) {
+  const dd = document.getElementById(`blp-dd-${slotIdx}`);
+  if (!dd) return;
+  const q        = query.trim().toLowerCase();
+  const row      = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"]`);
+  const slotType = row?.dataset.slotType || 'regular';
+  const results  = [];
+
+  if (typeof OVERFRAME_MODS !== 'undefined') {
+    // Determine allowed categories for this slot
+    let allowedCats = null;
+    if (typeof OVERFRAME_MOD_CATS !== 'undefined') {
+      if (slotType === 'aura')          allowedCats = new Set(['aura']);
+      else if (slotType === 'stance')   allowedCats = new Set(['stance']);
+      else if (slotType === 'exilus')   allowedCats = new Set(['exilus']);
+      else if (slotType === 'precept')  allowedCats = new Set(['companion', 'universal']);
+      else if (slotType.startsWith('arcane-')) allowedCats = new Set([slotType]);
+      else {
+        // For exalted sub-forms, look up mod cats based on the exalted weapon type
+        const exType = blpCurrentExaltedType();
+        const exTabKey = exType === 'companion' ? 'companions'
+                       : exType === 'melee'     ? 'melee'
+                       : exType === 'primary'   ? 'primary'
+                       : exType === 'secondary' ? 'secondary'
+                       : null;
+        allowedCats = new Set(BLP_TAB_MOD_CATS[exTabKey || _blpTab] || ['universal']);
+      }
+    }
+
+    for (const [id, name] of OVERFRAME_MODS) {
+      if (allowedCats) {
+        const modCat = OVERFRAME_MOD_CATS.get(id);
+        if (!allowedCats.has(modCat)) continue;
+      }
+      if (!q || name.toLowerCase().includes(q)) {
+        results.push([id, name]);
+        if (results.length >= 12) break;
+      }
+    }
+  }
+  if (!results.length) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = results.map(([id, name]) =>
+    `<div class="blp-mod-opt" onmousedown="blpPickMod(${slotIdx},${id},'${jsStr(name)}')">${esc(name)}</div>`
+  ).join('');
+}
+
+function blpCloseModPicker(slotIdx) {
+  const dd = document.getElementById(`blp-dd-${slotIdx}`);
+  if (dd) dd.style.display = 'none';
+  if (_blpActiveSlot === slotIdx) _blpActiveSlot = null;
+}
+
+function blpPickMod(slotIdx, modId, modName) {
+  blpUpdateSlot(slotIdx, { modId, modName });
+  const input = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"] .blp-mod-input`);
+  if (input) input.value = modName;
+  blpCloseModPicker(slotIdx);
+}
+
+function blpSetRank(slotIdx, val) {
+  blpUpdateSlot(slotIdx, { rank: Math.min(10, Math.max(0, parseInt(val, 10) || 0)) });
+}
+
+function blpClearSlot(slotIdx) {
+  blpUpdateSlot(slotIdx, { modId: null, modName: '', rank: 0 });
+  const row = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"]`);
+  if (row) {
+    const inp = row.querySelector('.blp-mod-input');
+    const rnk = row.querySelector('.blp-rank-input');
+    if (inp) inp.value = '';
+    if (rnk) rnk.value = 0;
+  }
+}
+
+function blpUpdateSlot(slotIdx, changes) {
+  const key = blpBuildKey();
+  if (!myBuilds[key]) myBuilds[key] = blpEmptyBuild();
+  const build = myBuilds[key];
+  while (build.slots.length <= slotIdx) build.slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
+  Object.assign(build.slots[slotIdx], changes);
+  build.isModified = true;
+  saveMyBuilds();
+  blpRefreshBaseBar();
+  blpRefreshItemList();
+}
+
+function blpRefreshBaseBar() {
+  const build = myBuilds[blpBuildKey()];
+  const bar = document.getElementById('blp-base-bar');
+  if (!bar || !build?.baseBuildTitle) return;
+  bar.innerHTML = `
+    <span class="blp-base-label">Base:</span>
+    <span id="blp-base-title">${esc(build.baseBuildTitle)}</span>
+    <span>by ${esc(build.baseAuthor || '')}</span>
+    <a id="blp-base-link" href="https://overframe.gg${esc(build.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
+    ${build.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
+  `;
+}
+
+function blpHasAnyBuild(name) {
+  if (myBuilds[name]) return true;
+  const prefix = name + '\x00';
+  return Object.keys(myBuilds).some(k => k.startsWith(prefix));
+}
+
+function blpRefreshItemList() {
+  // Update green dot without full re-render
+  const itemEl = document.querySelector(`.blp-item[onclick*="${_blpItem?.replace(/'/g, "\\'")}"]`);
+  if (itemEl && blpHasAnyBuild(_blpItem) && !itemEl.querySelector('.blp-item-dot')) {
+    itemEl.insertAdjacentHTML('afterbegin', '<span class="blp-item-dot"></span>');
+  }
+}
+
+function blpAddSlot() {
+  const key = blpBuildKey();
+  if (!myBuilds[key]) myBuilds[key] = blpEmptyBuild();
+  const slots = myBuilds[key].slots;
+  slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
+  saveMyBuilds();
+  const slotsDiv = document.getElementById('blp-slots');
+  if (slotsDiv) slotsDiv.insertAdjacentHTML('beforeend', blpSlotHtml(slots.length - 1, slots[slots.length - 1]));
+}
+
+function blpClearBuild() {
+  if (_blpSubForm) {
+    delete myBuilds[blpBuildKey()];
+  } else {
+    // Clear main build and all exalted sub-form builds
+    delete myBuilds[_blpItem];
+    const prefix = _blpItem + '\x00';
+    for (const k of Object.keys(myBuilds)) {
+      if (k.startsWith(prefix)) delete myBuilds[k];
+    }
+  }
+  saveMyBuilds();
+  blpRenderEditor();
+  blpFilterItems();
+}
+
+// OF browser (inline in builds page)
+function blpToggleOFBrowser() {
+  const list = document.getElementById('blp-of-list');
+  const btn  = document.getElementById('blp-of-btn');
+  if (!list || !btn) return;
+  const opening = list.style.display === 'none';
+  list.style.display = opening ? 'block' : 'none';
+  btn.textContent = opening ? 'Browse Overframe Builds ▴' : 'Browse Overframe Builds ▾';
+  if (opening && _blpOFBuilds === null) blpFetchOFBuilds();
+}
+
+async function blpFetchOFBuilds() {
+  _blpOFBuilds = false;
+  const list = document.getElementById('blp-of-list');
+  if (!list) return;
+  list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">Loading…</div>';
+  try {
+    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_blpOFId)}&ordering=-score&limit=20`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    _blpOFBuilds = data.results || [];
+    blpRenderOFList();
+  } catch (e) {
+    if (list) list.innerHTML = `<div style="color:var(--red);font-size:11px;padding:8px">Failed: ${esc(e.message)}</div>`;
+  }
+}
+
+function blpRenderOFList() {
+  const list = document.getElementById('blp-of-list');
+  if (!list || !Array.isArray(_blpOFBuilds)) return;
+  if (!_blpOFBuilds.length) { list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">No builds found.</div>'; return; }
+  list.innerHTML = _blpOFBuilds.map(b =>
+    `<div class="blp-of-build" onclick="blpLoadOFBuild(${b.id})">
+      <div class="blp-of-build-title">${esc(b.title)}</div>
+      <div class="blp-of-build-meta">
+        <span class="blp-of-score">▲ ${b.score.toLocaleString()}</span>
+        <span>${b.formas} forma</span>
+        <span>by ${esc(b.author.username)}</span>
+      </div>
+    </div>`
+  ).join('');
+}
+
+async function blpLoadOFBuild(buildId) {
+  const list = document.getElementById('blp-of-list');
+  if (list) list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">Loading build…</div>';
+  try {
+    const res = await fetch(`${OF_API}/builds/${buildId}/`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const build  = await res.json();
+    const tab    = _blpTab;
+    const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
+    const toSlot = (s, type) => ({
+      type,
+      modId:   s.mod ?? null,
+      modName: s.mod != null
+        ? ((typeof OVERFRAME_MODS !== 'undefined' && OVERFRAME_MODS.get(s.mod)) || `Mod #${s.mod}`)
+        : '',
+      rank: s.rank ?? 0,
+    });
+    const empty   = type => ({ type, modId: null, modName: '', rank: 0 });
+    const modCat  = modId => modId != null && typeof OVERFRAME_MOD_CATS !== 'undefined'
+      ? OVERFRAME_MOD_CATS.get(modId) : null;
+    let slots;
+
+    const cat      = blpItemCat();
+    const arcanes  = raw.filter(s => s.drain === 0);
+    const arcIds   = new Set(arcanes.map(s => s.id));
+    const modSlots = raw.filter(s => !arcIds.has(s.id));
+
+    if (tab === 'warframes') {
+      const auraSlot = modSlots.find(s => s.drain < 0) || null;
+      const rest     = modSlots.filter(s => s.id !== auraSlot?.id);
+      slots = [
+        auraSlot ? toSlot(auraSlot, 'aura')  : empty('aura'),
+        rest[0]  ? toSlot(rest[0],  'exilus') : empty('exilus'),
+        ...rest.slice(1).map(s => toSlot(s, 'regular')),
+      ];
+      while (slots.length < 10) slots.push(empty('regular'));
+      slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-warframe') : empty('arcane-warframe'));
+      slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-warframe') : empty('arcane-warframe'));
+
+    } else if (tab === 'primary') {
+      const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
+      const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
+      slots = [
+        exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
+        ...rest.map(s => toSlot(s, 'regular')),
+      ];
+      while (slots.length < 9) slots.push(empty('regular'));
+      slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary') : empty('arcane-primary'));
+
+    } else if (tab === 'secondary') {
+      const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
+      const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
+      slots = [
+        exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
+        ...rest.map(s => toSlot(s, 'regular')),
+      ];
+      while (slots.length < 9) slots.push(empty('regular'));
+      const paxSlot      = arcanes.find(s => modCat(s.mod) === 'arcane-pax');
+      const regArcane    = arcanes.find(s => s.id !== paxSlot?.id);
+      slots.push(regArcane ? toSlot(regArcane, 'arcane-secondary') : empty('arcane-secondary'));
+      if (cat === 'Kitgun') slots.push(paxSlot ? toSlot(paxSlot, 'arcane-pax') : empty('arcane-pax'));
+
+    } else if (tab === 'melee') {
+      const stanceSlot = modSlots.find(s => s.drain < 0) || null;
+      const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
+      const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
+      const rest       = nonStance.filter(s => s.id !== exilusSlot?.id);
+      slots = [
+        stanceSlot ? toSlot(stanceSlot, 'stance')  : empty('stance'),
+        exilusSlot ? toSlot(exilusSlot, 'exilus')  : empty('exilus'),
+        ...rest.map(s => toSlot(s, 'regular')),
+      ];
+      while (slots.length < 10) slots.push(empty('regular'));
+      const exodiaSlot = arcanes.find(s => modCat(s.mod) === 'arcane-exodia');
+      const regArcane  = arcanes.find(s => s.id !== exodiaSlot?.id);
+      slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
+      if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
+
+    } else if (tab === 'companions') {
+      slots = modSlots.map((s, pos) => toSlot(s, COMPANION_PRECEPT_SLOTS.has(pos) ? 'precept' : 'regular'));
+      while (slots.length < 10) {
+        const pos = slots.length;
+        slots.push(empty(COMPANION_PRECEPT_SLOTS.has(pos) ? 'precept' : 'regular'));
+      }
+
+    } else if (tab === 'archWeapons') {
+      slots = modSlots.map(s => toSlot(s, 'regular'));
+      while (slots.length < 8) slots.push(empty('regular'));
+      if (cat === 'Arch-Gun') {
+        slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary')   : empty('arcane-primary'));
+        slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-secondary') : empty('arcane-secondary'));
+      }
+
+    } else {
+      slots = modSlots.map(s => toSlot(s, 'regular'));
+      while (slots.length < 8) slots.push(empty('regular'));
+    }
+    myBuilds[blpBuildKey()] = {
+      baseBuildId:    build.id,
+      baseBuildTitle: build.title,
+      baseBuildUrl:   build.url,
+      baseAuthor:     build.author.username,
+      slots,
+      isModified: false,
+    };
+    saveMyBuilds();
+    _blpOFBuilds = null; // reset so next browse re-fetches fresh list
+    blpRenderEditor();
+    blpFilterItems();
+  } catch (e) {
+    if (list) list.innerHTML = `<div style="color:var(--red);font-size:11px;padding:8px">Failed: ${esc(e.message)}</div>`;
+  }
+}
+
 const INCARNON_WEAPON_TAB = new Map();
 for (const wTab of ['primary', 'secondary', 'melee'])
   for (const [name] of (TAB_DATA[wTab] || []))
@@ -932,16 +1736,18 @@ function switchTab(tabEl) {
   const isCl      = activeTab === 'checklist';
   const isDucats  = activeTab === 'ducats';
   const isKitgun  = activeTab === 'kitgunBuilder';
-  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun;
+  const isBuilds  = activeTab === 'builds';
+  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds;
   document.getElementById('summary').classList.toggle('open', isSummary);
   document.getElementById('checklist-view').style.display = isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = isKitgun  ? 'block' : 'none';
+  document.getElementById('builds-view').style.display    = isBuilds  ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (isSpecial && !isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = (isCl || isKitgun) ? 'none' : '';
+  document.getElementById('search').style.display   = (isCl || isKitgun || isBuilds) ? 'none' : '';
   document.getElementById('status-dd').style.display = isSpecial ? 'none' : '';
   const isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = isIncarnon ? '' : 'none';
@@ -1332,13 +2138,17 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const _incInCircuit = !!incarnonGenesis && CIRCUIT_INCARNON_WEEK_LOOKUP[incarnonGenesis] != null;
   const _incCircuitNow = _incInCircuit && CIRCUIT_INCARNON_NOW.has(incarnonGenesis);
   const _incCircuitWk = _incInCircuit ? CIRCUIT_INCARNON_WEEK_LOOKUP[incarnonGenesis] : null;
-  const incCircuitTag = _incInCircuit ? `<div class="card-circuit${_incCircuitNow ? ' circuit-now' : ''}" title="Incarnon Genesis — Circuit Week ${_incCircuitWk}${_incCircuitNow ? ' (current)' : ''}">Inc. Circuit</div>` : '';
+  const incCircuitTag = _incInCircuit ? `<div class="card-circuit${_incCircuitNow ? ' circuit-now' : ''}" title="Incarnon Genesis — Circuit Week ${_incCircuitWk}${_incCircuitNow ? ' (current)' : ''}">Circuit Week ${_incCircuitWk}</div>` : '';
   const hasRecipe = BLUEPRINTS.has(name);
   const inCl = isInChecklist(tab, name);
   const _mr = WEAPON_MR_TABS.has(tab) && typeof WEAPON_MR !== 'undefined' ? (WEAPON_MR.get(name) ?? -1) : -1;
   const mrTag = _mr > 0 ? `<div class="card-mr">MR ${_mr}</div>` : '';
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(marketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
-  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div><button class="card-addlist${inCl?' on':''}" onclick="toggleChecklist('${tab}','${ename}')" title="Add to Checklist">+</button>`;
+  const _ofId = typeof OVERFRAME_MAP !== 'undefined' ? OVERFRAME_MAP.get(name) : null;
+  const buildsTag = _ofId ? `<button class="card-builds" onclick="openBuildsPanel('${ename}','${_ofId}')">Builds</button>` : '';
+  const _clOn = incarnonGenesis ? (inCl || isInIncarnonChecklist(name)) : inCl;
+  const _clClick = incarnonGenesis ? `openChecklistMenu(event,'${tab}','${ename}')` : `toggleChecklist('${tab}','${ename}')`;
+  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div><button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
   const slider = `<div class="card-row">
     <span class="rank-num">${rank}</span>
     <input class="rank-slider" type="range" min="0" max="${maxRank}"
@@ -1347,14 +2157,15 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
       onchange="sliderInput(this,'${tab}','${ename}',${maxRank})">
     <span class="rank-max">${maxRank}</span>
   </div>`;
+  const _aqOn    = incarnonGenesis ? (isAcq || isIncAcq) : isAcq;
+  const _aqClick = incarnonGenesis ? `openAcqMenu(event,'${tab}','${ename}')` : `toggleAcquired('${tab}','${ename}')`;
   const qbtns = `<div class="qbtns">
       ${hasRecipe ? `<button class="qbtn rec" onclick="flipCard(this)">Recipe</button>` : ''}
-      ${showAcq && rank === 0 ? `<button class="qbtn aq${isAcq?' on':''}" onclick="toggleAcquired('${tab}','${ename}')">Acq</button>` : ''}
-      ${incarnonGenesis ? `<span class="qbtn-split"><button class="qbtn inc${isIncAcq?' on':''}" onclick="toggleIncarnon('${tab}','${ename}')" title="Toggle Incarnon Owned">Inc</button><button class="qbtn cl${isInIncarnonChecklist(name)?' on':''}" onclick="toggleIncarnonChecklist('${ename}')" title="Add Incarnon to Checklist">+</button></span>` : ''}
+      ${showAcq && rank === 0 ? `<button class="qbtn aq${_aqOn?' on':''}" onclick="${_aqClick}">Acq</button>` : ''}
       <button class="qbtn mx" onclick="setRank('${tab}','${ename}',${maxRank})">Max</button>
       <button class="qbtn zr" onclick="setRank('${tab}','${ename}',0)">0</button>
     </div>`;
-  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}</div>`;
+  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}${buildsTag}</div>`;
   const recipe = hasRecipe ? buildRecipeBack(name) : '';
 
   if (listMode) {
@@ -1401,6 +2212,7 @@ function render() {
   if (activeTab === 'mods')      { renderMods();      return; }
   if (activeTab === 'arcanes')   { renderArcanes();   return; }
   if (activeTab === 'checklist')     { renderChecklist();     updateTabStat(); return; }
+  if (activeTab === 'builds')        { renderBuildsPage();    return; }
   if (activeTab === 'ducats')        { renderDucats();        updateTabStat(); return; }
   if (activeTab === 'kitgunBuilder') { renderKitgunBuilder(); updateTabStat(); return; }
   const items = TAB_DATA[activeTab] || [];
@@ -3710,6 +4522,8 @@ loadProgress();
 loadCustomItems();
 loadChecklist();
 loadModularBuilds();
+loadBuildPicks();
+loadMyBuilds();
 initAuth();
 const _savedTab = localStorage.getItem('wf-ui-tab');
 if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
@@ -3724,16 +4538,18 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isCl      = activeTab === 'checklist';
   const _isDucats  = activeTab === 'ducats';
   const _isKitgun  = activeTab === 'kitgunBuilder';
-  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun;
+  const _isBuilds  = activeTab === 'builds';
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds;
   document.getElementById('summary').classList.toggle('open', _isSummary);
   document.getElementById('checklist-view').style.display = _isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = _isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = _isKitgun  ? 'block' : 'none';
+  document.getElementById('builds-view').style.display    = _isBuilds  ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (_isSpecial && !_isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = (_isCl || _isKitgun) ? 'none' : '';
+  document.getElementById('search').style.display   = (_isCl || _isKitgun || _isBuilds) ? 'none' : '';
   document.getElementById('status-dd').style.display = _isSpecial ? 'none' : '';
   const _isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = _isIncarnon ? '' : 'none';

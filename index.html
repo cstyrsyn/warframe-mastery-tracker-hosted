@@ -313,6 +313,91 @@ body.topbar-mode .sidebar-divider { display: none; }
 .card-incarnon:hover { background: rgba(208,128,64,0.40); }
 .card-incarnon.on { background: rgba(160,100,220,0.30); color: #b87ce0; border-color: rgba(160,100,220,0.80); }
 .card-incarnon.on:hover { background: rgba(160,100,220,0.40); }
+.card-builds {
+  font-size: 8px; padding: 2px 5px; border-radius: 3px;
+  background: #0a2a45; color: #4db3ff;
+  border: 1px solid #4db3ff;
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
+  white-space: nowrap; flex-shrink: 0; text-decoration: none;
+}
+.card-builds:hover { background: #0e3860; }
+.cl-menu {
+  position: fixed; z-index: 9999;
+  background: #1a2535; border: 1px solid #3a4a60; border-radius: 6px;
+  padding: 4px; display: flex; flex-direction: column; gap: 2px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6); min-width: 190px;
+}
+.cl-menu-item {
+  background: none; border: none; color: var(--text);
+  text-align: left; padding: 7px 12px; border-radius: 4px;
+  cursor: pointer; font-size: 12px; white-space: nowrap; width: 100%;
+}
+.cl-menu-item:hover { background: #2a3a50; color: #fff; }
+
+/* ── BUILDS PANEL ── */
+#bp-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 1200;
+}
+#bp-overlay.open { display: block; }
+#bp-panel {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%;
+  background: var(--surface); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,0.5);
+}
+#bp-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 12px;
+}
+#bp-head-left { flex: 1; min-width: 0; }
+#bp-item-name { font-size: 15px; font-weight: 600; color: var(--gold); margin-bottom: 4px; }
+#bp-of-link { font-size: 10px; color: var(--blue); text-decoration: none; }
+#bp-of-link:hover { text-decoration: underline; }
+#bp-close {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0;
+}
+#bp-close:hover { color: var(--text); }
+#bp-body { flex: 1; overflow-y: auto; padding: 12px; }
+#bp-status { color: var(--text-muted); font-size: 12px; text-align: center; padding: 24px 12px; }
+.bp-build {
+  padding: 10px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--border); margin-bottom: 6px; transition: background 0.1s;
+}
+.bp-build:hover { background: var(--bg); }
+.bp-build.picked { border-color: var(--gold-dim); background: rgba(180,140,60,0.08); }
+.bp-build-title { font-size: 12px; color: var(--text); margin-bottom: 5px; font-weight: 500; }
+.bp-build-meta { display: flex; gap: 10px; font-size: 10px; color: var(--text-muted); flex-wrap: wrap; }
+.bp-score { color: var(--green); }
+.bp-tracking { font-size: 9px; color: var(--gold); margin-top: 4px; letter-spacing: 0.3px; }
+#bp-back {
+  background: none; border: none; color: var(--blue); font-size: 11px;
+  cursor: pointer; padding: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 4px;
+}
+#bp-back:hover { color: var(--text); }
+#bp-detail-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+#bp-detail-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 14px; }
+.bp-slots { display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; }
+.bp-slot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 5px 10px; background: var(--bg); border-radius: 4px;
+  font-size: 11px; border: 1px solid var(--border);
+}
+.bp-slot-name { color: var(--text); }
+.bp-slot-right { display: flex; gap: 8px; flex-shrink: 0; color: var(--text-muted); font-size: 10px; }
+#bp-use-btn {
+  width: 100%; padding: 9px; border-radius: 6px; font-size: 12px; font-family: inherit;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); transition: background 0.1s, border-color 0.1s;
+}
+#bp-use-btn:hover { background: var(--surface); border-color: var(--gold-dim); color: var(--gold); }
+#bp-use-btn.picked { background: rgba(180,140,60,0.15); border-color: var(--gold); color: var(--gold); }
+#bp-of-build-link {
+  display: block; text-align: center; margin-top: 10px;
+  font-size: 10px; color: var(--blue); text-decoration: none;
+}
+#bp-of-build-link:hover { text-decoration: underline; }
+
 .card-circuit {
   font-size: 8px; padding: 2px 5px; border-radius: 3px;
   background: rgba(74,180,210,0.28); color: #4ab4d2;
@@ -787,6 +872,127 @@ body.topbar-mode .sidebar-divider { display: none; }
 
 /* ── KITGUN BUILDER ── */
 #kitgun-view { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; }
+
+/* ── BUILDS PAGE ── */
+#builds-view {
+  display: none; flex-direction: row; margin: -14px -16px;
+  min-height: calc(100vh - 100px);
+}
+#blp-items {
+  width: 220px; flex-shrink: 0; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#blp-tab-bar {
+  display: flex; flex-wrap: wrap; gap: 3px;
+  padding: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.blp-tab {
+  font-size: 10px; padding: 3px 7px; border-radius: 3px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-muted);
+  font-family: inherit;
+}
+.blp-tab.active { background: rgba(180,140,60,0.15); border-color: var(--gold-dim); color: var(--gold); }
+#blp-search {
+  margin: 8px; width: calc(100% - 16px); box-sizing: border-box;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); padding: 5px 8px; font-size: 11px; outline: none; flex-shrink: 0;
+}
+#blp-item-list { overflow-y: auto; flex: 1; }
+.blp-item {
+  padding: 7px 12px; cursor: pointer; font-size: 12px; color: var(--text);
+  border-left: 2px solid transparent; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.blp-item:hover { background: rgba(255,255,255,0.03); }
+.blp-item.active { background: rgba(180,140,60,0.08); border-left-color: var(--gold); color: var(--gold); }
+.blp-item-dot {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); margin-right: 6px; vertical-align: middle; flex-shrink: 0;
+}
+#blp-editor { flex: 1; min-width: 0; padding: 18px 20px; overflow-y: auto; }
+#blp-editor-empty { color: var(--text-muted); font-size: 13px; padding: 40px 0; }
+#blp-item-title { font-size: 18px; font-weight: 600; color: var(--gold); margin-bottom: 6px; }
+#blp-subform-strip {
+  display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.blp-subform-btn {
+  font-size: 11px; padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-muted);
+  font-family: inherit; transition: border-color 0.1s, color 0.1s;
+}
+.blp-subform-btn:hover { border-color: var(--blue); color: var(--text); }
+.blp-subform-btn.active {
+  border-color: #e0803a; color: #e0803a; background: rgba(224,128,58,0.08); font-weight: 600;
+}
+#blp-base-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px; font-size: 11px; color: var(--text-muted);
+}
+.blp-base-label { text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; }
+#blp-base-title { color: var(--text); font-weight: 500; }
+#blp-base-link { color: var(--blue); text-decoration: none; }
+#blp-base-link:hover { text-decoration: underline; }
+.blp-modified-badge {
+  font-size: 9px; padding: 2px 6px; border-radius: 3px;
+  background: rgba(74,150,210,0.15); color: var(--blue); border: 1px solid rgba(74,150,210,0.4);
+}
+#blp-of-btn {
+  font-size: 11px; padding: 5px 12px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  font-family: inherit; margin-bottom: 10px;
+}
+#blp-of-btn:hover { border-color: var(--blue); color: var(--blue); }
+#blp-of-list { margin-bottom: 14px; }
+.blp-of-build {
+  padding: 8px 12px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--border); margin-bottom: 4px; transition: background 0.1s;
+}
+.blp-of-build:hover { background: var(--bg); border-color: var(--blue); }
+.blp-of-build-title { font-size: 12px; color: var(--text); margin-bottom: 3px; font-weight: 500; }
+.blp-of-build-meta { font-size: 10px; color: var(--text-muted); display: flex; gap: 10px; }
+.blp-of-score { color: var(--green); }
+.blp-section-label {
+  font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 8px; margin-top: 14px;
+}
+#blp-slots { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.blp-slot-row { display: flex; align-items: center; gap: 6px; }
+.blp-slot-num { font-size: 9px; color: var(--text-muted); width: 36px; text-align: right; flex-shrink: 0; }
+.blp-slot-row[data-slot-type="aura"]   .blp-slot-num { color: var(--gold,#c9a84c); font-weight: 600; }
+.blp-slot-row[data-slot-type="exilus"] .blp-slot-num { color: var(--blue); font-weight: 600; }
+.blp-slot-row[data-slot-type="stance"]  .blp-slot-num { color: #a580d8; font-weight: 600; }
+.blp-slot-row[data-slot-type="precept"]          .blp-slot-num { color: #5eb8b8; font-weight: 600; }
+.blp-slot-row[data-slot-type^="arcane-"]         .blp-slot-num { color: #e0803a; font-weight: 600; }
+.blp-mod-picker { flex: 1; position: relative; }
+.blp-mod-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); padding: 5px 8px; font-size: 11px; outline: none; font-family: inherit;
+  box-sizing: border-box;
+}
+.blp-mod-input:focus { border-color: var(--blue); }
+.blp-mod-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 500; margin-top: 2px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+  max-height: 160px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.blp-mod-opt { padding: 5px 10px; font-size: 11px; cursor: pointer; color: var(--text); }
+.blp-mod-opt:hover { background: var(--bg); color: var(--blue); }
+.blp-rank-input {
+  width: 44px; flex-shrink: 0; text-align: center; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px; color: var(--text);
+  padding: 5px 4px; font-size: 11px; outline: none; font-family: inherit;
+}
+.blp-slot-clear {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1; flex-shrink: 0;
+}
+.blp-slot-clear:hover { color: var(--red); }
+#blp-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.blp-action-btn {
+  font-size: 11px; padding: 6px 14px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit;
+}
+.blp-action-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.blp-action-btn.danger:hover { border-color: var(--red); color: var(--red); }
 .kg-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .kg-build { border-bottom: 1px solid var(--border-soft); }
 .kg-build:last-child { border-bottom: none; }
@@ -915,6 +1121,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div class="tab" data-tab="mods">Mods</div>
   <div class="tab" data-tab="arcanes">Arcanes</div>
   <div class="tab" data-tab="checklist">Checklist</div>
+  <div class="tab" data-tab="builds">Builds</div>
   <div class="tab" data-tab="kitgunBuilder">Kitgun/Zaw Builder</div>
   <div class="tab" data-tab="ducats">Ducats</div>
 </div>
@@ -933,6 +1140,18 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div id="checklist-view"></div>
   <div id="ducats-view"></div>
   <div id="kitgun-view"></div>
+  <div id="builds-view">
+    <div id="blp-items">
+      <div id="blp-tab-bar"></div>
+      <input id="blp-search" type="text" placeholder="Search items…" oninput="blpFilterItems()">
+      <div id="blp-item-list"></div>
+    </div>
+    <div id="blp-editor">
+      <div id="blp-editor-inner">
+        <div id="blp-editor-empty">Select an item on the left to view or create a build.</div>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -1130,5 +1349,19 @@ function toggleFilterRow(){
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="app.js"></script>
+
+<!-- Builds Panel -->
+<div id="bp-overlay" onclick="bpOverlayClick(event)">
+  <div id="bp-panel">
+    <div id="bp-head">
+      <div id="bp-head-left">
+        <div id="bp-item-name"></div>
+        <a id="bp-of-link" href="#" target="_blank" rel="noopener">View on Overframe ↗</a>
+      </div>
+      <button id="bp-close" onclick="closeBuildsPanel()">✕</button>
+    </div>
+    <div id="bp-body"></div>
+  </div>
+</div>
 </body>
 </html>
