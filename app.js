@@ -900,16 +900,21 @@ function blpRenderOFList() {
     results.innerHTML = `<div style="color:var(--text-muted);font-size:11px;padding:8px">${q ? 'No matching builds.' : 'No builds found.'}</div>`;
     return;
   }
-  results.innerHTML = filtered.map(b =>
-    `<div class="blp-of-build" onclick="blpLoadOFBuild(${b.id})">
+  results.innerHTML = filtered.map(b => {
+    const rawDate = b.updated || b.date_updated || b.created || null;
+    const dateFmt = rawDate
+      ? new Date(rawDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+      : '';
+    return `<div class="blp-of-build" onclick="blpLoadOFBuild(${b.id})">
       <div class="blp-of-build-title">${esc(b.title)}</div>
       <div class="blp-of-build-meta">
         <span class="blp-of-score">▲ ${b.score.toLocaleString()}</span>
         <span>${b.formas} forma</span>
         <span>by ${esc(b.author.username)}</span>
+        ${dateFmt ? `<span>${dateFmt}</span>` : ''}
       </div>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 }
 
 async function blpLoadOFBuild(buildId) {
