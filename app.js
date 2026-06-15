@@ -99,6 +99,7 @@ let _blpTab        = 'warframes';
 let _blpItem       = null;
 let _blpOFId       = null;
 let _blpOFBuilds   = null; // null=not fetched, false=loading, array=loaded
+let _blpOFSearch   = '';
 let _blpActiveSlot = null;
 let _blpSubForm    = null; // null = main warframe build, string = exalted sub-form name
 
@@ -401,6 +402,7 @@ function blpSetTab(tabKey) {
   _blpItem     = null;
   _blpOFId     = null;
   _blpOFBuilds = null;
+  _blpOFSearch = '';
   _blpSubForm  = null;
   renderBuildsPage();
   document.getElementById('blp-editor-inner').innerHTML =
@@ -439,6 +441,7 @@ function blpSelectItem(name) {
   _blpItem       = name;
   _blpOFId       = OVERFRAME_MAP.get(name) || null;
   _blpOFBuilds   = null;
+  _blpOFSearch   = '';
   _blpActiveSlot = null;
   _blpSubForm    = null;
   blpFilterItems();
@@ -610,8 +613,9 @@ function blpCurrentExaltedType() {
 
 // Switch to a sub-form (null = main build, string = exalted name)
 function blpSetSubForm(name) {
-  _blpSubForm   = name;
-  _blpOFBuilds  = null;
+  _blpSubForm    = name;
+  _blpOFBuilds   = null;
+  _blpOFSearch   = '';
   _blpActiveSlot = null;
   blpRenderEditor();
 }
@@ -832,21 +836,40 @@ async function blpFetchOFBuilds() {
   if (!list) return;
   list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">Loading…</div>';
   try {
-    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_blpOFId)}&ordering=-score&limit=20`);
+    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_blpOFId)}&ordering=-score&limit=100`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     _blpOFBuilds = data.results || [];
+    list.innerHTML = `
+      <input id="blp-of-search" class="blp-of-search" type="text" placeholder="Search by name or author…"
+        value="${esc(_blpOFSearch)}" oninput="blpOFSearch(this.value)">
+      <div id="blp-of-results"></div>
+    `;
     blpRenderOFList();
   } catch (e) {
     if (list) list.innerHTML = `<div style="color:var(--red);font-size:11px;padding:8px">Failed: ${esc(e.message)}</div>`;
   }
 }
 
+function blpOFSearch(q) {
+  _blpOFSearch = q;
+  blpRenderOFList();
+}
+
 function blpRenderOFList() {
-  const list = document.getElementById('blp-of-list');
-  if (!list || !Array.isArray(_blpOFBuilds)) return;
-  if (!_blpOFBuilds.length) { list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">No builds found.</div>'; return; }
-  list.innerHTML = _blpOFBuilds.map(b =>
+  const results = document.getElementById('blp-of-results');
+  if (!results || !Array.isArray(_blpOFBuilds)) return;
+  const q = _blpOFSearch.trim().toLowerCase();
+  const filtered = q
+    ? _blpOFBuilds.filter(b =>
+        b.title.toLowerCase().includes(q) || b.author.username.toLowerCase().includes(q)
+      )
+    : _blpOFBuilds;
+  if (!filtered.length) {
+    results.innerHTML = `<div style="color:var(--text-muted);font-size:11px;padding:8px">${q ? 'No matching builds.' : 'No builds found.'}</div>`;
+    return;
+  }
+  results.innerHTML = filtered.map(b =>
     `<div class="blp-of-build" onclick="blpLoadOFBuild(${b.id})">
       <div class="blp-of-build-title">${esc(b.title)}</div>
       <div class="blp-of-build-meta">
