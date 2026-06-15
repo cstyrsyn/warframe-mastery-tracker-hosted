@@ -521,8 +521,7 @@ function blpRenderEditor() {
        </div>`
     : '';
 
-  // Only show OF browser for main warframe build (we don't have OF IDs for exalteds)
-  const showOFBrowser = !_blpSubForm && _blpOFId;
+  const showOFBrowser = !!blpCurrentOFItemId();
   const ofBrowserHtml = showOFBrowser
     ? `<button id="blp-of-btn" onclick="blpToggleOFBrowser()">Browse Overframe Builds ▾</button>
        <div id="blp-of-list" style="display:none"></div>`
@@ -559,44 +558,52 @@ const COMPANION_PRECEPT_SLOTS = new Set([0, 4, 5, 9]);
 
 // Warframes that have separately-moddable exalted weapons or shadow forms.
 // type drives slot structure: 'melee'|'primary'|'secondary'|'companion'|'warframe'
+// ofId/ofPrimeId/ofUmbraId are Overframe item IDs for the builds browser
 const WARFRAME_EXALTED = new Map([
-  ['Ash',       [{name: 'Shadow Clones',      type: 'melee'}]],
-  ['Atlas',     [{name: 'Landslide',          type: 'melee'}]],
-  ['Baruuk',    [{name: 'Desert Wind',        type: 'melee'}]],
-  ['Bonewidow', [{name: 'Ironbride',          type: 'melee'}]],
-  ['Cyte-09',   [{name: 'Neutralizer',         type: 'primary'}]],
-  ['Dante',     [{name: 'Noctua',             type: 'primary'}]],
-  ['Excalibur', [{name: 'Exalted Blade',      type: 'melee'}]],
-  ['Gara',      [{name: 'Shattered Lash',     type: 'melee'}]],
-  ['Garuda',    [{name: "Garuda's Talons",    type: 'melee'}]],
-  ['Hildryn',   [{name: 'Balefire Charger',   type: 'secondary'}]],
-  ['Ivara',     [{name: 'Artemis Bow',         type: 'primary'}]],
-  ['Jade',      [{name: 'Glory',                type: 'primary'}]],
-  ['Khora',     [{name: 'Venari',              type: 'companion'}, {name: 'Whipclaw', type: 'melee'}]],
-  ['Mesa',      [{name: 'Regulators',          type: 'secondary'}]],
-  ['Sevagoth',  [{name: "Sevagoth's Shadow",   type: 'warframe'}, {name: 'Shadow Claws', type: 'melee'}]],
-  ['Temple',    [{name: 'Lizzie',               type: 'primary'}]],
-  ['Titania',   [{name: 'Dex Pixia',           type: 'secondary'}, {name: 'Diwata', type: 'melee'}]],
-  ['Valkyr',    [{name: 'Valkyr Talons',       type: 'melee'}]],
-  ['Voidrig',   [{name: 'Arquebex',            type: 'primary'}]],
-  ['Wukong',    [{name: 'Iron Staff',           type: 'melee'}]],
+  ['Ash',       [{name: 'Shadow Clones',    type: 'melee',     ofId: 7350, ofPrimeId: 7359}]],
+  ['Atlas',     [{name: 'Landslide',        type: 'melee',     ofId: 7352, ofPrimeId: 7355}]],
+  ['Baruuk',    [{name: 'Desert Wind',      type: 'melee',     ofId: 2272, ofPrimeId: 6056}]],
+  ['Bonewidow', [{name: 'Ironbride',        type: 'melee',     ofId: 5318}]],
+  ['Cyte-09',   [{name: 'Neutralizer',      type: 'primary',   ofId: 7239}]],
+  ['Dante',     [{name: 'Noctua',           type: 'primary',   ofId: 6525}]],
+  ['Excalibur', [{name: 'Exalted Blade',    type: 'melee',     ofId: 2406, ofPrimeId: 2401, ofUmbraId: 2398}]],
+  ['Gara',      [{name: 'Shattered Lash',   type: 'melee',     ofId: 7438, ofPrimeId: 7357}]],
+  ['Garuda',    [{name: "Garuda's Talons",  type: 'melee',     ofId: 2403, ofPrimeId: 5844}]],
+  ['Hildryn',   [{name: 'Balefire Charger', type: 'secondary', ofId: 2408, ofPrimeId: 6133}]],
+  ['Ivara',     [{name: 'Artemis Bow',      type: 'primary',   ofId: 2881, ofPrimeId: 4240}]],
+  ['Jade',      [{name: 'Glory',            type: 'primary',   ofId: 6602}]],
+  ['Khora',     [{name: 'Venari',           type: 'companion', ofId: 2409, ofPrimeId: 5912},
+                 {name: 'Whipclaw',         type: 'melee',     ofId: 7443, ofPrimeId: 7351}]],
+  ['Mesa',      [{name: 'Regulators',       type: 'secondary', ofId: 2399, ofPrimeId: 2405}]],
+  ['Sevagoth',  [{name: "Sevagoth's Shadow",type: 'warframe',  ofId: 5444, ofPrimeId: 6634},
+                 {name: 'Shadow Claws',     type: 'melee',     ofId: 5442, ofPrimeId: 6633}]],
+  ['Temple',    [{name: 'Lizzie',           type: 'primary',   ofId: 7360}]],
+  ['Titania',   [{name: 'Dex Pixia',        type: 'secondary', ofId: 2402, ofPrimeId: 4303},
+                 {name: 'Diwata',           type: 'melee',     ofId: 4322, ofPrimeId: 4304}]],
+  ['Valkyr',    [{name: 'Valkyr Talons',    type: 'melee',     ofId: 2400, ofPrimeId: 2404}]],
+  ['Voidrig',   [{name: 'Arquebex',         type: 'primary',   ofId: 5160}]],
+  ['Wukong',    [{name: 'Iron Staff',       type: 'melee',     ofId: 2407, ofPrimeId: 2680}]],
 ]);
 
 // Look up exalted weapons for a warframe name.
-// For Prime/Umbra variants the suffix is appended to weapon names (e.g. "Exalted Blade Prime").
-// Shadow-form entries (type:'warframe') keep their original name unchanged.
+// For Prime/Umbra variants: weapon names get the suffix appended; shadow-form names stay unchanged.
+// The correct ofId is resolved from ofPrimeId/ofUmbraId as appropriate.
 function blpGetExalted(name) {
   if (!name) return null;
   if (WARFRAME_EXALTED.has(name)) return WARFRAME_EXALTED.get(name);
   const m = name.match(/\s+(Prime|Umbra)$/i);
   if (!m) return null;
-  const suffix      = m[1];
+  const suffix      = m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase();
   const base        = name.slice(0, -(suffix.length + 1));
   const baseExalted = WARFRAME_EXALTED.get(base);
   if (!baseExalted) return null;
-  return baseExalted.map(e =>
-    e.type === 'warframe' ? e : { ...e, name: e.name + ' ' + suffix }
-  );
+  return baseExalted.map(e => {
+    const ofId = suffix === 'Prime' ? (e.ofPrimeId ?? null)
+               : suffix === 'Umbra' ? (e.ofUmbraId ?? null)
+               : e.ofId;
+    if (e.type === 'warframe') return { ...e, ofId };
+    return { ...e, name: e.name + ' ' + suffix, ofId };
+  });
 }
 
 // Storage key for the current build (compound key for exalted sub-forms)
@@ -609,6 +616,15 @@ function blpCurrentExaltedType() {
   if (!_blpSubForm) return null;
   const exalted = blpGetExalted(_blpItem);
   return (exalted && exalted.find(e => e.name === _blpSubForm)?.type) || null;
+}
+
+// Returns the Overframe item ID to use for the current view
+function blpCurrentOFItemId() {
+  if (_blpSubForm) {
+    const exalted = blpGetExalted(_blpItem);
+    return exalted?.find(e => e.name === _blpSubForm)?.ofId ?? null;
+  }
+  return _blpOFId;
 }
 
 // Switch to a sub-form (null = main build, string = exalted name)
@@ -836,7 +852,7 @@ async function blpFetchOFBuilds() {
   if (!list) return;
   list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">Loading…</div>';
   try {
-    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_blpOFId)}&ordering=-score&limit=100`);
+    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(blpCurrentOFItemId())}&ordering=-score&limit=100`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     _blpOFBuilds = data.results || [];
