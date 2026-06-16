@@ -253,7 +253,9 @@ function blpCyclePolarity(i) {
   const data = blpCurrentData();
   if (!data || !data.slots[i]) return;
   const cur = data.slots[i].polarity || 0;
-  const cycle = [0, 1, 2, 3, 4, 5, 7, 8, 9];
+  const isCompanionCtx = _blpTab === 'companions' || _blpTab === 'compWeapons'
+    || blpCurrentExaltedType() === 'companion' || blpCurrentExaltedType() === 'claws';
+  const cycle = [0, 1, 2, 3, 4, 7, 8, 9].concat(isCompanionCtx ? [5] : []);
   const ci = cycle.indexOf(cur);
   blpSetPolarity(i, cycle[(ci + 1) % cycle.length]);
 }
