@@ -770,7 +770,6 @@ function blpRenderEditor() {
     ${blpAbilitiesHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
     <div id="blp-actions">
-      <button class="blp-action-btn" onclick="blpAddSlot()">+ Add Slot</button>
       <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
   `;
