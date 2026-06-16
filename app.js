@@ -1455,7 +1455,7 @@ async function blpLoadOFBuild(buildId) {
     const build  = await res.json();
     const tab    = _blpTab;
     const cat    = blpItemCat();
-    const parsed = build.buildString ? parseOFBuildString(build.buildString) : null;
+    const parsed = parseOFBuildString(build.buildstring || build.buildString);
     let slots;
 
     if (parsed && Array.isArray(parsed[4])) {
@@ -1570,7 +1570,7 @@ async function blpLoadOFBuild(buildId) {
       }
     }
     let helminthAbility = null;
-    if (parsed && tab === 'warframes' && Array.isArray(parsed[5])) {
+    if (parsed && tab === 'warframes' && Array.isArray(parsed[5]) && parsed[5].length >= 2) {
       const [slot, ofId] = parsed[5];
       const name = HELMINTH_BY_OF_ID[ofId] || null;
       if (name && slot >= 0 && slot <= 3) helminthAbility = { slot, name };
