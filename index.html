@@ -1014,6 +1014,19 @@ body.topbar-mode .sidebar-divider { display: none; }
 .blp-tile[data-slot-type="precept"] .blp-tile-label { color: #5eb8b8; }
 .blp-tile[data-slot-type^="arcane-"] .blp-tile-label { color: #e0803a; }
 .blp-tile-footer { display: flex; align-items: center; gap: 4px; }
+.blp-pol-wrap { position: relative; flex-shrink: 0; }
+.blp-pol-picker {
+  position: absolute; bottom: calc(100% + 4px); left: 0; z-index: 200;
+  background: var(--bg-card,#1e1e22); border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px; min-width: 130px; box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.blp-pol-opt {
+  display: flex; align-items: center; gap: 7px; padding: 4px 7px;
+  border-radius: 4px; cursor: pointer; font-size: 11px;
+}
+.blp-pol-opt:hover { background: rgba(255,255,255,0.07); }
+.blp-pol-opt.active { background: rgba(255,255,255,0.12); }
+.blp-pol-name { color: var(--text-muted); }
 .blp-slot-polarity {
   font-size: 9px; min-width: 18px; padding: 1px 3px; border-radius: 3px; cursor: pointer;
   background: var(--tag-bg); border: 1px solid var(--border-soft); color: var(--text-muted);

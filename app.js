@@ -102,6 +102,7 @@ let _blpOFId       = null;
 let _blpOFBuilds   = null; // null=not fetched, false=loading, array=loaded
 let _blpOFSearch   = '';
 let _blpActiveSlot          = null;
+let _blpActivePolSlot       = null;
 let _blpSubForm             = null; // null = main build, string = exalted sub-form name
 let _blpHelminthPickerSlot  = null;
 
@@ -249,15 +250,44 @@ function blpSetPolarity(i, p) {
   blpRenderEditor();
 }
 
-function blpCyclePolarity(i) {
-  const data = blpCurrentData();
-  if (!data || !data.slots[i]) return;
-  const cur = data.slots[i].polarity || 0;
-  const isCompanionCtx = _blpTab === 'companions' || _blpTab === 'compWeapons'
+function blpPolPickerHtml(slotIdx, currentPol) {
+  const isCompCtx = _blpTab === 'companions' || _blpTab === 'compWeapons'
     || blpCurrentExaltedType() === 'companion' || blpCurrentExaltedType() === 'claws';
-  const cycle = [0, 1, 2, 3, 4, 7, 8, 9].concat(isCompanionCtx ? [5] : []);
-  const ci = cycle.indexOf(cur);
-  blpSetPolarity(i, cycle[(ci + 1) % cycle.length]);
+  const opts = [0, 1, 2, 3, 4, 7, 8, 9].concat(isCompCtx ? [5] : []);
+  return `<div class="blp-pol-picker">${opts.map(p =>
+    `<div class="blp-pol-opt${p === currentPol ? ' active' : ''}" onmousedown="blpPickPolarity(${slotIdx},${p})">
+      ${blpPolarityLabel(p)}
+      <span class="blp-pol-name">${POLARITY_NAMES[p] || 'None'}</span>
+    </div>`).join('')}</div>`;
+}
+
+function blpTogglePolPicker(i) {
+  const opening = _blpActivePolSlot !== i;
+  _blpActivePolSlot = opening ? i : null;
+  blpRefreshPolWrap(i);
+  if (opening) {
+    setTimeout(() => document.addEventListener('click', function _closePol(e) {
+      if (!e.target.closest(`#blp-pol-wrap-${i}`)) {
+        document.removeEventListener('click', _closePol);
+        _blpActivePolSlot = null;
+        blpRefreshPolWrap(i);
+      }
+    }), 0);
+  }
+}
+
+function blpRefreshPolWrap(i) {
+  const wrap = document.getElementById(`blp-pol-wrap-${i}`);
+  if (!wrap) return;
+  const pol = blpCurrentData()?.slots[i]?.polarity ?? 0;
+  wrap.innerHTML =
+    `<button class="blp-slot-polarity${pol ? ' p' + pol : ''}" onclick="blpTogglePolPicker(${i})" title="Polarity">${blpPolarityLabel(pol)}</button>` +
+    (_blpActivePolSlot === i ? blpPolPickerHtml(i, pol) : '');
+}
+
+function blpPickPolarity(i, p) {
+  _blpActivePolSlot = null;
+  blpSetPolarity(i, p);
 }
 
 // Reactor for warframes/companions/vehicles; Catalyst for all weapons
@@ -620,6 +650,7 @@ function blpSelectItem(name) {
   _blpOFBuilds            = null;
   _blpOFSearch            = '';
   _blpActiveSlot          = null;
+  _blpActivePolSlot       = null;
   _blpSubForm             = null;
   _blpHelminthPickerSlot  = null;
   const builds   = blpItemBuilds(name);
@@ -633,7 +664,8 @@ function blpSelectBuild(buildId) {
   _blpSubForm    = null;
   _blpOFBuilds   = null;
   _blpOFSearch   = '';
-  _blpActiveSlot = null;
+  _blpActiveSlot    = null;
+  _blpActivePolSlot = null;
   blpFilterItems();
   blpRenderEditor();
 }
@@ -784,8 +816,9 @@ function blpCreateBuild() {
   const entry    = blpNewBuildEntry(`Build ${myBuilds[_blpItem].length + 1}`);
   myBuilds[_blpItem].push(entry);
   _blpBuildId    = entry.id;
-  _blpOFBuilds   = null;
-  _blpActiveSlot = null;
+  _blpOFBuilds      = null;
+  _blpActiveSlot    = null;
+  _blpActivePolSlot = null;
   saveMyBuilds();
   blpFilterItems();
   blpRenderEditor();
@@ -931,8 +964,9 @@ function blpCurrentOFItemId() {
 function blpSetSubForm(name) {
   _blpSubForm    = name;
   _blpOFBuilds   = null;
-  _blpOFSearch   = '';
-  _blpActiveSlot = null;
+  _blpOFSearch      = '';
+  _blpActiveSlot    = null;
+  _blpActivePolSlot = null;
   blpRenderEditor();
 }
 
@@ -964,7 +998,10 @@ function blpTileHtml(i, slot, regIndex) {
       <div class="blp-mod-dropdown" id="blp-dd-${i}" style="display:none"></div>
     </div>
     <div class="blp-tile-footer">
-      <button class="blp-slot-polarity${polarity ? ' p' + polarity : ''}" onclick="blpCyclePolarity(${i})" title="Polarity (click to cycle)">${blpPolarityLabel(polarity)}</button>
+      <div class="blp-pol-wrap" id="blp-pol-wrap-${i}">
+        <button class="blp-slot-polarity${polarity ? ' p' + polarity : ''}" onclick="blpTogglePolPicker(${i})" title="Polarity">${blpPolarityLabel(polarity)}</button>
+        ${_blpActivePolSlot === i ? blpPolPickerHtml(i, polarity) : ''}
+      </div>
       <input class="blp-rank-input" type="number" min="0" max="10" value="${rank}" title="Rank"
         onchange="blpSetRank(${i}, this.value)">
       <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear">✕</button>
