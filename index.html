@@ -1044,6 +1044,43 @@ body.topbar-mode .sidebar-divider { display: none; }
 .blp-slot-polarity.p9 { background: rgba(200,160,50,0.2); border-color: rgba(200,160,50,0.5); color: var(--gold); }
 .blp-special-row .blp-tile { max-width: calc(50% - 3px); }
 .blp-arcane-row .blp-tile { max-width: calc(50% - 3px); }
+#blp-shard-row { display: flex; gap: 6px; margin-bottom: 16px; }
+.blp-shard {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 7px;
+}
+.blp-shard.blp-shard-set { border-color: var(--shard-col); }
+.blp-shard-header { display: flex; align-items: center; gap: 3px; }
+.blp-shard-label {
+  flex: 1; font-size: 9px; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-muted); font-weight: 600; line-height: 1;
+}
+.blp-shard.blp-shard-set .blp-shard-label { color: var(--shard-col); }
+.blp-shard-tau {
+  font-size: 12px; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 0 1px; line-height: 1; flex-shrink: 0;
+}
+.blp-shard-tau:hover, .blp-shard-tau.active { color: var(--gold); }
+.blp-shard-clear-btn {
+  font-size: 11px; background: none; border: none; cursor: pointer;
+  color: var(--text-muted); padding: 0 1px; line-height: 1; flex-shrink: 0;
+}
+.blp-shard-clear-btn:hover { color: var(--red); }
+.blp-shard-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+.blp-shard-dot {
+  width: 13px; height: 13px; border-radius: 50%; cursor: pointer; padding: 0; flex-shrink: 0;
+  border: 2px solid transparent; transition: transform 0.1s;
+}
+.blp-shard-dot:hover { transform: scale(1.15); }
+.blp-shard-dot.active { border-color: white; transform: scale(1.1); }
+.blp-shard-buff {
+  width: 100%; background: var(--bg); border: 1px solid var(--border-soft); border-radius: 3px;
+  color: var(--text); font-size: 9px; padding: 2px 3px; font-family: inherit;
+  outline: none; cursor: pointer;
+}
+.blp-shard-buff:focus { border-color: var(--blue); }
+.blp-shard-buff:disabled { color: var(--text-muted); cursor: default; }
 .blp-mod-picker { position: relative; }
 .blp-mod-input {
   width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px;

@@ -185,6 +185,53 @@ function blpEnsureCurrentData() {
   return build;
 }
 
+const ARCHON_SHARDS = {
+  Crimson: { hex: '#c84040', buffs: [
+    ['+25% Melee Critical Damage',     '+37.5% Melee Critical Damage'],
+    ['+25% Primary Status Chance',     '+37.5% Primary Status Chance'],
+    ['+25% Secondary Critical Chance', '+37.5% Secondary Critical Chance'],
+    ['+10% Ability Strength',          '+15% Ability Strength'],
+    ['+10% Ability Duration',          '+15% Ability Duration'],
+  ]},
+  Amber: { hex: '#c88020', buffs: [
+    ['+30% Energy filled on Spawn',          '+45% Energy filled on Spawn'],
+    ['+100% Effectiveness on Health Orbs',   '+150% Effectiveness on Health Orbs'],
+    ['+50% Effectiveness on Energy Orbs',    '+75% Effectiveness on Energy Orbs'],
+    ['+25% Casting Speed',                   '+37.5% Casting Speed'],
+    ['+15% Parkour Velocity',                '+22.5% Parkour Velocity'],
+  ]},
+  Azure: { hex: '#4a86d8', buffs: [
+    ['+150 Max Health',          '+225 Max Health'],
+    ['+150 Shield Capacity',     '+225 Shield Capacity'],
+    ['+50 Energy Max',           '+75 Energy Max'],
+    ['+150 Armor',               '+225 Armor'],
+    ['+5 Health/s Regenerated',  '+7.5 Health/s Regenerated'],
+  ]},
+  Emerald: { hex: '#30a850', buffs: [
+    ['Toxin Status deals +30% more damage',     'Toxin Status deals +45% more damage'],
+    ['+2 Health per Toxin Status hit',          '+3 Health per Toxin Status hit'],
+    ['+10% Ability Damage vs Corrosion Status', '+15% Ability Damage vs Corrosion Status'],
+    ['+2 max Corrosion Status stacks',          '+3 max Corrosion Status stacks'],
+  ]},
+  Topaz: { hex: '#c86020', buffs: [
+    ['+1 Max HP per Blast kill (max 300)',      '+2 Max HP per Blast kill (max 450)'],
+    ['+5 Shield per Blast kill',                '+7.5 Shield per Blast kill'],
+    ['+1% Sec Crit per Heat kill (max 50%)',   '+1.5% Sec Crit per Heat kill (max 75%)'],
+    ['+10% Ability Damage vs Radiation Status', '+15% Ability Damage vs Radiation Status'],
+  ]},
+  Violet: { hex: '#8040c8', buffs: [
+    ['+10% Ability Damage vs Electricity Status',       '+15% Ability Damage vs Electricity Status'],
+    ['+30% Primary Electricity Damage',                 '+45% Primary Electricity Damage'],
+    ['+25% Melee Crit Damage (2x when >500 Energy)',   '+37.5% Melee Crit Damage (2x when >500 Energy)'],
+    ['+20% Health/Energy cross-pickup',                 '+30% Health/Energy cross-pickup'],
+  ]},
+};
+const ARCHON_SHARD_NAMES = Object.keys(ARCHON_SHARDS);
+
+function blpEmptyShards() {
+  return Array(5).fill(null).map(() => ({ color: null, buffIndex: null, tauforged: false }));
+}
+
 function blpNewBuildEntry(name) {
   const empty = blpEmptyBuild();
   blpApplyDefaultPolarities(empty.slots);
@@ -193,6 +240,7 @@ function blpNewBuildEntry(name) {
     baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
     baseAuthor: null, slots: empty.slots, isModified: false,
     potatoed: false, helminthAbility: null, formas: null,
+    shards: blpEmptyShards(),
   };
 }
 
@@ -803,6 +851,7 @@ function blpRenderEditor() {
     ${metaBarHtml}
     ${blpAbilitiesHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
+    ${_blpTab === 'warframes' && !_blpSubForm ? blpShardsHtml(build) : ''}
     <div id="blp-actions">
       <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
@@ -856,6 +905,83 @@ function blpTogglePotato() {
   saveMyBuilds();
   const btn = document.getElementById('blp-potato-btn');
   if (btn) btn.classList.toggle('active', build.potatoed);
+}
+
+function blpBuildShards(build) {
+  if (!Array.isArray(build?.shards) || build.shards.length !== 5) return blpEmptyShards();
+  return build.shards;
+}
+
+function blpSetShardColor(i, color) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  if (!Array.isArray(build.shards) || build.shards.length !== 5) build.shards = blpEmptyShards();
+  const shard = build.shards[i];
+  if (shard.color === color) {
+    shard.color = null; shard.buffIndex = null; shard.tauforged = false;
+  } else {
+    shard.color = color; shard.buffIndex = null;
+  }
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpSetShardBuff(i, buffIndex) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  if (!Array.isArray(build.shards) || build.shards.length !== 5) build.shards = blpEmptyShards();
+  build.shards[i].buffIndex = buffIndex === '' ? null : Number(buffIndex);
+  saveMyBuilds();
+}
+
+function blpToggleShardTauforged(i) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  if (!Array.isArray(build.shards) || build.shards.length !== 5) build.shards = blpEmptyShards();
+  build.shards[i].tauforged = !build.shards[i].tauforged;
+  saveMyBuilds();
+  const btn = document.querySelector(`#blp-shard-row .blp-shard:nth-child(${i + 1}) .blp-shard-tau`);
+  if (btn) btn.classList.toggle('active', build.shards[i].tauforged);
+}
+
+function blpClearShard(i) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  if (!Array.isArray(build.shards) || build.shards.length !== 5) build.shards = blpEmptyShards();
+  build.shards[i] = { color: null, buffIndex: null, tauforged: false };
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpShardsHtml(build) {
+  const shards = blpBuildShards(build);
+  const tiles = shards.map((shard, i) => {
+    const color = shard.color;
+    const entry = color ? ARCHON_SHARDS[color] : null;
+    const hex   = entry?.hex || '';
+    const dots  = ARCHON_SHARD_NAMES.map(n =>
+      `<button class="blp-shard-dot${color === n ? ' active' : ''}" style="background:${ARCHON_SHARDS[n].hex}"
+        onclick="blpSetShardColor(${i},'${n}')" title="${n}"></button>`
+    ).join('');
+    const buffSel = entry
+      ? `<select class="blp-shard-buff" onchange="blpSetShardBuff(${i},this.value)">
+           <option value="">— Buff —</option>
+           ${entry.buffs.map(([b], bi) =>
+             `<option value="${bi}"${shard.buffIndex === bi ? ' selected' : ''}>${esc(b)}</option>`
+           ).join('')}
+         </select>`
+      : `<select class="blp-shard-buff" disabled><option value="">— Color first —</option></select>`;
+    return `<div class="blp-shard${color ? ' blp-shard-set' : ''}" style="${hex ? '--shard-col:' + hex : ''}">
+      <div class="blp-shard-header">
+        <span class="blp-shard-label">Shard ${i + 1}</span>
+        <button class="blp-shard-tau${shard.tauforged && color ? ' active' : ''}" onclick="blpToggleShardTauforged(${i})" title="Tauforged">★</button>
+        <button class="blp-shard-clear-btn" onclick="blpClearShard(${i})" title="Clear">✕</button>
+      </div>
+      <div class="blp-shard-dots">${dots}</div>
+      ${buffSel}
+    </div>`;
+  }).join('');
+  return `<div class="blp-section-label">Archon Shards</div><div id="blp-shard-row">${tiles}</div>`;
 }
 
 // Number of contiguous special prefix slots per tab (used for regular slot label arithmetic)
