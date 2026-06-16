@@ -1459,8 +1459,10 @@ async function blpLoadOFBuild(buildId) {
     let slots;
 
     if (parsed && Array.isArray(parsed[4])) {
+      console.log('[blpLoadOFBuild] using buildString', parsed);
       slots = slotsFromBuildString(parsed, tab, _blpItem, cat);
     } else {
+      console.log('[blpLoadOFBuild] fallback to slots heuristic', { buildString: build.buildString, parsed });
       const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
       const toSlot = (s, type) => ({
         type,
