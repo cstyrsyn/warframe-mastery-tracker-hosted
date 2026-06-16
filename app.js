@@ -940,8 +940,7 @@ function blpToggleShardTauforged(i) {
   if (!Array.isArray(build.shards) || build.shards.length !== 5) build.shards = blpEmptyShards();
   build.shards[i].tauforged = !build.shards[i].tauforged;
   saveMyBuilds();
-  const btn = document.querySelector(`#blp-shard-row .blp-shard:nth-child(${i + 1}) .blp-shard-tau`);
-  if (btn) btn.classList.toggle('active', build.shards[i].tauforged);
+  blpRenderEditor();
 }
 
 function blpClearShard(i) {
@@ -966,8 +965,8 @@ function blpShardsHtml(build) {
     const buffSel = entry
       ? `<select class="blp-shard-buff" onchange="blpSetShardBuff(${i},this.value)">
            <option value="">— Buff —</option>
-           ${entry.buffs.map(([b], bi) =>
-             `<option value="${bi}"${shard.buffIndex === bi ? ' selected' : ''}>${esc(b)}</option>`
+           ${entry.buffs.map(([b, t], bi) =>
+             `<option value="${bi}"${shard.buffIndex === bi ? ' selected' : ''}>${esc(shard.tauforged ? t : b)}</option>`
            ).join('')}
          </select>`
       : `<select class="blp-shard-buff" disabled><option value="">— Color first —</option></select>`;
