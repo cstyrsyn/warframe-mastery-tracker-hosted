@@ -999,6 +999,10 @@ const HELMINTH_ABILITIES = typeof HELMINTH_OF_IDS !== 'undefined'
   ? Object.keys(HELMINTH_OF_IDS).sort()
   : [];
 
+const HELMINTH_BY_OF_ID = typeof HELMINTH_OF_IDS !== 'undefined'
+  ? Object.fromEntries(Object.entries(HELMINTH_OF_IDS).map(([name, { id }]) => [id, name]))
+  : {};
+
 // Damage-buff abilities that are subject to forced-slot replacement rules
 const HELMINTH_DAMAGE_BUFFS = new Set(['Eclipse', 'Roar', "Xata's Whisper"]);
 
@@ -1563,6 +1567,13 @@ async function blpLoadOFBuild(buildId) {
         while (slots.length < (cat === 'Necramech' ? 12 : 8)) slots.push(empty('regular'));
       }
     }
+    let helminthAbility = null;
+    if (parsed && tab === 'warframes' && Array.isArray(parsed[5])) {
+      const [slot, ofId] = parsed[5];
+      const name = HELMINTH_BY_OF_ID[ofId] || null;
+      if (name && slot >= 0 && slot <= 3) helminthAbility = { slot, name };
+    }
+
     if (!_blpBuildId) {
       // No build selected yet — auto-create one named after the OF build
       if (!myBuilds[_blpItem]) myBuilds[_blpItem] = [];
@@ -1570,7 +1581,7 @@ async function blpLoadOFBuild(buildId) {
         id: blpGenId(), name: build.title, subForms: {},
         baseBuildId: build.id, baseBuildTitle: build.title,
         baseBuildUrl: build.url, baseAuthor: build.author.username,
-        slots, isModified: false, potatoed: true,
+        slots, helminthAbility, isModified: false, potatoed: true,
       };
       myBuilds[_blpItem].push(entry);
       _blpBuildId = entry.id;
@@ -1584,9 +1595,11 @@ async function blpLoadOFBuild(buildId) {
         data.slots          = slots;
         data.isModified     = false;
       }
-      // Overframe builds assume a potato is installed
       const mainBuild = blpCurrentBuild();
-      if (mainBuild && !_blpSubForm) mainBuild.potatoed = true;
+      if (mainBuild && !_blpSubForm) {
+        mainBuild.potatoed       = true;
+        mainBuild.helminthAbility = helminthAbility;
+      }
     }
     saveMyBuilds();
     _blpOFBuilds = null; // reset so next browse re-fetches fresh list
