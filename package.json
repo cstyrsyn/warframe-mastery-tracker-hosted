@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "build": "node build.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }

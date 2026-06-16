@@ -1,6 +1,8 @@
 config.js
+node_modules/
 dev/node_modules/
 dev/Import/node_modules/
 dev/wiki-cache/
 dev/wiki-diff/
 dev/backups/
+*.bkp.js

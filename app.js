@@ -94,19 +94,174 @@ function saveBuildPicks() { localStorage.setItem(BP_PICKS_KEY, JSON.stringify(bu
 // MY BUILDS STATE (Builds page)
 // ─────────────────────────────────────────────
 const MY_BUILDS_KEY = 'wf-my-builds';
-let myBuilds = {}; // { [itemName]: { baseBuildId, baseBuildTitle, baseBuildUrl, baseAuthor, slots, isModified } }
+let myBuilds = {}; // { [itemName]: BuildEntry[] }
 let _blpTab        = 'warframes';
 let _blpItem       = null;
+let _blpBuildId    = null; // UUID of the active build
 let _blpOFId       = null;
 let _blpOFBuilds   = null; // null=not fetched, false=loading, array=loaded
 let _blpOFSearch   = '';
-let _blpActiveSlot = null;
-let _blpSubForm    = null; // null = main warframe build, string = exalted sub-form name
+let _blpActiveSlot          = null;
+let _blpSubForm             = null; // null = main build, string = exalted sub-form name
+let _blpHelminthPickerSlot  = null;
+
+function blpGenId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
 function loadMyBuilds() {
-  try { myBuilds = JSON.parse(localStorage.getItem(MY_BUILDS_KEY) || '{}'); } catch { myBuilds = {}; }
+  let raw = {};
+  try { raw = JSON.parse(localStorage.getItem(MY_BUILDS_KEY) || '{}'); } catch {}
+  myBuilds = {};
+  let dirty = false;
+
+  // Pass 1: new-format arrays and old top-level build objects
+  for (const [key, val] of Object.entries(raw)) {
+    if (!val || key.includes('\x00')) continue;
+    if (Array.isArray(val)) { myBuilds[key] = val; continue; }
+    dirty = true;
+    myBuilds[key] = [{
+      id: blpGenId(), name: 'Build 1', subForms: {},
+      baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
+      baseBuildUrl: val.baseBuildUrl ?? null, baseAuthor: val.baseAuthor ?? null,
+      slots: val.slots ?? [], isModified: val.isModified ?? false,
+    }];
+  }
+
+  // Pass 2: old sub-form keys (ItemName\x00SubFormName)
+  for (const [key, val] of Object.entries(raw)) {
+    if (!val || !key.includes('\x00')) continue;
+    dirty = true;
+    const nullIdx  = key.indexOf('\x00');
+    const itemName = key.slice(0, nullIdx);
+    const sfName   = key.slice(nullIdx + 1);
+    if (!myBuilds[itemName]) {
+      myBuilds[itemName] = [{
+        id: blpGenId(), name: 'Build 1', subForms: {},
+        baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
+        baseAuthor: null, slots: [], isModified: false,
+      }];
+    }
+    myBuilds[itemName][0].subForms[sfName] = {
+      baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
+      baseBuildUrl: val.baseBuildUrl ?? null, baseAuthor: val.baseAuthor ?? null,
+      slots: val.slots ?? [], isModified: val.isModified ?? false,
+    };
+  }
+
+  if (dirty) saveMyBuilds();
 }
 function saveMyBuilds() { localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds)); }
+
+function blpItemBuilds(name) {
+  const val = myBuilds[name ?? _blpItem];
+  return Array.isArray(val) ? val : [];
+}
+
+function blpCurrentBuild() {
+  if (!_blpItem || !_blpBuildId) return null;
+  return blpItemBuilds(_blpItem).find(b => b.id === _blpBuildId) || null;
+}
+
+// Returns the active slot data container (build or sub-form), or null
+function blpCurrentData() {
+  const build = blpCurrentBuild();
+  if (!build) return null;
+  return _blpSubForm ? (build.subForms[_blpSubForm] || null) : build;
+}
+
+// Like blpCurrentData but creates the sub-form entry if missing
+function blpEnsureCurrentData() {
+  const build = blpCurrentBuild();
+  if (!build) return null;
+  if (_blpSubForm) {
+    if (!build.subForms[_blpSubForm]) {
+      build.subForms[_blpSubForm] = {
+        baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
+        baseAuthor: null, slots: blpEmptyBuild().slots, isModified: false,
+      };
+    }
+    return build.subForms[_blpSubForm];
+  }
+  return build;
+}
+
+function blpNewBuildEntry(name) {
+  const empty = blpEmptyBuild();
+  blpApplyDefaultPolarities(empty.slots);
+  return {
+    id: blpGenId(), name: name || 'Build 1', subForms: {},
+    baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
+    baseAuthor: null, slots: empty.slots, isModified: false,
+    potatoed: false, helminthAbility: null,
+  };
+}
+
+// Polarity labels: index = polarity value (6 unused)
+const POLARITY_NAMES = ['','Madurai','Vazarin','Naramon','Zenurik','Penjaga','','Unairu','Umbra','Any'];
+const POLARITY_EXTS  = ['','svg','svg','svg','svg','svg','','svg','svg','png'];
+function blpPolarityLabel(p) {
+  const name = POLARITY_NAMES[p];
+  if (!name) return '—';
+  return `<img src="https://wiki.warframe.com/images/${name}_Pol%28xBlack%29.${POLARITY_EXTS[p]}?5760d" class="pol-icon" alt="${name[0]}">`;
+}
+
+function blpApplyDefaultPolarities(slots) {
+  if (!_blpItem || _blpSubForm) return;
+  const def = DEFAULT_POLARITIES[_blpItem];
+  if (!def) return;
+  if (Array.isArray(def[2])) {
+    // Dual-aura warframe (Jade): [aura1, aura2, [mods], exilus]
+    if (slots[0]) slots[0].polarity = def[0];
+    if (slots[1]) slots[1].polarity = def[1];
+    if (slots[2]) slots[2].polarity = def[3];
+    for (let i = 0; i < def[2].length; i++) if (slots[3 + i]) slots[3 + i].polarity = def[2][i];
+  } else if (Array.isArray(def[1])) {
+    if (_blpTab === 'primary' || _blpTab === 'secondary') {
+      // [exilus, [s1..s8]]: slot[0]=exilus, slots[1..8]=mods
+      if (slots[0]) slots[0].polarity = def[0];
+      for (let i = 0; i < def[1].length; i++) if (slots[1 + i]) slots[1 + i].polarity = def[1][i];
+    } else {
+      // Warframe or melee: [aura/stance, [s1..s8], exilus?]
+      if (slots[0]) slots[0].polarity = def[0];
+      if (def[2] != null && slots[1]) slots[1].polarity = def[2];
+      for (let i = 0; i < def[1].length; i++) if (slots[2 + i]) slots[2 + i].polarity = def[1][i];
+    }
+  } else if (def.length === 10) {
+    // Companion: type is derived from polarity (Penjaga=5 → precept)
+    for (let i = 0; i < 10; i++) if (slots[i]) {
+      slots[i].polarity = def[i];
+      slots[i].type = def[i] === 5 ? 'precept' : 'regular';
+    }
+  } else {
+    // Flat: archgun, archmelee, archwing, sentinel, necramech
+    for (let i = 0; i < def.length; i++) if (slots[i]) slots[i].polarity = def[i];
+  }
+}
+
+function blpSetPolarity(i, p) {
+  const data = blpCurrentData();
+  if (!data || !data.slots[i]) return;
+  data.slots[i].polarity = p;
+  if (_blpTab === 'companions' || blpCurrentExaltedType() === 'companion') {
+    data.slots[i].type = p === 5 ? 'precept' : 'regular';
+  }
+  data.isModified = true;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpCyclePolarity(i) {
+  const data = blpCurrentData();
+  if (!data || !data.slots[i]) return;
+  const cur = data.slots[i].polarity || 0;
+  const cycle = [0, 1, 2, 3, 4, 5, 7, 8, 9];
+  const ci = cycle.indexOf(cur);
+  blpSetPolarity(i, cycle[(ci + 1) % cycle.length]);
+}
+
+// Reactor for warframes/companions/vehicles; Catalyst for all weapons
+function blpPotatoLabel() {
+  return new Set(['warframes', 'companions', 'vehicles']).has(_blpTab) ? 'Reactor' : 'Catalyst';
+}
 
 function clKey(tab, name)         { return tab + '\t' + name; }
 function isInChecklist(tab, name) { return checklistItems.has(clKey(tab, name)); }
@@ -400,6 +555,7 @@ function renderBuildsPage() {
 function blpSetTab(tabKey) {
   _blpTab      = tabKey;
   _blpItem     = null;
+  _blpBuildId  = null;
   _blpOFId     = null;
   _blpOFBuilds = null;
   _blpOFSearch = '';
@@ -431,19 +587,39 @@ function blpFilterItems() {
   }
   list.innerHTML = items.map(item => {
     const name     = item[0];
-    const hasBuild = blpHasAnyBuild(name);
+    const builds   = blpItemBuilds(name);
     const isActive = name === _blpItem;
-    return `<div class="blp-item${isActive ? ' active' : ''}" onclick="blpSelectItem('${jsStr(name)}')">${hasBuild ? '<span class="blp-item-dot"></span>' : ''}${esc(name)}</div>`;
+    let html = `<div class="blp-item${isActive ? ' active' : ''}" onclick="blpSelectItem('${jsStr(name)}')">${builds.length ? '<span class="blp-item-dot"></span>' : ''}${esc(name)}</div>`;
+    if (isActive && builds.length > 0) {
+      for (const b of builds) {
+        const isBuildActive = b.id === _blpBuildId;
+        html += `<div class="blp-build-entry${isBuildActive ? ' active' : ''}" onclick="blpSelectBuild('${jsStr(b.id)}')">${esc(b.name)}</div>`;
+      }
+    }
+    return html;
   }).join('');
 }
 
 function blpSelectItem(name) {
-  _blpItem       = name;
-  _blpOFId       = OVERFRAME_MAP.get(name) || null;
+  _blpItem                = name;
+  _blpOFId                = OVERFRAME_MAP.get(name) || null;
+  _blpOFBuilds            = null;
+  _blpOFSearch            = '';
+  _blpActiveSlot          = null;
+  _blpSubForm             = null;
+  _blpHelminthPickerSlot  = null;
+  const builds   = blpItemBuilds(name);
+  _blpBuildId    = builds.length > 0 ? builds[0].id : null;
+  blpFilterItems();
+  blpRenderEditor();
+}
+
+function blpSelectBuild(buildId) {
+  _blpBuildId    = buildId;
+  _blpSubForm    = null;
   _blpOFBuilds   = null;
   _blpOFSearch   = '';
   _blpActiveSlot = null;
-  _blpSubForm    = null;
   blpFilterItems();
   blpRenderEditor();
 }
@@ -455,7 +631,7 @@ function blpItemCat() {
 }
 
 function blpEmptyBuild() {
-  const s    = type => ({ type, modId: null, modName: '', rank: 0 });
+  const s    = type => ({ type, modId: null, modName: '', rank: 0, polarity: 0 });
   const reg8 = () => Array(8).fill(null).map(() => s('regular'));
   let slots;
 
@@ -471,7 +647,9 @@ function blpEmptyBuild() {
     } else if (exType === 'secondary') {
       slots = [...reg8(), s('arcane-secondary')];
     } else if (exType === 'companion') {
-      slots = Array(10).fill(null).map((_, i) => s(COMPANION_PRECEPT_SLOTS.has(i) ? 'precept' : 'regular'));
+      slots = Array(10).fill(null).map(() => s('regular'));
+    } else if (exType === 'claws') {
+      slots = [s('stance'), ...reg8()];
     } else {
       slots = reg8();
     }
@@ -480,7 +658,11 @@ function blpEmptyBuild() {
 
   const cat = blpItemCat();
   if (_blpTab === 'warframes') {
-    slots = [s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
+    if (_blpItem === 'Jade') {
+      slots = [s('aura'), s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
+    } else {
+      slots = [s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
+    }
   } else if (_blpTab === 'primary') {
     slots = [s('exilus'), ...reg8(), s('arcane-primary')];
   } else if (_blpTab === 'secondary') {
@@ -490,12 +672,14 @@ function blpEmptyBuild() {
     slots = [s('stance'), s('exilus'), ...reg8(), s('arcane-melee')];
     if (cat === 'Zaw') slots.push(s('arcane-exodia'));
   } else if (_blpTab === 'companions') {
-    slots = Array(10).fill(null).map((_, i) => s(COMPANION_PRECEPT_SLOTS.has(i) ? 'precept' : 'regular'));
+    slots = Array(10).fill(null).map(() => s('regular'));
   } else if (_blpTab === 'archWeapons') {
     slots = reg8();
     if (cat === 'Arch-Gun') { slots.push(s('arcane-primary')); slots.push(s('arcane-secondary')); }
   } else {
-    slots = reg8();
+    slots = cat === 'Necramech'
+      ? Array(12).fill(null).map(() => s('regular'))
+      : reg8();
   }
   return { baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null, baseAuthor: null, slots, isModified: false };
 }
@@ -507,19 +691,8 @@ function blpRenderEditor() {
     return;
   }
 
-  const exalted    = _blpTab === 'warframes' ? blpGetExalted(_blpItem) : null;
-  const buildKey   = blpBuildKey();
-  const build      = myBuilds[buildKey] || blpEmptyBuild();
-  const slots      = build.slots;
-
-  const subFormHtml = exalted
-    ? `<div id="blp-subform-strip">
-        <button class="blp-subform-btn${_blpSubForm === null ? ' active' : ''}" onclick="blpSetSubForm(null)">Warframe</button>
-        ${exalted.map(e =>
-          `<button class="blp-subform-btn${_blpSubForm === e.name ? ' active' : ''}" onclick="blpSetSubForm('${jsStr(e.name)}')">${esc(e.name)}</button>`
-        ).join('')}
-       </div>`
-    : '';
+  const build = blpCurrentBuild();
+  const data  = build ? (_blpSubForm ? (build.subForms[_blpSubForm] || null) : build) : null;
 
   const showOFBrowser = !!blpCurrentOFItemId();
   const ofBrowserHtml = showOFBrowser
@@ -529,34 +702,115 @@ function blpRenderEditor() {
        </div>`
     : '';
 
-  const baseBarHtml = build.baseBuildTitle
+  if (!build) {
+    inner.innerHTML = `
+      <div id="blp-item-title">${esc(_blpItem)}</div>
+      <div id="blp-editor-empty" style="padding:20px 0 12px">
+        No builds yet.&ensp;<button class="blp-action-btn" onclick="blpCreateBuild()">+ New Build</button>
+      </div>
+      ${ofBrowserHtml}`;
+    return;
+  }
+
+  const exalted        = blpGetActiveExalted(_blpItem);
+  const mainLabel      = _blpTab === 'companions' ? 'Companion' : 'Warframe';
+  const subFormHtml = exalted
+    ? `<div id="blp-subform-strip">
+        <button class="blp-subform-btn${_blpSubForm === null ? ' active' : ''}" onclick="blpSetSubForm(null)">${mainLabel}</button>
+        ${exalted.map(e =>
+          `<button class="blp-subform-btn${_blpSubForm === e.name ? ' active' : ''}" onclick="blpSetSubForm('${jsStr(e.name)}')">${esc(e.name)}</button>`
+        ).join('')}
+       </div>`
+    : '';
+
+  const slots = data?.slots || blpEmptyBuild().slots;
+  const baseBarHtml = data?.baseBuildTitle
     ? `<div id="blp-base-bar">
         <span class="blp-base-label">Base:</span>
-        <span id="blp-base-title">${esc(build.baseBuildTitle)}</span>
-        <span>by ${esc(build.baseAuthor || '')}</span>
-        <a id="blp-base-link" href="https://overframe.gg${esc(build.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
-        ${build.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
+        <span id="blp-base-title">${esc(data.baseBuildTitle)}</span>
+        <span>by ${esc(data.baseAuthor || '')}</span>
+        <a id="blp-base-link" href="https://overframe.gg${esc(data.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
+        ${data.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
        </div>`
     : `<div id="blp-base-bar"><span class="blp-base-label">No base build${showOFBrowser ? ' — browse Overframe below or' : ' —'} fill slots manually</span></div>`;
 
+  const potatoHtml = !_blpSubForm
+    ? `<button id="blp-potato-btn" class="blp-potato-btn${build.potatoed ? ' active' : ''}"
+         onclick="blpTogglePotato()" title="Double mod capacity">${blpPotatoLabel()}</button>`
+    : '';
+
   inner.innerHTML = `
     <div id="blp-item-title">${esc(_blpItem)}</div>
+    <div id="blp-build-name-bar">
+      <input id="blp-build-name-input" class="blp-build-name-input" type="text" value="${esc(build.name)}"
+        onchange="blpSaveBuildName(this.value)" onblur="blpSaveBuildName(this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()">
+      ${potatoHtml}
+      <button class="blp-action-btn" onclick="blpCreateBuild()">+ New</button>
+      <button class="blp-action-btn danger" onclick="blpDeleteBuild()">Delete</button>
+    </div>
     ${subFormHtml}
     ${baseBarHtml}
     ${ofBrowserHtml}
-    <div class="blp-section-label">Mod Slots</div>
-    <div id="blp-slots">${slots.map((s, i) => blpSlotHtml(i, s)).join('')}</div>
+    ${blpAbilitiesHtml(build)}
+    <div id="blp-slots">${blpSlotsHtml(slots)}</div>
     <div id="blp-actions">
       <button class="blp-action-btn" onclick="blpAddSlot()">+ Add Slot</button>
-      <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Build</button>
+      <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
   `;
 }
 
+function blpCreateBuild() {
+  if (!_blpItem) return;
+  if (!myBuilds[_blpItem]) myBuilds[_blpItem] = [];
+  _blpSubForm    = null;
+  const entry    = blpNewBuildEntry(`Build ${myBuilds[_blpItem].length + 1}`);
+  myBuilds[_blpItem].push(entry);
+  _blpBuildId    = entry.id;
+  _blpOFBuilds   = null;
+  _blpActiveSlot = null;
+  saveMyBuilds();
+  blpFilterItems();
+  blpRenderEditor();
+  setTimeout(() => { const n = document.getElementById('blp-build-name-input'); if (n) { n.select(); } }, 0);
+}
+
+function blpDeleteBuild() {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  const builds = myBuilds[_blpItem];
+  const idx    = builds.findIndex(b => b.id === _blpBuildId);
+  if (idx !== -1) builds.splice(idx, 1);
+  if (!builds.length) delete myBuilds[_blpItem];
+  _blpBuildId = myBuilds[_blpItem]?.[0]?.id || null;
+  _blpSubForm = null;
+  saveMyBuilds();
+  blpFilterItems();
+  blpRenderEditor();
+}
+
+function blpSaveBuildName(name) {
+  const build   = blpCurrentBuild();
+  if (!build) return;
+  const trimmed = name.trim() || 'Build 1';
+  if (build.name === trimmed) return;
+  build.name = trimmed;
+  saveMyBuilds();
+  blpFilterItems();
+}
+
+function blpTogglePotato() {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.potatoed = !build.potatoed;
+  saveMyBuilds();
+  const btn = document.getElementById('blp-potato-btn');
+  if (btn) btn.classList.toggle('active', build.potatoed);
+}
+
 // Number of contiguous special prefix slots per tab (used for regular slot label arithmetic)
 const BLP_PREFIX = { warframes: 2, primary: 1, secondary: 1, melee: 2 };
-// Companion precept slot indices (0-based): slots 1,5,6,10 in 1-based = 0,4,5,9
-const COMPANION_PRECEPT_SLOTS = new Set([0, 4, 5, 9]);
 
 // Warframes that have separately-moddable exalted weapons or shadow forms.
 // type drives slot structure: 'melee'|'primary'|'secondary'|'companion'|'warframe'
@@ -587,6 +841,39 @@ const WARFRAME_EXALTED = new Map([
   ['Wukong',    [{name: 'Iron Staff',       type: 'melee',     ofId: 2407, ofPrimeId: 2680}]],
 ]);
 
+// Companion beast weapons (Kubrows, Kavats, Predasites, Vulpaphyla)
+// type: 'claws' → 8 regular mod slots, no stance/exilus/arcane
+const COMPANION_EXALTED = new Map([
+  ['Chesa',               [{name: 'Chesa Claws',    type: 'claws', ofId: 7151}]],
+  ['Huras',               [{name: 'Huras Claws',    type: 'claws', ofId: 7157}]],
+  ['Raksa',               [{name: 'Raksa Claws',    type: 'claws', ofId: 7164}]],
+  ['Sahasa',              [{name: 'Sahasa Claws',   type: 'claws', ofId: 7166}]],
+  ['Sunika',              [{name: 'Sunika Claws',   type: 'claws', ofId: 7154}]],
+  ['Helminth Charger',    [{name: 'Helminth Claws', type: 'claws', ofId: 7152}]],
+  ['Adarza',              [{name: 'Adarza Claws',   type: 'claws', ofId: 7156}]],
+  ['Smeeta',              [{name: 'Smeeta Claws',   type: 'claws', ofId: 7160}]],
+  ['Vasca',               [{name: 'Vasca Claws',    type: 'claws', ofId: 7153}]],
+  ['Venari',              [{name: 'Venari Claws',   type: 'claws', ofId: 7169}]],
+  ['Venari Prime',        [{name: 'Venari Prime Claws', type: 'claws', ofId: 7171}]],
+  ['Medjay Predasite',    [{name: 'Medjay Claws',   type: 'claws', ofId: 7162}]],
+  ['Pharaoh Predasite',   [{name: 'Pharaoh Claws',  type: 'claws', ofId: 7161}]],
+  ['Vizier Predasite',    [{name: 'Vizier Claws',   type: 'claws', ofId: 7163}]],
+  ['Crescent Vulpaphyla', [{name: 'Crescent Claws', type: 'claws', ofId: 7158}]],
+  ['Panzer Vulpaphyla',   [{name: 'Panzer Claws',   type: 'claws', ofId: 7165}]],
+  ['Sly Vulpaphyla',      [{name: 'Sly Claws',      type: 'claws', ofId: 7150}]],
+]);
+
+function blpGetCompanionExalted(name) {
+  return COMPANION_EXALTED.get(name) || null;
+}
+
+// Returns sub-forms for the current item regardless of tab
+function blpGetActiveExalted(name) {
+  if (_blpTab === 'warframes')  return blpGetExalted(name ?? _blpItem);
+  if (_blpTab === 'companions') return blpGetCompanionExalted(name ?? _blpItem);
+  return null;
+}
+
 // Look up exalted weapons for a warframe name.
 // For Prime/Umbra variants: weapon names get the suffix appended; shadow-form names stay unchanged.
 // The correct ofId is resolved from ofPrimeId/ofUmbraId as appropriate.
@@ -608,22 +895,17 @@ function blpGetExalted(name) {
   });
 }
 
-// Storage key for the current build (compound key for exalted sub-forms)
-function blpBuildKey() {
-  return _blpSubForm ? _blpItem + '\x00' + _blpSubForm : _blpItem;
-}
-
-// Returns the exalted type string ('melee','primary','secondary','companion','warframe') for current sub-form, or null if main
+// Returns the exalted type string for the current sub-form, or null if on the main build
 function blpCurrentExaltedType() {
   if (!_blpSubForm) return null;
-  const exalted = blpGetExalted(_blpItem);
+  const exalted = blpGetActiveExalted();
   return (exalted && exalted.find(e => e.name === _blpSubForm)?.type) || null;
 }
 
 // Returns the Overframe item ID to use for the current view
 function blpCurrentOFItemId() {
   if (_blpSubForm) {
-    const exalted = blpGetExalted(_blpItem);
+    const exalted = blpGetActiveExalted();
     return exalted?.find(e => e.name === _blpSubForm)?.ofId ?? null;
   }
   return _blpOFId;
@@ -638,50 +920,234 @@ function blpSetSubForm(name) {
   blpRenderEditor();
 }
 
-function blpSlotHtml(i, slot) {
+function blpTileHtml(i, slot, regIndex) {
   const modName  = slot?.modName || '';
   const rank     = slot?.rank ?? 0;
-  const slotType = slot?.type || 'regular';
+  const polarity = slot?.polarity ?? 0;
+  const isCompanionCtx = _blpTab === 'companions' || blpCurrentExaltedType() === 'companion';
+  const slotType = isCompanionCtx ? (polarity === 5 ? 'precept' : 'regular') : (slot?.type || 'regular');
   let label;
-  if (slotType === 'aura')                label = 'Aura';
-  else if (slotType === 'exilus')         label = 'Exilus';
-  else if (slotType === 'stance')         label = 'Stance';
-  else if (slotType === 'precept')        label = 'Precept';
+  if (slotType === 'aura')               label = 'Aura';
+  else if (slotType === 'exilus')        label = 'Exilus';
+  else if (slotType === 'stance')        label = 'Stance';
+  else if (slotType === 'precept')       label = 'Precept';
   else if (slotType === 'arcane-warframe') label = 'Arcane';
   else if (slotType === 'arcane-primary')  label = _blpTab === 'archWeapons' ? 'Arc.Prim' : 'Arcane';
   else if (slotType === 'arcane-secondary') label = _blpTab === 'archWeapons' ? 'Arc.Sec' : 'Arcane';
-  else if (slotType === 'arcane-melee')   label = 'Arcane';
-  else if (slotType === 'arcane-pax')     label = 'Pax';
-  else if (slotType === 'arcane-exodia')  label = 'Exodia';
-  else if (_blpTab === 'companions' || blpCurrentExaltedType() === 'companion') {
-    // Count regular (non-precept) slots from index 0 up to i to get sequential label
-    let n = 0;
-    for (let j = 0; j <= i; j++) if (!COMPANION_PRECEPT_SLOTS.has(j)) n++;
-    label = String(n);
-  }
-  else {
-    // Exalted weapon builds have no prefix slots; normal builds use BLP_PREFIX
-    const prefix = (_blpSubForm && blpCurrentExaltedType() !== 'warframe') ? 0 : (BLP_PREFIX[_blpTab] || 0);
-    label = String(i - prefix + 1);
-  }
-  return `<div class="blp-slot-row" data-slot="${i}" data-slot-type="${slotType}">
-    <span class="blp-slot-num">${label}</span>
+  else if (slotType === 'arcane-melee')  label = 'Arcane';
+  else if (slotType === 'arcane-pax')    label = 'Pax';
+  else if (slotType === 'arcane-exodia') label = 'Exodia';
+  else label = String(regIndex + 1); // 1-based regular slot number
+
+  return `<div class="blp-tile" data-slot="${i}" data-slot-type="${slotType}">
+    <span class="blp-tile-label">${label}</span>
     <div class="blp-mod-picker">
-      <input class="blp-mod-input" type="text" value="${esc(modName)}" placeholder="Search mod…"
+      <input class="blp-mod-input" type="text" value="${esc(modName)}" placeholder="—"
         onfocus="blpOpenModPicker(${i})" oninput="blpSearchMod(${i}, this.value)"
         onblur="setTimeout(()=>blpCloseModPicker(${i}),150)">
       <div class="blp-mod-dropdown" id="blp-dd-${i}" style="display:none"></div>
     </div>
-    <input class="blp-rank-input" type="number" min="0" max="10" value="${rank}" title="Rank"
-      onchange="blpSetRank(${i}, this.value)">
-    <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear slot">✕</button>
+    <div class="blp-tile-footer">
+      <button class="blp-slot-polarity${polarity ? ' p' + polarity : ''}" onclick="blpCyclePolarity(${i})" title="Polarity (click to cycle)">${blpPolarityLabel(polarity)}</button>
+      <input class="blp-rank-input" type="number" min="0" max="10" value="${rank}" title="Rank"
+        onchange="blpSetRank(${i}, this.value)">
+      <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear">✕</button>
+    </div>
   </div>`;
 }
+
+function blpSlotsHtml(slots) {
+  const isCompanion = _blpTab === 'companions' || blpCurrentExaltedType() === 'companion';
+  const PREFIX_TYPES = new Set(['aura', 'stance', 'exilus']);
+  const isSuffix = t => t.startsWith('arcane-');
+
+  if (isCompanion) {
+    // 2 rows of 5; precept slots numbered separately from regular ones
+    let regN = 0;
+    const tiles = slots.map((s, i) => {
+      const t = (s?.polarity ?? 0) === 5 ? 'precept' : 'regular';
+      const ri = t === 'precept' ? 0 : regN++;
+      return blpTileHtml(i, s, ri);
+    });
+    let html = '';
+    for (let i = 0; i < tiles.length; i += 5)
+      html += `<div class="blp-tile-row">${tiles.slice(i, i + 5).join('')}</div>`;
+    return html;
+  }
+
+  const prefix = [], regular = [], suffix = [];
+  slots.forEach((s, i) => {
+    const t = s?.type || 'regular';
+    if (PREFIX_TYPES.has(t))  prefix.push([i, s]);
+    else if (isSuffix(t))     suffix.push([i, s]);
+    else                      regular.push([i, s]);
+  });
+
+  let html = '';
+  if (prefix.length)
+    html += `<div class="blp-tile-row blp-special-row">${prefix.map(([i, s]) => blpTileHtml(i, s, 0)).join('')}</div>`;
+  for (let i = 0; i < regular.length; i += 4)
+    html += `<div class="blp-tile-row">${regular.slice(i, i + 4).map(([idx, s], j) => blpTileHtml(idx, s, i + j)).join('')}</div>`;
+  if (suffix.length)
+    html += `<div class="blp-tile-row blp-arcane-row">${suffix.map(([i, s]) => blpTileHtml(i, s, 0)).join('')}</div>`;
+  return html;
+}
+
+// ── ABILITY PANEL ──────────────────────────────────────────────────────────────
+
+const HELMINTH_ABILITIES = typeof HELMINTH_OF_IDS !== 'undefined'
+  ? Object.keys(HELMINTH_OF_IDS).sort()
+  : [];
+
+// Damage-buff abilities that are subject to forced-slot replacement rules
+const HELMINTH_DAMAGE_BUFFS = new Set(['Eclipse', 'Roar', "Xata's Whisper"]);
+
+// Warframes that have a mandatory replacement target for damage-buff abilities.
+// Eclipse/Roar/Xata's Whisper can ONLY replace the named ability on these frames.
+const HELMINTH_FORCED_SLOT = {
+  'Chroma':   'Vex Armor',
+  'Cyte-09':  'Resupply',
+  'Mirage':   'Eclipse',
+  'Octavia':  'Amp',
+  'Oraxia':   'Silken Stride',
+  'Rhino':    'Roar',
+  'Temple':   "Ripper's Wail",
+  'Uriel':    'Demonium',
+  'Xaku':     "Xata's Whisper",
+};
+
+// Returns a predicate for whether a Helminth ability is valid for the given slot index.
+function blpHelminthFilter(slot) {
+  const baseAbilities = (typeof WARFRAME_ABILITIES !== 'undefined' && WARFRAME_ABILITIES[_blpItem]) || [];
+  const ownSet        = new Set(baseAbilities);
+  const forcedAbility = HELMINTH_FORCED_SLOT[_blpItem];
+  const forcedSlot    = forcedAbility != null ? baseAbilities.indexOf(forcedAbility) : -1;
+  return a => {
+    if (ownSet.has(a)) return false;
+    if (forcedSlot >= 0 && HELMINTH_DAMAGE_BUFFS.has(a) && slot !== forcedSlot) return false;
+    return true;
+  };
+}
+
+function blpAbilitiesHtml(build) {
+  if (!_blpItem || _blpSubForm) return '';
+  const baseAbilities = typeof WARFRAME_ABILITIES !== 'undefined' ? WARFRAME_ABILITIES[_blpItem] : null;
+  if (!baseAbilities || _blpItem === 'Helminth') return '';
+
+  const isWarframe  = _blpTab === 'warframes';
+  const helminth    = build?.helminthAbility || null; // { slot, name } or null
+
+  const tiles = baseAbilities.map((abilityName, i) => {
+    const isReplaced = helminth && helminth.slot === i;
+    const isLocked   = helminth && !isReplaced;
+    const displayName = isReplaced ? helminth.name : abilityName;
+
+    let cls = 'blp-ability-tile';
+    if (isReplaced) cls += ' helminth';
+    else if (isLocked) cls += ' locked';
+    else if (isWarframe) cls += ' selectable';
+
+    const clickAttr = (isWarframe && !isLocked)
+      ? `onclick="blpOpenHelminthPicker(${i})"` : '';
+
+    const clearBtn = isReplaced
+      ? `<button class="blp-ability-clear" onclick="event.stopPropagation();blpClearHelminthAbility()" title="Remove">✕</button>` : '';
+
+    let ddHtml = '';
+    if (isWarframe && _blpHelminthPickerSlot === i) {
+      const allow = blpHelminthFilter(i);
+      const opts = HELMINTH_ABILITIES
+        .filter(a => allow(a))
+        .map(a =>
+          `<div class="blp-ability-opt${isReplaced && a === helminth.name ? ' active' : ''}" onmousedown="blpPickHelminthAbility(${i},'${jsStr(a)}')">${esc(a)}</div>`
+        ).join('');
+      ddHtml = `<div class="blp-ability-dd">
+        <input class="blp-ability-search" type="text" placeholder="Search…" autocomplete="off"
+          oninput="blpSearchHelminth(${i},this.value)"
+          onkeydown="if(event.key==='Escape')blpCloseHelminthPicker()"
+          onclick="event.stopPropagation()">
+        <div class="blp-ability-opts" id="blp-ability-opts-${i}">${opts}</div>
+      </div>`;
+    }
+
+    const originalLabel = isReplaced
+      ? `<span class="blp-ability-original">replaces ${esc(abilityName)}</span>` : '';
+
+    return `<div class="${cls}" ${clickAttr}>
+      <span class="blp-ability-num">${i + 1}</span>
+      <span class="blp-ability-name">${esc(displayName)}</span>
+      ${originalLabel}${clearBtn}${ddHtml}
+    </div>`;
+  }).join('');
+
+  return `<div id="blp-abilities">${tiles}</div>`;
+}
+
+function blpOpenHelminthPicker(slot) {
+  if (_blpHelminthPickerSlot === slot) {
+    _blpHelminthPickerSlot = null;
+    blpRenderEditor();
+    return;
+  }
+  _blpHelminthPickerSlot = slot;
+  blpRenderEditor();
+  setTimeout(() => {
+    document.querySelector('.blp-ability-search')?.focus();
+    document.addEventListener('click', function closeHelminth(e) {
+      if (!e.target.closest('#blp-abilities')) {
+        _blpHelminthPickerSlot = null;
+        blpRenderEditor();
+      }
+      document.removeEventListener('click', closeHelminth);
+    });
+  }, 0);
+}
+
+function blpCloseHelminthPicker() {
+  _blpHelminthPickerSlot = null;
+  blpRenderEditor();
+}
+
+function blpSearchHelminth(slot, query) {
+  const container = document.getElementById(`blp-ability-opts-${slot}`);
+  if (!container) return;
+  const q = query.trim().toLowerCase();
+  const build = blpCurrentBuild();
+  const helminth = build?.helminthAbility || null;
+  const allow    = blpHelminthFilter(slot);
+  container.innerHTML = HELMINTH_ABILITIES
+    .filter(a => allow(a) && (!q || a.toLowerCase().includes(q)))
+    .map(a =>
+      `<div class="blp-ability-opt${helminth && helminth.slot === slot && a === helminth.name ? ' active' : ''}" onmousedown="blpPickHelminthAbility(${slot},'${jsStr(a)}')">${esc(a)}</div>`
+    ).join('');
+}
+
+function blpPickHelminthAbility(slot, name) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.helminthAbility = { slot, name };
+  build.isModified = true;
+  _blpHelminthPickerSlot = null;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpClearHelminthAbility() {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.helminthAbility = null;
+  build.isModified = true;
+  _blpHelminthPickerSlot = null;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+// ── MOD PICKER ─────────────────────────────────────────────────────────────────
 
 function blpOpenModPicker(slotIdx) {
   if (_blpActiveSlot !== null && _blpActiveSlot !== slotIdx) blpCloseModPicker(_blpActiveSlot);
   _blpActiveSlot = slotIdx;
-  const input = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"] .blp-mod-input`);
+  const input = document.querySelector(`.blp-tile[data-slot="${slotIdx}"] .blp-mod-input`);
   blpSearchMod(slotIdx, input?.value || '');
 }
 
@@ -701,7 +1167,7 @@ function blpSearchMod(slotIdx, query) {
   const dd = document.getElementById(`blp-dd-${slotIdx}`);
   if (!dd) return;
   const q        = query.trim().toLowerCase();
-  const row      = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"]`);
+  const row      = document.querySelector(`.blp-tile[data-slot="${slotIdx}"]`);
   const slotType = row?.dataset.slotType || 'regular';
   const results  = [];
 
@@ -718,6 +1184,7 @@ function blpSearchMod(slotIdx, query) {
         // For exalted sub-forms, look up mod cats based on the exalted weapon type
         const exType = blpCurrentExaltedType();
         const exTabKey = exType === 'companion' ? 'companions'
+                       : exType === 'claws'     ? 'companions' // claw weapon mods are companion-category
                        : exType === 'melee'     ? 'melee'
                        : exType === 'primary'   ? 'primary'
                        : exType === 'secondary' ? 'secondary'
@@ -752,7 +1219,7 @@ function blpCloseModPicker(slotIdx) {
 
 function blpPickMod(slotIdx, modId, modName) {
   blpUpdateSlot(slotIdx, { modId, modName });
-  const input = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"] .blp-mod-input`);
+  const input = document.querySelector(`.blp-tile[data-slot="${slotIdx}"] .blp-mod-input`);
   if (input) input.value = modName;
   blpCloseModPicker(slotIdx);
 }
@@ -763,7 +1230,7 @@ function blpSetRank(slotIdx, val) {
 
 function blpClearSlot(slotIdx) {
   blpUpdateSlot(slotIdx, { modId: null, modName: '', rank: 0 });
-  const row = document.querySelector(`.blp-slot-row[data-slot="${slotIdx}"]`);
+  const row = document.querySelector(`.blp-tile[data-slot="${slotIdx}"]`);
   if (row) {
     const inp = row.querySelector('.blp-mod-input');
     const rnk = row.querySelector('.blp-rank-input');
@@ -773,68 +1240,58 @@ function blpClearSlot(slotIdx) {
 }
 
 function blpUpdateSlot(slotIdx, changes) {
-  const key = blpBuildKey();
-  if (!myBuilds[key]) myBuilds[key] = blpEmptyBuild();
-  const build = myBuilds[key];
-  while (build.slots.length <= slotIdx) build.slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
-  Object.assign(build.slots[slotIdx], changes);
-  build.isModified = true;
+  const data = blpEnsureCurrentData();
+  if (!data) return;
+  while (data.slots.length <= slotIdx) data.slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
+  Object.assign(data.slots[slotIdx], changes);
+  data.isModified = true;
   saveMyBuilds();
   blpRefreshBaseBar();
   blpRefreshItemList();
 }
 
 function blpRefreshBaseBar() {
-  const build = myBuilds[blpBuildKey()];
-  const bar = document.getElementById('blp-base-bar');
-  if (!bar || !build?.baseBuildTitle) return;
+  const data = blpCurrentData();
+  const bar  = document.getElementById('blp-base-bar');
+  if (!bar || !data?.baseBuildTitle) return;
   bar.innerHTML = `
     <span class="blp-base-label">Base:</span>
-    <span id="blp-base-title">${esc(build.baseBuildTitle)}</span>
-    <span>by ${esc(build.baseAuthor || '')}</span>
-    <a id="blp-base-link" href="https://overframe.gg${esc(build.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
-    ${build.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
+    <span id="blp-base-title">${esc(data.baseBuildTitle)}</span>
+    <span>by ${esc(data.baseAuthor || '')}</span>
+    <a id="blp-base-link" href="https://overframe.gg${esc(data.baseBuildUrl || '')}" target="_blank" rel="noopener">↗ Overframe</a>
+    ${data.isModified ? '<span class="blp-modified-badge">Modified</span>' : ''}
   `;
 }
 
 function blpHasAnyBuild(name) {
-  if (myBuilds[name]) return true;
-  const prefix = name + '\x00';
-  return Object.keys(myBuilds).some(k => k.startsWith(prefix));
+  return blpItemBuilds(name).length > 0;
 }
 
 function blpRefreshItemList() {
-  // Update green dot without full re-render
-  const itemEl = document.querySelector(`.blp-item[onclick*="${_blpItem?.replace(/'/g, "\\'")}"]`);
-  if (itemEl && blpHasAnyBuild(_blpItem) && !itemEl.querySelector('.blp-item-dot')) {
-    itemEl.insertAdjacentHTML('afterbegin', '<span class="blp-item-dot"></span>');
-  }
+  blpFilterItems();
 }
 
 function blpAddSlot() {
-  const key = blpBuildKey();
-  if (!myBuilds[key]) myBuilds[key] = blpEmptyBuild();
-  const slots = myBuilds[key].slots;
-  slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
+  const data = blpEnsureCurrentData();
+  if (!data) return;
+  data.slots.push({ type: 'regular', modId: null, modName: '', rank: 0 });
   saveMyBuilds();
   const slotsDiv = document.getElementById('blp-slots');
-  if (slotsDiv) slotsDiv.insertAdjacentHTML('beforeend', blpSlotHtml(slots.length - 1, slots[slots.length - 1]));
+  if (slotsDiv) slotsDiv.innerHTML = blpSlotsHtml(data.slots);
 }
 
 function blpClearBuild() {
-  if (_blpSubForm) {
-    delete myBuilds[blpBuildKey()];
-  } else {
-    // Clear main build and all exalted sub-form builds
-    delete myBuilds[_blpItem];
-    const prefix = _blpItem + '\x00';
-    for (const k of Object.keys(myBuilds)) {
-      if (k.startsWith(prefix)) delete myBuilds[k];
-    }
-  }
+  const data = blpEnsureCurrentData();
+  if (!data) return;
+  const empty = blpEmptyBuild();
+  data.slots          = empty.slots;
+  data.baseBuildId    = null;
+  data.baseBuildTitle = null;
+  data.baseBuildUrl   = null;
+  data.baseAuthor     = null;
+  data.isModified     = false;
   saveMyBuilds();
   blpRenderEditor();
-  blpFilterItems();
 }
 
 // OF browser (inline in builds page)
@@ -917,6 +1374,74 @@ function blpRenderOFList() {
   }).join('');
 }
 
+function parseOFBuildString(bs) {
+  try { return JSON.parse(atob(bs)); } catch { return null; }
+}
+
+function slotsFromBuildString(arr, tab, item, cat) {
+  const mods = arr[4] || [];
+  const mk = (entry, type) => ({
+    type,
+    modId:    entry[0] || null,
+    modName:  entry[0] && typeof OVERFRAME_MODS !== 'undefined'
+      ? (OVERFRAME_MODS.get(entry[0]) || `Mod #${entry[0]}`) : '',
+    rank:     entry[1] ?? 0,
+    polarity: entry[2] ?? 0,
+  });
+  const e  = type => ({ type, modId: null, modName: '', rank: 0, polarity: 0 });
+  const g  = (i, type) => mods[i] ? mk(mods[i], type) : e(type);
+  const rs = (start, count) => Array.from({ length: count }, (_, i) => mods[start + i] ? mk(mods[start + i], 'regular') : e('regular'));
+
+  if (tab === 'warframes') {
+    const r8 = rs(0, 8);
+    if (item === 'Jade') {
+      // buildString: [r8..r1, aura1, exilus, arc1, arc2, aura2]
+      return [g(8,'aura'), g(12,'aura'), g(9,'exilus'), ...r8, g(10,'arcane-warframe'), g(11,'arcane-warframe')];
+    }
+    // buildString: [r8..r1, aura, exilus, arc1, arc2]
+    return [g(8,'aura'), g(9,'exilus'), ...r8, g(10,'arcane-warframe'), g(11,'arcane-warframe')];
+  }
+  if (tab === 'primary') {
+    // buildString: [r8..r1, exilus, arc]
+    return [g(8,'exilus'), ...rs(0,8), g(9,'arcane-primary')];
+  }
+  if (tab === 'secondary') {
+    // buildString: [r8..r1, exilus, arc]
+    const result = [g(8,'exilus'), ...rs(0,8), g(9,'arcane-secondary')];
+    if (cat === 'Kitgun') result.push(e('arcane-pax'));
+    return result;
+  }
+  if (tab === 'melee') {
+    // buildString: [r8..r1, stance, exilus, arc]
+    const result = [g(8,'stance'), g(9,'exilus'), ...rs(0,8), g(10,'arcane-melee')];
+    if (cat === 'Zaw') result.push(e('arcane-exodia'));
+    return result;
+  }
+  if (tab === 'companions') {
+    if (blpCurrentExaltedType() === 'claws') {
+      // buildString: [r8..r1, stance]
+      return [g(8,'stance'), ...rs(0,8)];
+    }
+    // buildString: [r10..r1]; precept mods have polarity 5
+    return Array.from({ length: 10 }, (_, i) => {
+      const m = mods[i];
+      if (!m) return e('regular');
+      const s = mk(m, 'regular');
+      if (s.polarity === 5) s.type = 'precept';
+      return s;
+    });
+  }
+  if (tab === 'archWeapons') {
+    // buildString: [r8..r1]
+    const result = rs(0, 8);
+    if (cat === 'Arch-Gun') { result.push(e('arcane-primary')); result.push(e('arcane-secondary')); }
+    return result;
+  }
+  // compWeapons, vehicles, etc.
+  const count = cat === 'Necramech' ? 12 : 8;
+  return rs(0, count);
+}
+
 async function blpLoadOFBuild(buildId) {
   const list = document.getElementById('blp-of-list');
   if (list) list.innerHTML = '<div style="color:var(--text-muted);font-size:11px;padding:8px">Loading build…</div>';
@@ -925,103 +1450,144 @@ async function blpLoadOFBuild(buildId) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const build  = await res.json();
     const tab    = _blpTab;
-    const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
-    const toSlot = (s, type) => ({
-      type,
-      modId:   s.mod ?? null,
-      modName: s.mod != null
-        ? ((typeof OVERFRAME_MODS !== 'undefined' && OVERFRAME_MODS.get(s.mod)) || `Mod #${s.mod}`)
-        : '',
-      rank: s.rank ?? 0,
-    });
-    const empty   = type => ({ type, modId: null, modName: '', rank: 0 });
-    const modCat  = modId => modId != null && typeof OVERFRAME_MOD_CATS !== 'undefined'
-      ? OVERFRAME_MOD_CATS.get(modId) : null;
+    const cat    = blpItemCat();
+    const parsed = build.buildString ? parseOFBuildString(build.buildString) : null;
     let slots;
 
-    const cat      = blpItemCat();
-    const arcanes  = raw.filter(s => s.drain === 0);
-    const arcIds   = new Set(arcanes.map(s => s.id));
-    const modSlots = raw.filter(s => !arcIds.has(s.id));
-
-    if (tab === 'warframes') {
-      const auraSlot = modSlots.find(s => s.drain < 0) || null;
-      const rest     = modSlots.filter(s => s.id !== auraSlot?.id);
-      slots = [
-        auraSlot ? toSlot(auraSlot, 'aura')  : empty('aura'),
-        rest[0]  ? toSlot(rest[0],  'exilus') : empty('exilus'),
-        ...rest.slice(1).map(s => toSlot(s, 'regular')),
-      ];
-      while (slots.length < 10) slots.push(empty('regular'));
-      slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-warframe') : empty('arcane-warframe'));
-      slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-warframe') : empty('arcane-warframe'));
-
-    } else if (tab === 'primary') {
-      const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
-      const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
-      slots = [
-        exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
-        ...rest.map(s => toSlot(s, 'regular')),
-      ];
-      while (slots.length < 9) slots.push(empty('regular'));
-      slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary') : empty('arcane-primary'));
-
-    } else if (tab === 'secondary') {
-      const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
-      const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
-      slots = [
-        exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
-        ...rest.map(s => toSlot(s, 'regular')),
-      ];
-      while (slots.length < 9) slots.push(empty('regular'));
-      const paxSlot      = arcanes.find(s => modCat(s.mod) === 'arcane-pax');
-      const regArcane    = arcanes.find(s => s.id !== paxSlot?.id);
-      slots.push(regArcane ? toSlot(regArcane, 'arcane-secondary') : empty('arcane-secondary'));
-      if (cat === 'Kitgun') slots.push(paxSlot ? toSlot(paxSlot, 'arcane-pax') : empty('arcane-pax'));
-
-    } else if (tab === 'melee') {
-      const stanceSlot = modSlots.find(s => s.drain < 0) || null;
-      const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
-      const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
-      const rest       = nonStance.filter(s => s.id !== exilusSlot?.id);
-      slots = [
-        stanceSlot ? toSlot(stanceSlot, 'stance')  : empty('stance'),
-        exilusSlot ? toSlot(exilusSlot, 'exilus')  : empty('exilus'),
-        ...rest.map(s => toSlot(s, 'regular')),
-      ];
-      while (slots.length < 10) slots.push(empty('regular'));
-      const exodiaSlot = arcanes.find(s => modCat(s.mod) === 'arcane-exodia');
-      const regArcane  = arcanes.find(s => s.id !== exodiaSlot?.id);
-      slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
-      if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
-
-    } else if (tab === 'companions') {
-      slots = modSlots.map((s, pos) => toSlot(s, COMPANION_PRECEPT_SLOTS.has(pos) ? 'precept' : 'regular'));
-      while (slots.length < 10) {
-        const pos = slots.length;
-        slots.push(empty(COMPANION_PRECEPT_SLOTS.has(pos) ? 'precept' : 'regular'));
-      }
-
-    } else if (tab === 'archWeapons') {
-      slots = modSlots.map(s => toSlot(s, 'regular'));
-      while (slots.length < 8) slots.push(empty('regular'));
-      if (cat === 'Arch-Gun') {
-        slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary')   : empty('arcane-primary'));
-        slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-secondary') : empty('arcane-secondary'));
-      }
-
+    if (parsed && Array.isArray(parsed[4])) {
+      slots = slotsFromBuildString(parsed, tab, _blpItem, cat);
     } else {
-      slots = modSlots.map(s => toSlot(s, 'regular'));
-      while (slots.length < 8) slots.push(empty('regular'));
+      const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
+      const toSlot = (s, type) => ({
+        type,
+        modId:   s.mod ?? null,
+        modName: s.mod != null
+          ? ((typeof OVERFRAME_MODS !== 'undefined' && OVERFRAME_MODS.get(s.mod)) || `Mod #${s.mod}`)
+          : '',
+        rank: s.rank ?? 0,
+        polarity: 0,
+      });
+      const empty   = type => ({ type, modId: null, modName: '', rank: 0, polarity: 0 });
+      const modCat  = modId => modId != null && typeof OVERFRAME_MOD_CATS !== 'undefined'
+        ? OVERFRAME_MOD_CATS.get(modId) : null;
+
+      const arcanes  = raw.filter(s => s.drain === 0);
+      const arcIds   = new Set(arcanes.map(s => s.id));
+      const modSlots = raw.filter(s => !arcIds.has(s.id));
+
+      if (tab === 'warframes') {
+        const auraSlots = modSlots.filter(s => s.drain < 0);
+        const rest      = modSlots.filter(s => s.drain >= 0);
+        if (_blpItem === 'Jade') {
+          slots = [
+            auraSlots[0] ? toSlot(auraSlots[0], 'aura')   : empty('aura'),
+            auraSlots[1] ? toSlot(auraSlots[1], 'aura')   : empty('aura'),
+            rest[0]      ? toSlot(rest[0],      'exilus')  : empty('exilus'),
+            ...rest.slice(1).map(s => toSlot(s, 'regular')),
+          ];
+          while (slots.length < 11) slots.push(empty('regular'));
+        } else {
+          slots = [
+            auraSlots[0] ? toSlot(auraSlots[0], 'aura')  : empty('aura'),
+            rest[0]      ? toSlot(rest[0],       'exilus') : empty('exilus'),
+            ...rest.slice(1).map(s => toSlot(s, 'regular')),
+          ];
+          while (slots.length < 10) slots.push(empty('regular'));
+        }
+        slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-warframe') : empty('arcane-warframe'));
+        slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-warframe') : empty('arcane-warframe'));
+
+      } else if (tab === 'primary') {
+        const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
+        const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
+        slots = [
+          exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
+          ...rest.map(s => toSlot(s, 'regular')),
+        ];
+        while (slots.length < 9) slots.push(empty('regular'));
+        slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary') : empty('arcane-primary'));
+
+      } else if (tab === 'secondary') {
+        const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
+        const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
+        slots = [
+          exilusSlot ? toSlot(exilusSlot, 'exilus') : empty('exilus'),
+          ...rest.map(s => toSlot(s, 'regular')),
+        ];
+        while (slots.length < 9) slots.push(empty('regular'));
+        const paxSlot      = arcanes.find(s => modCat(s.mod) === 'arcane-pax');
+        const regArcane    = arcanes.find(s => s.id !== paxSlot?.id);
+        slots.push(regArcane ? toSlot(regArcane, 'arcane-secondary') : empty('arcane-secondary'));
+        if (cat === 'Kitgun') slots.push(paxSlot ? toSlot(paxSlot, 'arcane-pax') : empty('arcane-pax'));
+
+      } else if (tab === 'melee') {
+        const stanceSlot = modSlots.find(s => s.drain < 0) || null;
+        const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
+        const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
+        const rest       = nonStance.filter(s => s.id !== exilusSlot?.id);
+        slots = [
+          stanceSlot ? toSlot(stanceSlot, 'stance')  : empty('stance'),
+          exilusSlot ? toSlot(exilusSlot, 'exilus')  : empty('exilus'),
+          ...rest.map(s => toSlot(s, 'regular')),
+        ];
+        while (slots.length < 10) slots.push(empty('regular'));
+        const exodiaSlot = arcanes.find(s => modCat(s.mod) === 'arcane-exodia');
+        const regArcane  = arcanes.find(s => s.id !== exodiaSlot?.id);
+        slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
+        if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
+
+      } else if (tab === 'companions') {
+        if (blpCurrentExaltedType() === 'claws') {
+          const stanceSlot = modSlots.find(s => s.drain < 0) || null;
+          const rest       = modSlots.filter(s => s.id !== stanceSlot?.id);
+          slots = [
+            stanceSlot ? toSlot(stanceSlot, 'stance') : empty('stance'),
+            ...rest.map(s => toSlot(s, 'regular')),
+          ];
+          while (slots.length < 9) slots.push(empty('regular'));
+        } else {
+          slots = modSlots.map(s => toSlot(s, 'regular'));
+          while (slots.length < 10) slots.push(empty('regular'));
+        }
+
+      } else if (tab === 'archWeapons') {
+        slots = modSlots.map(s => toSlot(s, 'regular'));
+        while (slots.length < 8) slots.push(empty('regular'));
+        if (cat === 'Arch-Gun') {
+          slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary')   : empty('arcane-primary'));
+          slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-secondary') : empty('arcane-secondary'));
+        }
+
+      } else {
+        slots = modSlots.map(s => toSlot(s, 'regular'));
+        while (slots.length < (cat === 'Necramech' ? 12 : 8)) slots.push(empty('regular'));
+      }
     }
-    myBuilds[blpBuildKey()] = {
-      baseBuildId:    build.id,
-      baseBuildTitle: build.title,
-      baseBuildUrl:   build.url,
-      baseAuthor:     build.author.username,
-      slots,
-      isModified: false,
-    };
+    if (!_blpBuildId) {
+      // No build selected yet — auto-create one named after the OF build
+      if (!myBuilds[_blpItem]) myBuilds[_blpItem] = [];
+      const entry = {
+        id: blpGenId(), name: build.title, subForms: {},
+        baseBuildId: build.id, baseBuildTitle: build.title,
+        baseBuildUrl: build.url, baseAuthor: build.author.username,
+        slots, isModified: false, potatoed: true,
+      };
+      myBuilds[_blpItem].push(entry);
+      _blpBuildId = entry.id;
+    } else {
+      const data = blpEnsureCurrentData();
+      if (data) {
+        data.baseBuildId    = build.id;
+        data.baseBuildTitle = build.title;
+        data.baseBuildUrl   = build.url;
+        data.baseAuthor     = build.author.username;
+        data.slots          = slots;
+        data.isModified     = false;
+      }
+      // Overframe builds assume a potato is installed
+      const mainBuild = blpCurrentBuild();
+      if (mainBuild && !_blpSubForm) mainBuild.potatoed = true;
+    }
     saveMyBuilds();
     _blpOFBuilds = null; // reset so next browse re-fetches fresh list
     _blpOFSearch  = '';
