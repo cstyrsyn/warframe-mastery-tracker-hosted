@@ -191,7 +191,7 @@ function blpNewBuildEntry(name) {
     id: blpGenId(), name: name || 'Build 1', subForms: {},
     baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
     baseAuthor: null, slots: empty.slots, isModified: false,
-    potatoed: false, helminthAbility: null,
+    potatoed: false, helminthAbility: null, formas: null,
   };
 }
 
@@ -261,6 +261,18 @@ function blpCyclePolarity(i) {
 // Reactor for warframes/companions/vehicles; Catalyst for all weapons
 function blpPotatoLabel() {
   return new Set(['warframes', 'companions', 'vehicles']).has(_blpTab) ? 'Reactor' : 'Catalyst';
+}
+
+function blpFormaCount(build) {
+  if (!build || _blpSubForm) return 0;
+  // Use Overframe's count when the build hasn't been modified since import
+  if (!build.isModified && build.baseBuildId != null && build.formas != null) return build.formas;
+  // Otherwise count slots whose polarity differs from the item default
+  const defBuild = blpEmptyBuild();
+  blpApplyDefaultPolarities(defBuild.slots);
+  return (build.slots || []).reduce((n, slot, i) => {
+    return n + ((slot.polarity || 0) !== (defBuild.slots[i]?.polarity || 0) ? 1 : 0);
+  }, 0);
 }
 
 function clKey(tab, name)         { return tab + '\t' + name; }
@@ -734,9 +746,12 @@ function blpRenderEditor() {
        </div>`
     : `<div id="blp-base-bar"><span class="blp-base-label">No base build${showOFBrowser ? ' — browse Overframe below or' : ' —'} fill slots manually</span></div>`;
 
-  const potatoHtml = !_blpSubForm
-    ? `<button id="blp-potato-btn" class="blp-potato-btn${build.potatoed ? ' active' : ''}"
-         onclick="blpTogglePotato()" title="Double mod capacity">${blpPotatoLabel()}</button>`
+  const metaBarHtml = !_blpSubForm
+    ? `<div id="blp-meta-bar">
+        <button id="blp-potato-btn" class="blp-potato-btn${build.potatoed ? ' active' : ''}"
+          onclick="blpTogglePotato()" title="Double mod capacity">${blpPotatoLabel()}</button>
+        <span id="blp-forma-count">◆ ${blpFormaCount(build)} Forma</span>
+       </div>`
     : '';
 
   inner.innerHTML = `
@@ -745,13 +760,13 @@ function blpRenderEditor() {
       <input id="blp-build-name-input" class="blp-build-name-input" type="text" value="${esc(build.name)}"
         onchange="blpSaveBuildName(this.value)" onblur="blpSaveBuildName(this.value)"
         onkeydown="if(event.key==='Enter')this.blur()">
-      ${potatoHtml}
       <button class="blp-action-btn" onclick="blpCreateBuild()">+ New</button>
       <button class="blp-action-btn danger" onclick="blpDeleteBuild()">Delete</button>
     </div>
     ${subFormHtml}
     ${baseBarHtml}
     ${ofBrowserHtml}
+    ${metaBarHtml}
     ${blpAbilitiesHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
     <div id="blp-actions">
@@ -1583,7 +1598,7 @@ async function blpLoadOFBuild(buildId) {
         id: blpGenId(), name: build.title, subForms: {},
         baseBuildId: build.id, baseBuildTitle: build.title,
         baseBuildUrl: build.url, baseAuthor: build.author.username,
-        slots, helminthAbility, isModified: false, potatoed: true,
+        slots, helminthAbility, isModified: false, potatoed: true, formas: build.formas ?? null,
       };
       myBuilds[_blpItem].push(entry);
       _blpBuildId = entry.id;
@@ -1599,8 +1614,9 @@ async function blpLoadOFBuild(buildId) {
       }
       const mainBuild = blpCurrentBuild();
       if (mainBuild && !_blpSubForm) {
-        mainBuild.potatoed       = true;
+        mainBuild.potatoed        = true;
         mainBuild.helminthAbility = helminthAbility;
+        mainBuild.formas          = build.formas ?? null;
       }
     }
     saveMyBuilds();
