@@ -26,6 +26,35 @@ const KITGUN_GRIPS = new Map([
   ['Ulnaris',    ['Father',   'Entrati',         500, 5000, [['Faceted Tiametrite',5],['Tempered Bapholite',20],['Benign Infested Tumor',20],['Spinal Core Section',10]]]],
 ]);
 
+// Stance compat: [oneHandedCompatName, twoHandedCompatName] per strike
+const ZAW_STRIKE_TYPES = new Map([
+  ['Balla',         ['Daggers',    'Staves'     ]],
+  ['Cyath',         ['Machetes',   'Polearms'   ]],
+  ['Dehtat',        ['Rapiers',    'Polearms'   ]],
+  ['Dokrahm',       ['Scythes',    'Heavy Blade']],
+  ['Kronsh',        ['Machetes',   'Polearms'   ]],
+  ['Mewan',         ['Swords',     'Polearms'   ]],
+  ['Ooltha',        ['Swords',     'Staves'     ]],
+  ['Rabvee',        ['Machetes',   'Hammers'    ]],
+  ['Sepfahn',       ['Nikanas',    'Staves'     ]],
+  ['Plague Keewar', ['Scythes',    'Staves'     ]],
+  ['Plague Kripath',['Rapiers',    'Polearms'   ]],
+]);
+
+// Grip handedness: 'one' or 'two'
+const ZAW_GRIP_HANDEDNESS = new Map([
+  ['Jayap',        'two'],
+  ['Korb',         'one'],
+  ['Kroostra',     'two'],
+  ['Kwath',        'one'],
+  ['Laka',         'one'],
+  ['Peye',         'one'],
+  ['Seekalla',     'two'],
+  ['Shtung',       'two'],
+  ['Plague Akwin', 'one'],
+  ['Plague Bokwin','two'],
+]);
+
 // ─────────────────────────────────────────────
 // ZAW COMPONENT DATA
 // Format: [vendor, syndicate, bpCost, craftCredits, [[resource, qty], ...]]
@@ -75,6 +104,32 @@ const ZAW_LINKS = new Map([
   ['Ekwana II Ruhang', ['Hok','Ostron',  7500, 5000, [['Maprico',5],['Fersteel Alloy',20],['Condroc Wing',5],['Tralok Eyes',5]]]],
   ['Vargeet Ruhang II',['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Kuaka Spinal Claw',5],['Cetus Wisp',2]]]],
   ['Ekwana Ruhang II', ['Hok','Ostron', 10000, 5000, [['Breath of the Eidolon',5],['Auroxium Alloy',20],['Condroc Wing',5],['Cetus Wisp',2]]]],
+]);
+
+// Overframe buildString ID → component name maps (for build import)
+const KITGUN_GRIP_MAP = new Map([
+  [4299,'Brash'],[2622,'Gibber'],[2621,'Haymaker'],[2620,'Lovetap'],
+  [5323,'Palmaris'],[2619,'Ramble'],[4300,'Shrewd'],[4301,'Steadyslam'],
+  [4302,'Tremor'],[5324,'Ulnaris'],
+]);
+const KITGUN_PRIMARY_GRIP_NAMES = new Set(['Brash','Palmaris','Shrewd','Steadyslam','Tremor']);
+const KITGUN_LOADER_MAP = new Map([
+  [5321,'Arcroid'],[2605,'Bashrack'],[2604,'Bellows'],[2603,'Deepbreath'],
+  [2616,'Flutterfire'],[2608,'Killstream'],[5320,'Macro Arcroid'],
+  [5319,'Macro Thymoid'],[2615,'Ramflare'],[2611,'Slap'],[2609,'Slapneedle'],
+  [2613,'Sparkfire'],[2607,'Splat'],[2606,'Stitch'],[2617,'Swiftfire'],
+  [2614,'Thunderdrum'],[5322,'Thymoid'],[2612,'Zip'],[2618,'Zipfire'],[2610,'Zipneedle'],
+]);
+const ZAW_GRIP_MAP = new Map([
+  [2593,'Jayap'],[2599,'Korb'],[2596,'Kroostra'],[2597,'Kwath'],[2598,'Laka'],
+  [2595,'Peye'],[2601,'Plague Akwin'],[2602,'Plague Bokwin'],[2594,'Seekalla'],[2600,'Shtung'],
+]);
+const ZAW_LINK_MAP = new Map([
+  [2592,'Ekwana II Jai'],[2584,'Ekwana II Ruhang'],[2591,'Ekwana Jai'],
+  [2590,'Ekwana Jai II'],[2583,'Ekwana Ruhang'],[2582,'Ekwana Ruhang II'],
+  [2585,'Jai'],[2588,'Jai II'],[2577,'Ruhang'],[2580,'Ruhang II'],
+  [2587,'Vargeet II Jai'],[2579,'Vargeet II Ruhang'],[2586,'Vargeet Jai'],
+  [2589,'Vargeet Jai II'],[2578,'Vargeet Ruhang'],[2581,'Vargeet Ruhang II'],
 ]);
 
 const KITGUN_LOADERS = new Map([

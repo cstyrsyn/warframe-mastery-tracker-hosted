@@ -95,8 +95,9 @@ function saveBuildPicks() { localStorage.setItem(BP_PICKS_KEY, JSON.stringify(bu
 // ─────────────────────────────────────────────
 const MY_BUILDS_KEY = 'wf-my-builds';
 let myBuilds = {}; // { [itemName]: BuildEntry[] }
-let _blpTab        = 'warframes';
+let _blpTab        = 'mybuilds';
 let _blpItem       = null;
+let _blpItemTab    = null; // resolved tab for items selected in My Builds
 let _blpBuildId    = null; // UUID of the active build
 let _blpOFId       = null;
 let _blpOFBuilds   = null; // null=not fetched, false=loading, array=loaded
@@ -177,7 +178,7 @@ function blpEnsureCurrentData() {
     if (!build.subForms[_blpSubForm]) {
       build.subForms[_blpSubForm] = {
         baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
-        baseAuthor: null, slots: blpEmptyBuild().slots, isModified: false,
+        baseAuthor: null, itemRank: null, slots: blpEmptyBuild().slots, isModified: false,
       };
     }
     return build.subForms[_blpSubForm];
@@ -239,7 +240,7 @@ function blpNewBuildEntry(name) {
     id: blpGenId(), name: name || 'Build 1', subForms: {},
     baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
     baseAuthor: null, slots: empty.slots, isModified: false,
-    potatoed: false, helminthAbility: null, formas: null,
+    potatoed: false, helminthAbility: null, formas: null, itemRank: null,
     shards: blpEmptyShards(),
   };
 }
@@ -247,6 +248,8 @@ function blpNewBuildEntry(name) {
 // Polarity labels: index = polarity value (6 unused)
 const POLARITY_NAMES = ['','Madurai','Vazarin','Naramon','Zenurik','Penjaga','','Unairu','Umbra','Any'];
 const POLARITY_EXTS  = ['','svg','svg','svg','svg','svg','','svg','svg','png'];
+// Reverse lookup: polarity name string → integer index
+const POLARITY_INT   = new Map(POLARITY_NAMES.map((n, i) => n ? [n, i] : null).filter(Boolean));
 function blpPolarityLabel(p) {
   const name = POLARITY_NAMES[p];
   if (!name) return '—';
@@ -327,10 +330,13 @@ function blpTogglePolPicker(i) {
 function blpRefreshPolWrap(i) {
   const wrap = document.getElementById(`blp-pol-wrap-${i}`);
   if (!wrap) return;
-  const pol = blpCurrentData()?.slots[i]?.polarity ?? 0;
+  const slot  = blpCurrentData()?.slots[i];
+  const pol   = slot?.polarity ?? 0;
+  const isArc = (slot?.type || '').startsWith('arcane-');
   wrap.innerHTML =
     `<button class="blp-slot-polarity${pol ? ' p' + pol : ''}" onclick="blpTogglePolPicker(${i})" title="Polarity">${blpPolarityLabel(pol)}</button>` +
-    (_blpActivePolSlot === i ? blpPolPickerHtml(i, pol) : '');
+    (_blpActivePolSlot === i ? blpPolPickerHtml(i, pol) : '') +
+    blpPolBadgeHtml(blpPolEffect(slot?.modName || '', pol, isArc));
 }
 
 function blpPickPolarity(i, p) {
@@ -627,10 +633,13 @@ function toggleBuildPick(buildId) {
 // ─────────────────────────────────────────────
 
 const BLP_TABS = [
+  { key: 'mybuilds',    label: 'My Builds'  },
   { key: 'warframes',   label: 'Warframes'  },
   { key: 'primary',     label: 'Primary'    },
   { key: 'secondary',   label: 'Secondary'  },
+  { key: 'kitguns',     label: 'Kitguns'    },
   { key: 'melee',       label: 'Melee'      },
+  { key: 'zaws',        label: 'Zaws'       },
   { key: 'companions',  label: 'Companions' },
   { key: 'compWeapons', label: 'Comp.Wpns'  },
   { key: 'vehicles',    label: 'Vehicles'   },
@@ -639,13 +648,14 @@ const BLP_TABS = [
 
 function renderBuildsPage() {
   document.getElementById('blp-tab-bar').innerHTML = BLP_TABS.map(t =>
-    `<button class="blp-tab${t.key === _blpTab ? ' active' : ''}" onclick="blpSetTab('${t.key}')">${t.label}</button>`
+    `<button class="blp-tab${t.key === 'mybuilds' ? ' mybuilds-tab' : ''}${t.key === _blpTab ? ' active' : ''}" onclick="blpSetTab('${t.key}')">${t.label}</button>`
   ).join('');
   blpFilterItems();
 }
 
 function blpSetTab(tabKey) {
   _blpTab      = tabKey;
+  _blpItemTab  = null;
   _blpItem     = null;
   _blpBuildId  = null;
   _blpOFId     = null;
@@ -657,27 +667,122 @@ function blpSetTab(tabKey) {
     '<div id="blp-editor-empty">Select an item on the left to view or create a build.</div>';
 }
 
+// Returns the true tab for the selected item (resolves mybuilds to the item's actual tab)
+function blpResolvedTab() {
+  return (_blpTab === 'mybuilds' && _blpItemTab) ? _blpItemTab : _blpTab;
+}
+
+// Find which logical tab an item lives in (across all tabs)
+function blpFindItemTab(name) {
+  const ALL = ['warframes','primary','secondary','kitguns','melee','zaws','companions','compWeapons','vehicles','archWeapons'];
+  for (const t of ALL) {
+    const srcTab = (t === 'kitguns') ? 'secondary' : (t === 'zaws') ? 'melee' : t;
+    const item = (TAB_DATA[srcTab] || []).find(([n]) => n === name);
+    if (!item) continue;
+    if (t === 'kitguns'   && item[1] !== 'Kitgun') continue;
+    if (t === 'zaws'      && item[1] !== 'Zaw')    continue;
+    if (t === 'secondary' && item[1] === 'Kitgun')  continue;
+    if (t === 'melee'     && item[1] === 'Zaw')     continue;
+    return t;
+  }
+  return null;
+}
+
+function blpItemSourceTab() {
+  const tab = blpResolvedTab();
+  if (tab === 'kitguns') return 'secondary';
+  if (tab === 'zaws') return 'melee';
+  return tab;
+}
+
 function blpGetItems() {
-  const items  = TAB_DATA[_blpTab] || [];
   const search = (document.getElementById('blp-search')?.value || '').toLowerCase();
+
+  if (_blpTab === 'mybuilds') {
+    const ALL_TABS = ['warframes','primary','secondary','kitguns','melee','zaws','companions','compWeapons','vehicles','archWeapons'];
+    const results = [];
+    const seen = new Set();
+    for (const t of ALL_TABS) {
+      const srcTab = (t === 'kitguns') ? 'secondary' : (t === 'zaws') ? 'melee' : t;
+      const pool = (TAB_DATA[srcTab] || []).filter(i => {
+        if (t === 'kitguns')   return i[1] === 'Kitgun';
+        if (t === 'zaws')      return i[1] === 'Zaw';
+        if (t === 'secondary') return i[1] !== 'Kitgun';
+        if (t === 'melee')     return i[1] !== 'Zaw';
+        return true;
+      });
+      for (const item of pool) {
+        const name = item[0];
+        if (seen.has(name)) continue;
+        if (!myBuilds[name]?.length) continue;
+        if (search && !name.toLowerCase().includes(search)) continue;
+        seen.add(name);
+        results.push({ item, tab: t });
+      }
+    }
+    return results;
+  }
+
+  let items;
+  if (_blpTab === 'kitguns') {
+    items = (TAB_DATA.secondary || []).filter(i => i[1] === 'Kitgun');
+  } else if (_blpTab === 'zaws') {
+    items = (TAB_DATA.melee || []).filter(i => i[1] === 'Zaw');
+  } else if (_blpTab === 'secondary') {
+    items = (TAB_DATA.secondary || []).filter(i => i[1] !== 'Kitgun');
+  } else if (_blpTab === 'melee') {
+    items = (TAB_DATA.melee || []).filter(i => i[1] !== 'Zaw');
+  } else {
+    items = TAB_DATA[_blpTab] || [];
+  }
   return items
     .filter(item => {
       if (!OVERFRAME_MAP.get(item[0])) return false;
       if (search && !item[0].toLowerCase().includes(search)) return false;
       return true;
     })
-    .sort((a, b) => a[0].localeCompare(b[0]));
+    .sort((a, b) => {
+      const aHas = myBuilds[a[0]]?.length > 0 ? 0 : 1;
+      const bHas = myBuilds[b[0]]?.length > 0 ? 0 : 1;
+      if (aHas !== bHas) return aHas - bHas;
+      return a[0].localeCompare(b[0]);
+    });
 }
 
+const BLP_TAB_LABELS = { warframes:'Warframe', primary:'Primary', secondary:'Secondary', kitguns:'Kitgun', melee:'Melee', zaws:'Zaw', companions:'Companion', compWeapons:'Comp.Wpn', vehicles:'Vehicle', archWeapons:'Arch.Wpn' };
+
 function blpFilterItems() {
-  const items = blpGetItems();
-  const list  = document.getElementById('blp-item-list');
+  const raw  = blpGetItems();
+  const list = document.getElementById('blp-item-list');
   if (!list) return;
-  if (!items.length) {
+
+  if (_blpTab === 'mybuilds') {
+    if (!raw.length) {
+      list.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-muted)">No saved builds yet.</div>';
+      return;
+    }
+    list.innerHTML = raw.map(({ item, tab }) => {
+      const name     = item[0];
+      const builds   = blpItemBuilds(name);
+      const isActive = name === _blpItem;
+      const badge    = BLP_TAB_LABELS[tab] || tab;
+      let html = `<div class="blp-item${isActive ? ' active' : ''}" onclick="blpSelectItem('${jsStr(name)}')"><span class="blp-item-dot"></span>${esc(name)}<span class="blp-item-cat-badge">${esc(badge)}</span></div>`;
+      if (isActive && builds.length > 0) {
+        for (const b of builds) {
+          const isBuildActive = b.id === _blpBuildId;
+          html += `<div class="blp-build-entry${isBuildActive ? ' active' : ''}" onclick="blpSelectBuild('${jsStr(b.id)}')">${esc(b.name)}</div>`;
+        }
+      }
+      return html;
+    }).join('');
+    return;
+  }
+
+  if (!raw.length) {
     list.innerHTML = '<div style="padding:12px;font-size:11px;color:var(--text-muted)">No items found.</div>';
     return;
   }
-  list.innerHTML = items.map(item => {
+  list.innerHTML = raw.map(item => {
     const name     = item[0];
     const builds   = blpItemBuilds(name);
     const isActive = name === _blpItem;
@@ -694,6 +799,7 @@ function blpFilterItems() {
 
 function blpSelectItem(name) {
   _blpItem                = name;
+  _blpItemTab             = _blpTab === 'mybuilds' ? blpFindItemTab(name) : null;
   _blpOFId                = OVERFRAME_MAP.get(name) || null;
   _blpOFBuilds            = null;
   _blpOFSearch            = '';
@@ -721,7 +827,84 @@ function blpSelectBuild(buildId) {
 // Returns the category string (index 1 in TAB_DATA row) for the currently selected item
 function blpItemCat() {
   if (!_blpItem) return '';
-  return (TAB_DATA[_blpTab]?.find(([n]) => n === _blpItem) || [])[1] || '';
+  return (TAB_DATA[blpItemSourceTab()]?.find(([n]) => n === _blpItem) || [])[1] || '';
+}
+
+function blpItemMaxRank() {
+  if (!_blpItem || !_blpTab) return 30;
+  return (TAB_DATA[blpItemSourceTab()]?.find(([n]) => n === _blpItem) || [])[3] || 30;
+}
+
+// Returns 'match', 'mismatch', or null (neutral / no data)
+function blpPolEffect(modName, slotPol, isArcane) {
+  if (!modName || !slotPol || isArcane) return null;
+  const modPol     = MOD_MAP.get(modName)?.polarity || '';
+  const slotPolName = POLARITY_NAMES[slotPol]  || '';
+  if (!modPol || !slotPolName) return null;
+  return (slotPolName === 'Any' || slotPolName === modPol) ? 'match' : 'mismatch';
+}
+
+function blpPolBadgeHtml(effect) {
+  if (effect === 'match')
+    return `<span class="blp-pol-badge blp-pol-match" title="Matching polarity — cost halved">½</span>`;
+  if (effect === 'mismatch')
+    return `<span class="blp-pol-badge blp-pol-mismatch" title="Mismatching polarity — cost ×1.25">×1¼</span>`;
+  return '';
+}
+
+// Returns { used, total } capacity for the current build.
+// Aura/stance mods contribute positive capacity; all other mods cost capacity.
+// Polarity matching: match = ceil(cost×0.5), mismatch = round(cost×1.25).
+// Aura matching polarity doubles the capacity contribution.
+function blpComputeCapacity(build) {
+  if (!build) return { used: 0, total: 0 };
+  const itemRank = _blpSubForm
+    ? (build.subForms[_blpSubForm]?.itemRank ?? 30)
+    : (build.itemRank ?? blpItemMaxRank());
+  const baseCapacity = _blpSubForm
+    ? itemRank * 2  // exalted weapons always have Orokin Catalyst
+    : itemRank * (build.potatoed ? 2 : 1);
+  const data         = _blpSubForm ? (build.subForms[_blpSubForm] || null) : build;
+  const slots        = data?.slots || [];
+
+  let auraBonus   = 0;
+  let regularCost = 0;
+
+  for (const slot of slots) {
+    if (!slot?.modName) continue;
+    const slotType = slot.type || 'regular';
+    if (slotType.startsWith('arcane-')) continue; // arcanes have no capacity drain
+    const modRow = MOD_MAP.get(slot.modName);
+    if (!modRow) continue;
+    const baseDrain = modRow.baseDrain ?? 0;
+    const isBonus   = slotType === 'aura' || slotType === 'stance';
+    // Aura/stance drain is stored as a negative in the API; abs gives the capacity base
+    const rawCost   = Math.abs(baseDrain) + (slot.rank ?? 0);
+    const polEffect = blpPolEffect(slot.modName, slot.polarity ?? 0, false);
+    if (isBonus) {
+      if      (polEffect === 'match')    auraBonus += rawCost * 2;
+      else if (polEffect === 'mismatch') auraBonus += Math.floor(rawCost * 0.8);
+      else                               auraBonus += rawCost; // neutral slot (no polarity)
+    } else {
+      if      (polEffect === 'match')    regularCost += Math.ceil(rawCost * 0.5);
+      else if (polEffect === 'mismatch') regularCost += Math.round(rawCost * 1.25);
+      else                               regularCost += rawCost;
+    }
+  }
+
+  return { used: regularCost, total: baseCapacity + auraBonus };
+}
+
+function blpRefreshCapacity() {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  const { used, total } = blpComputeCapacity(build);
+  const usedEl  = document.getElementById('blp-cap-used');
+  const totalEl = document.getElementById('blp-cap-total');
+  if (!usedEl || !totalEl) return;
+  usedEl.textContent = used;
+  totalEl.textContent = total;
+  usedEl.classList.toggle('cap-over', used > total);
 }
 
 function blpEmptyBuild() {
@@ -751,23 +934,28 @@ function blpEmptyBuild() {
   }
 
   const cat = blpItemCat();
-  if (_blpTab === 'warframes') {
+  const tab = blpResolvedTab();
+  if (tab === 'warframes') {
     if (_blpItem === 'Jade') {
       slots = [s('aura'), s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
     } else {
       slots = [s('aura'), s('exilus'), ...reg8(), s('arcane-warframe'), s('arcane-warframe')];
     }
-  } else if (_blpTab === 'primary') {
+  } else if (tab === 'primary') {
     slots = [s('exilus'), ...reg8(), s('arcane-primary')];
-  } else if (_blpTab === 'secondary') {
+  } else if (tab === 'secondary') {
     slots = [s('exilus'), ...reg8(), s('arcane-secondary')];
-    if (cat === 'Kitgun') slots.push(s('arcane-pax'));
-  } else if (_blpTab === 'melee') {
+  } else if (tab === 'kitguns') {
+    const grip = blpCurrentBuild()?.kitgunGrip;
+    const arcType = KITGUN_PRIMARY_GRIP_NAMES.has(grip) ? 'arcane-primary' : 'arcane-secondary';
+    slots = [s('exilus'), ...reg8(), s(arcType), s('arcane-pax')];
+  } else if (tab === 'melee') {
     slots = [s('stance'), s('exilus'), ...reg8(), s('arcane-melee')];
-    if (cat === 'Zaw') slots.push(s('arcane-exodia'));
-  } else if (_blpTab === 'companions') {
+  } else if (tab === 'zaws') {
+    slots = [s('stance'), s('exilus'), ...reg8(), s('arcane-melee'), s('arcane-exodia')];
+  } else if (tab === 'companions') {
     slots = Array(10).fill(null).map(() => s('regular'));
-  } else if (_blpTab === 'archWeapons') {
+  } else if (tab === 'archWeapons') {
     slots = reg8();
     if (cat === 'Arch-Gun') { slots.push(s('arcane-primary')); slots.push(s('arcane-secondary')); }
   } else {
@@ -807,7 +995,7 @@ function blpRenderEditor() {
   }
 
   const exalted        = blpGetActiveExalted(_blpItem);
-  const mainLabel      = _blpTab === 'companions' ? 'Companion' : 'Warframe';
+  const mainLabel      = blpResolvedTab() === 'companions' ? 'Companion' : 'Warframe';
   const subFormHtml = exalted
     ? `<div id="blp-subform-strip">
         <button class="blp-subform-btn${_blpSubForm === null ? ' active' : ''}" onclick="blpSetSubForm(null)">${mainLabel}</button>
@@ -828,13 +1016,40 @@ function blpRenderEditor() {
        </div>`
     : `<div id="blp-base-bar"><span class="blp-base-label">No base build${showOFBrowser ? ' — browse Overframe below or' : ' —'} fill slots manually</span></div>`;
 
+  const _maxRank  = blpItemMaxRank();
+  const _itemRank = build.itemRank ?? _maxRank;
+  const _cap      = blpComputeCapacity(build);
+
+  const _sfRank = _blpSubForm ? (data?.itemRank ?? 30) : null;
   const metaBarHtml = !_blpSubForm
     ? `<div id="blp-meta-bar">
         <button id="blp-potato-btn" class="blp-potato-btn${build.potatoed ? ' active' : ''}"
           onclick="blpTogglePotato()" title="Double mod capacity">${blpPotatoLabel()}</button>
         <span id="blp-forma-count">◆ ${blpFormaCount(build)} Forma</span>
+       </div>
+       <div id="blp-capacity-bar">
+         <span class="blp-cap-label">Rank</span>
+         <input type="range" id="blp-rank-slider" min="0" max="${_maxRank}" value="${_itemRank}"
+           oninput="blpSetItemRank(+this.value)">
+         <span id="blp-rank-val">${_itemRank}</span>
+         <span class="blp-cap-sep">·</span>
+         <span class="blp-cap-label">Capacity</span>
+         <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
+         <span class="blp-cap-sep">/</span>
+         <span id="blp-cap-total">${_cap.total}</span>
        </div>`
-    : '';
+    : `<div id="blp-capacity-bar">
+         <span class="blp-cap-label">Rank</span>
+         <input type="range" id="blp-rank-slider" min="0" max="30" value="${_sfRank}"
+           oninput="blpSetSubFormRank(+this.value)">
+         <span id="blp-rank-val">${_sfRank}</span>
+         <span class="blp-cap-sep">·</span>
+         <span class="blp-cap-label">Capacity</span>
+         <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
+         <span class="blp-cap-sep">/</span>
+         <span id="blp-cap-total">${_cap.total}</span>
+         <span class="blp-cap-sep">·</span><span class="blp-cap-label" title="Exalted weapons always have an Orokin Catalyst installed">◇ Catalyst</span>
+       </div>`;
 
   inner.innerHTML = `
     <div id="blp-item-title">${esc(_blpItem)}</div>
@@ -850,8 +1065,9 @@ function blpRenderEditor() {
     ${ofBrowserHtml}
     ${metaBarHtml}
     ${blpAbilitiesHtml(build)}
+    ${blpComponentsHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
-    ${_blpTab === 'warframes' && !_blpSubForm ? blpShardsHtml(build) : ''}
+    ${blpResolvedTab() === 'warframes' && !_blpSubForm ? blpShardsHtml(build) : ''}
     <div id="blp-actions">
       <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
@@ -905,6 +1121,121 @@ function blpTogglePotato() {
   saveMyBuilds();
   const btn = document.getElementById('blp-potato-btn');
   if (btn) btn.classList.toggle('active', build.potatoed);
+  blpRefreshCapacity();
+}
+
+function blpComponentsHtml(build) {
+  if (!build || _blpSubForm) return '';
+  const _compTab = blpResolvedTab();
+  if (_compTab === 'kitguns') {
+    const grip   = build.kitgunGrip  || '';
+    const loader = build.kitgunLoader || '';
+    const isPrimary = KITGUN_PRIMARY_GRIP_NAMES.has(grip);
+    const typeLabel = grip ? (isPrimary ? 'Primary' : 'Secondary') : '';
+    const gripOpts = [...KITGUN_GRIPS.keys()].map(g =>
+      `<option value="${esc(g)}"${g === grip ? ' selected' : ''}>${esc(g)} ${KITGUN_PRIMARY_GRIP_NAMES.has(g) ? '(P)' : '(S)'}</option>`
+    ).join('');
+    const loaderOpts = [...KITGUN_LOADERS.keys()].map(l =>
+      `<option value="${esc(l)}"${l === loader ? ' selected' : ''}>${esc(l)}</option>`
+    ).join('');
+    return `<div class="blp-components-row">
+      <span class="blp-comp-label">Grip</span>
+      <select class="blp-comp-select" onchange="blpSetKitgunGrip(this.value)">
+        <option value="">— Select —</option>${gripOpts}
+      </select>
+      ${typeLabel ? `<span class="blp-kitgun-type">${typeLabel}</span>` : ''}
+      <span class="blp-comp-label">Loader</span>
+      <select class="blp-comp-select" onchange="blpSetKitgunLoader(this.value)">
+        <option value="">— Select —</option>${loaderOpts}
+      </select>
+    </div>`;
+  }
+  if (_compTab === 'zaws') {
+    const grip = build.zawGrip || '';
+    const link = build.zawLink || '';
+    const gripOpts = [...ZAW_GRIPS.keys()].map(g =>
+      `<option value="${esc(g)}"${g === grip ? ' selected' : ''}>${esc(g)}</option>`
+    ).join('');
+    const linkOpts = [...ZAW_LINKS.keys()].map(l =>
+      `<option value="${esc(l)}"${l === link ? ' selected' : ''}>${esc(l)}</option>`
+    ).join('');
+    return `<div class="blp-components-row">
+      <span class="blp-comp-label">Grip</span>
+      <select class="blp-comp-select" onchange="blpSetZawGrip(this.value)">
+        <option value="">— Select —</option>${gripOpts}
+      </select>
+      <span class="blp-comp-label">Link</span>
+      <select class="blp-comp-select" onchange="blpSetZawLink(this.value)">
+        <option value="">— Select —</option>${linkOpts}
+      </select>
+    </div>`;
+  }
+  return '';
+}
+
+function blpSetKitgunGrip(name) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.kitgunGrip = name || null;
+  const isPrimary = KITGUN_PRIMARY_GRIP_NAMES.has(name);
+  const arcType   = isPrimary ? 'arcane-primary' : 'arcane-secondary';
+  const arcSlot   = build.slots?.find(s => s.type === 'arcane-primary' || s.type === 'arcane-secondary');
+  if (arcSlot) arcSlot.type = arcType;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpSetKitgunLoader(name) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.kitgunLoader = name || null;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpSetZawGrip(name) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.zawGrip = name || null;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpSetZawLink(name) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.zawLink = name || null;
+  saveMyBuilds();
+  blpRenderEditor();
+}
+
+function blpZawStanceCompat() {
+  const types = ZAW_STRIKE_TYPES.get(_blpItem);
+  if (!types) return null;
+  const hand = ZAW_GRIP_HANDEDNESS.get(blpCurrentBuild()?.zawGrip);
+  if (!hand) return [...new Set(types)]; // no grip selected: show stances for both handednesses
+  return [hand === 'two' ? types[1] : types[0]];
+}
+
+function blpSetItemRank(v) {
+  const build = blpCurrentBuild();
+  if (!build) return;
+  build.itemRank = +v;
+  saveMyBuilds();
+  const rankEl = document.getElementById('blp-rank-val');
+  if (rankEl) rankEl.textContent = build.itemRank;
+  blpRefreshCapacity();
+}
+
+function blpSetSubFormRank(v) {
+  const build = blpCurrentBuild();
+  if (!build || !_blpSubForm) return;
+  if (!build.subForms[_blpSubForm]) build.subForms[_blpSubForm] = {};
+  build.subForms[_blpSubForm].itemRank = +v;
+  saveMyBuilds();
+  const rankEl = document.getElementById('blp-rank-val');
+  if (rankEl) rankEl.textContent = v;
+  blpRefreshCapacity();
 }
 
 function blpBuildShards(build) {
@@ -1043,8 +1374,9 @@ function blpGetCompanionExalted(name) {
 
 // Returns sub-forms for the current item regardless of tab
 function blpGetActiveExalted(name) {
-  if (_blpTab === 'warframes')  return blpGetExalted(name ?? _blpItem);
-  if (_blpTab === 'companions') return blpGetCompanionExalted(name ?? _blpItem);
+  const tab = blpResolvedTab();
+  if (tab === 'warframes')  return blpGetExalted(name ?? _blpItem);
+  if (tab === 'companions') return blpGetCompanionExalted(name ?? _blpItem);
   return null;
 }
 
@@ -1114,20 +1446,51 @@ function blpTileHtml(i, slot, regIndex) {
   else if (slotType === 'arcane-exodia') label = 'Exodia';
   else label = String(regIndex + 1); // 1-based regular slot number
 
-  return `<div class="blp-tile" data-slot="${i}" data-slot-type="${slotType}">
+  const isArcaneSlot = slotType.startsWith('arcane-');
+  const unowned = modName && (
+    isArcaneSlot ? !progress['arc:' + modName] : !progress[aqKey('mods', modName)]
+  );
+  let ownedRank = 0;
+  if (modName) {
+    if (isArcaneSlot) {
+      const copies = progress['arc:' + modName] || 0;
+      ownedRank = ARCANE_RANK_COPIES.reduce((r, needed, idx) => copies >= needed ? idx : r, -1);
+    } else {
+      ownedRank = progress[itemKey('mods', modName)] || 0;
+    }
+  }
+  const rankLow = modName && rank > 0 && ownedRank < rank;
+  const modMaxRank = modName
+    ? (isArcaneSlot ? (ARCANE_MAP.get(modName)?.[3] ?? 5) : (MOD_MAP.get(modName)?.maxRank ?? 10))
+    : (isArcaneSlot ? 5 : 10);
+  const polEffect   = blpPolEffect(modName, polarity, isArcaneSlot);
+  const modPolInt   = POLARITY_INT.get(MOD_MAP.get(modName)?.polarity || '') || 0;
+  const modPolIcon  = modPolInt ? blpPolarityLabel(modPolInt) : '';
+  const modLs    = (!isArcaneSlot && modName) ? MOD_MAP.get(modName)?.levelStats : null;
+  const arcaneLs = (isArcaneSlot && modName) ? ARCANE_LEVEL_STATS?.[modName] : null;
+  const statDesc = modLs?.length
+    ? (modLs[Math.min(rank, modLs.length - 1)]?.[0] || '')
+    : arcaneLs?.length
+      ? (arcaneLs[Math.min(rank, arcaneLs.length - 1)]?.[0] || '')
+      : '';
+
+  return `<div class="blp-tile${unowned ? ' blp-tile--unowned' : ''}" data-slot="${i}" data-slot-type="${slotType}">
     <span class="blp-tile-label">${label}</span>
     <div class="blp-mod-picker">
-      <input class="blp-mod-input" type="text" value="${esc(modName)}" placeholder="—"
+      <div class="blp-mod-pol-icon" id="blp-pol-icon-${i}">${modPolIcon}</div>
+      <input class="blp-mod-input${modPolInt ? ' blp-mod-input--has-icon' : ''}" type="text" value="${esc(modName)}" placeholder="—"
         onfocus="blpOpenModPicker(${i})" oninput="blpSearchMod(${i}, this.value)"
         onblur="setTimeout(()=>blpCloseModPicker(${i}),150)">
       <div class="blp-mod-dropdown" id="blp-dd-${i}" style="display:none"></div>
     </div>
+    <div class="blp-stat-desc" id="blp-stat-${i}">${esc(statDesc).replace(/\\n/g, '<br>')}</div>
     <div class="blp-tile-footer">
       <div class="blp-pol-wrap" id="blp-pol-wrap-${i}">
         <button class="blp-slot-polarity${polarity ? ' p' + polarity : ''}" onclick="blpTogglePolPicker(${i})" title="Polarity">${blpPolarityLabel(polarity)}</button>
         ${_blpActivePolSlot === i ? blpPolPickerHtml(i, polarity) : ''}
+        ${blpPolBadgeHtml(polEffect)}
       </div>
-      <input class="blp-rank-input" type="number" min="0" max="10" value="${rank}" title="Rank"
+      <input class="blp-rank-input${rankLow ? ' blp-rank-input--low' : ''}" type="number" min="0" max="${modMaxRank}" value="${rank}" title="Rank"
         onchange="blpSetRank(${i}, this.value)">
       <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear">✕</button>
     </div>
@@ -1135,7 +1498,7 @@ function blpTileHtml(i, slot, regIndex) {
 }
 
 function blpSlotsHtml(slots) {
-  const isCompanion = _blpTab === 'companions' || blpCurrentExaltedType() === 'companion';
+  const isCompanion = blpResolvedTab() === 'companions' || blpCurrentExaltedType() === 'companion';
   const PREFIX_TYPES = new Set(['aura', 'stance', 'exilus']);
   const isSuffix = t => t.startsWith('arcane-');
 
@@ -1216,7 +1579,7 @@ function blpAbilitiesHtml(build) {
   const baseAbilities = typeof WARFRAME_ABILITIES !== 'undefined' ? WARFRAME_ABILITIES[_blpItem] : null;
   if (!baseAbilities || _blpItem === 'Helminth') return '';
 
-  const isWarframe  = _blpTab === 'warframes';
+  const isWarframe  = blpResolvedTab() === 'warframes';
   const helminth    = build?.helminthAbility || null; // { slot, name } or null
 
   const tiles = baseAbilities.map((abilityName, i) => {
@@ -1307,10 +1670,30 @@ function blpSearchHelminth(slot, query) {
 function blpPickHelminthAbility(slot, name) {
   const build = blpCurrentBuild();
   if (!build) return;
+
+  // Remove any mods that augment the ability being replaced by this helminth slot
+  const base = _blpItem.replace(' Prime', '').replace(' Umbra', '');
+  const abilities = WARFRAME_ABILITIES[_blpItem] || WARFRAME_ABILITIES[base] || [];
+  const replacedAbility = abilities[slot] ?? null;
+  const removed = [];
+  if (replacedAbility && build.slots) {
+    for (const s of build.slots) {
+      const augAbility = AUGMENT_ABILITY.get(s?.modName || '');
+      if (augAbility === replacedAbility) {
+        removed.push(s.modName);
+        s.modName = '';
+        s.rank = 0;
+      }
+    }
+  }
+
   build.helminthAbility = { slot, name };
   build.isModified = true;
   _blpHelminthPickerSlot = null;
   saveMyBuilds();
+  if (removed.length) {
+    showToast(`Removed ${removed.join(', ')} — ${replacedAbility} augments cannot be used while the ability is replaced.`);
+  }
   blpRenderEditor();
 }
 
@@ -1338,12 +1721,211 @@ const BLP_TAB_MOD_CATS = {
   warframes:   ['warframe', 'universal'],
   primary:     ['primary', 'universal'],
   secondary:   ['secondary', 'universal'],
+  kitguns:     ['secondary', 'universal'],
   melee:       ['melee', 'universal'],
+  zaws:        ['melee', 'universal'],
   companions:  ['companion', 'universal'],
   compWeapons: ['primary', 'secondary', 'melee', 'universal'],
   vehicles:    ['vehicle', 'universal'],
   archWeapons: ['archweapon', 'universal'],
 };
+
+// Weapon exilus mods per slot type — keyed by _blpTab value.
+// The API does not reliably mark these as isExilus, so they are maintained here.
+const PRIMARY_EXILUS_MODS = new Set([
+  'Ammo Drum','Shell Compression',
+  'Rifle Ammo Mutation','Primed Rifle Ammo Mutation',
+  'Shotgun Ammo Mutation','Primed Shotgun Ammo Mutation',
+  'Arrow Mutation','Sniper Ammo Mutation','Vigilante Supplies',
+  'Eagle Eye','Broad Eye','Overview','Aero Periphery','Ambush Optics',
+  'Agile Aim','Snap Shot','Aerial Ace',
+  'Gun Glide','Double-Barrel Drift','Stabilizer','Vile Precision',
+  'Guided Ordnance','Narrow Barrel',
+  'Hush','Silent Battery',
+  'Twitch','Soft Hands',
+  'Lock and Load','Tactical Reload',
+  'Terminal Velocity','Fatal Acceleration','Galvanized Acceleration',
+  'Mending Shot','Bhisaj-Bal','Sinister Reach',
+]);
+const SECONDARY_EXILUS_MODS = new Set([
+  'Trick Mag',
+  'Pistol Ammo Mutation','Primed Pistol Ammo Mutation',
+  'Air Recon','Hawk Eye',
+  'Spry Sights',
+  'Strafing Slide','Steady Hands',
+  'Targeting Subsystem',
+  'Suppress',
+  'Reflex Draw',
+  'Eject Magazine',
+  'Lethal Momentum',
+  'Energizing Shot','Ruinous Extension',
+  'Fass Canticle','Jahu Canticle','Khra Canticle','Lohk Canticle',
+]);
+const MELEE_EXILUS_MODS = new Set([
+  'Dispatch Overdrive','Electromagnetic Shielding','Focused Defense',
+  'Guardian Derision','Parry','Whirlwind',
+  "Condition's Perfection","Discipline's Merit","Dreamer's Wrath",
+  "Master's Edge","Mentor's Legacy","Opportunity's Reach",
+]);
+const WEAPON_EXILUS_BY_TAB = {
+  primary:   PRIMARY_EXILUS_MODS,
+  secondary: SECONDARY_EXILUS_MODS,
+  kitguns:   SECONDARY_EXILUS_MODS,
+  melee:     MELEE_EXILUS_MODS,
+  zaws:      MELEE_EXILUS_MODS,
+};
+
+// Stance slot filtering: maps weapon category → allowed stance mod compatName values.
+// 'Whip' covers both pure whips and blade-whips; 'Tonfa' covers both tonfas and nunchaku.
+const STANCE_CAT_COMPATS = {
+  'Assault Saws':  ['Assault Saw'],
+  'Claws':         ['Claws'],
+  'Daggers':       ['Daggers'],
+  'Dual Daggers':  ['Dual Daggers'],
+  'Dual Swords':   ['Dual Swords'],
+  'Fist/Sparring': ['Fists', 'Sparring'],
+  'Glaive':        ['Glaives'],
+  'Gunblade':      ['Gunblade'],
+  'Hammer':        ['Hammers'],
+  'Heavy Blades':  ['Heavy Blade'],
+  'Heavy Scythes': ['Heavy Scythe'],
+  'Machetes':      ['Machetes'],
+  'Polearm/Staff': ['Polearms', 'Staves'],
+  'Rapier':        ['Rapiers'],
+  'Scythe':        ['Scythes'],
+  'Sword-Shield':  ['Sword And Shield'],
+  'Tonfa':         ['Tonfas', 'Nunchaku'],
+  'Warfans':       ['Warfans'],
+  'Whip':          ['Whips', 'Blade And Whip'],
+};
+// Per-weapon overrides for categories that contain mixed weapon types.
+// Unlisted weapons in ambiguous categories fall back to showing all stances.
+const STANCE_WEAPON_COMPATS = new Map([
+  // Swords/Nikanas — mixed bag
+  ['Azothane',       ['Swords']],
+  ['Broken War',     ['Swords']],
+  ['Cronus',         ['Swords']],
+  ['Dark Sword',     ['Swords']],
+  ['Dex Nikana',     ['Nikanas']],
+  ['Dragon Nikana',  ['Nikanas']],
+  ['Ether Sword',    ['Swords']],
+  ['Heat Sword',     ['Swords']],
+  ['Jaw Sword',      ['Swords']],
+  ['Krohkur',        ['Swords']],
+  ['Mire',           ['Swords']],
+  ['Nikana',         ['Nikanas']],
+  ['Pangolin Sword', ['Swords']],
+  ['Pennant',        ['Two-Handed Nikana']],
+  ['Plasma Sword',   ['Swords']],
+  ['Prisma Skana',   ['Swords']],
+  ['Skana',          ['Swords']],
+  ['Skiajati',       ['Nikanas']],
+  ['Sun & Moon',     ['Dual Nikanas']],
+  ['Syam',           ['Swords']],
+  ['Tatsu',          ['Two-Handed Nikana']],
+  // Coda
+  ['Coda Caustacyst',['Scythes']],
+  ['Coda Hirudo',    ['Sparring']],
+  ['Coda Mire',      ['Swords']],
+  ['Coda Motovore',  ['Dual Daggers']],
+  ['Coda Pathocyst', ['Swords']],
+  // Kuva
+  ['Kuva Ghoulsaw',  ['Assault Saw']],
+  ['Kuva Shildeg',   ['Hammers']],
+  // MK1
+  ['Mk1-Bo',         ['Staves']],
+  ['Mk1-Furax',      ['Fists', 'Sparring']],
+  // Tenet
+  ['Tenet Agendus',  ['Tonfas']],
+  ['Tenet Exec',     ['Heavy Blade']],
+  ['Tenet Grigori',  ['Scythes']],
+  ['Tenet Livia',    ['Rapiers']],
+  // Zaw strikes
+  ['Balla',          ['Daggers']],
+  ['Cyath',          ['Polearms']],
+  ['Dehtat',         ['Dual Daggers']],
+  ['Dokrahm',        ['Heavy Blade']],
+  ['Kronsh',         ['Hammers']],
+  ['Mewan',          ['Swords']],
+  ['Ooltha',         ['Polearms']],
+  ['Plague Keewar',  ['Heavy Scythe']],
+  ['Plague Kripath', ['Polearms']],
+  ['Rabvee',         ['Hammers']],
+  ['Sepfahn',        ['Nikanas']],
+  // Prime — mapped by base weapon type
+  ['Ankyros Prime',       ['Fists', 'Sparring']],
+  ['Bo Prime',            ['Staves']],
+  ['Cobra & Crane Prime', ['Sword And Shield']],
+  ['Dakra Prime',         ['Swords']],
+  ['Destreza Prime',      ['Rapiers']],
+  ['Dual Kamas Prime',    ['Dual Swords']],
+  ['Dual Keres Prime',    ['Dual Daggers']],
+  ['Dual Zoren Prime',    ['Dual Swords']],
+  ['Fang Prime',          ['Dual Daggers']],
+  ['Fragor Prime',        ['Hammers']],
+  ['Galatine Prime',      ['Heavy Blade']],
+  ['Glaive Prime',        ['Glaives']],
+  ['Gram Prime',          ['Heavy Blade']],
+  ['Guandao Prime',       ['Polearms']],
+  ['Gunsen Prime',        ['Warfans']],
+  ['Karyst Prime',        ['Daggers']],
+  ['Kestrel Prime',       ['Glaives']],
+  ['Kogake Prime',        ['Fists', 'Sparring']],
+  ['Kronen Prime',        ['Tonfas']],
+  ['Masseter Prime',      ['Heavy Blade']],
+  ['Nami Skyla Prime',    ['Dual Swords']],
+  ['Nikana Prime',        ['Nikanas']],
+  ['Ninkondi Prime',      ['Nunchaku']],
+  ['Okina Prime',         ['Dual Daggers']],
+  ['Orthos Prime',        ['Polearms']],
+  ['Pangolin Prime',      ['Swords']],
+  ['Quassus Prime',       ['Warfans']],
+  ['Reaper Prime',        ['Scythes']],
+  ['Redeemer Prime',      ['Gunblade']],
+  ['Sarofang Prime',      ['Heavy Blade']],
+  ['Scindo Prime',        ['Heavy Blade']],
+  ['Silva & Aegis Prime', ['Sword And Shield']],
+  ['Tatsu Prime',         ['Two-Handed Nikana']],
+  ['Tekko Prime',         ['Fists', 'Sparring']],
+  ['Tipedo Prime',        ['Staves']],
+  ['Venato Prime',        ['Scythes']],
+  ['Venka Prime',         ['Claws']],
+  ['Volnus Prime',        ['Hammers']],
+]);
+
+// Fast name-keyed lookups for mod and arcane data
+const MOD_MAP    = new Map(MODS.map(m => [m.name, m]));
+const ARCANE_MAP = new Map(ARCANES.map(a => [a[0], a]));
+// Reverse map: mod name → Overframe mod ID (for weapon exilus slot results)
+const OF_MOD_ID  = typeof OVERFRAME_MODS !== 'undefined'
+  ? new Map([...OVERFRAME_MODS].map(([id, name]) => [name, id]))
+  : new Map();
+
+// Augments that only apply to a specific item: modName → compatName (warframe/weapon name)
+// Exclude all-uppercase compatNames (AURA, WARFRAME, etc.) — those are slot/category types, not item names
+const MOD_ITEM_RESTRICT = (() => {
+  const m = new Map();
+  for (const mod of MODS) {
+    if (mod.isAugment && mod.compatName && mod.compatName !== mod.compatName.toUpperCase())
+      m.set(mod.name, mod.compatName);
+  }
+  return m;
+})();
+
+// Warframe augment ability maps — description starts with "<Ability> Augment:"
+// ability name → [augment mod names], and reverse map
+const ABILITY_AUGMENTS = new Map();  // abilityName → [modName, ...]
+const AUGMENT_ABILITY  = new Map();  // modName → abilityName
+for (const mod of MODS) {
+  if (!mod.isAugment || mod.category !== 'Warframe Mod') continue;
+  const desc  = mod.levelStats?.at(-1)?.[0] || '';
+  const match = desc.match(/^(.+?) Augment:/);
+  if (!match) continue;
+  const ability = match[1];
+  AUGMENT_ABILITY.set(mod.name, ability);
+  if (!ABILITY_AUGMENTS.has(ability)) ABILITY_AUGMENTS.set(ability, []);
+  ABILITY_AUGMENTS.get(ability).push(mod.name);
+}
 
 function blpSearchMod(slotIdx, query) {
   const dd = document.getElementById(`blp-dd-${slotIdx}`);
@@ -1354,43 +1936,117 @@ function blpSearchMod(slotIdx, query) {
   const results  = [];
 
   if (typeof OVERFRAME_MODS !== 'undefined') {
-    // Determine allowed categories for this slot
-    let allowedCats = null;
-    if (typeof OVERFRAME_MOD_CATS !== 'undefined') {
-      if (slotType === 'aura')          allowedCats = new Set(['aura']);
-      else if (slotType === 'stance')   allowedCats = new Set(['stance']);
-      else if (slotType === 'exilus')   allowedCats = new Set(['exilus']);
-      else if (slotType === 'precept')  allowedCats = new Set(['companion', 'universal']);
-      else if (slotType.startsWith('arcane-')) allowedCats = new Set([slotType]);
-      else {
-        // For exalted sub-forms, look up mod cats based on the exalted weapon type
-        const exType = blpCurrentExaltedType();
-        const exTabKey = exType === 'companion' ? 'companions'
-                       : exType === 'claws'     ? 'companions' // claw weapon mods are companion-category
-                       : exType === 'melee'     ? 'melee'
-                       : exType === 'primary'   ? 'primary'
-                       : exType === 'secondary' ? 'secondary'
-                       : null;
-        allowedCats = new Set(BLP_TAB_MOD_CATS[exTabKey || _blpTab] || ['universal']);
-      }
-    }
+    // Weapon exilus slots use our own curated sets rather than OVERFRAME_MOD_CATS
+    const _resolvedTab = blpResolvedTab();
+    const _exilusTab = _resolvedTab === 'kitguns'
+      ? (KITGUN_PRIMARY_GRIP_NAMES.has(blpCurrentBuild()?.kitgunGrip) ? 'primary' : 'secondary')
+      : _resolvedTab;
+    const weaponExilusSet = slotType === 'exilus' ? WEAPON_EXILUS_BY_TAB[_exilusTab] : null;
 
-    for (const [id, name] of OVERFRAME_MODS) {
-      if (allowedCats) {
-        const modCat = OVERFRAME_MOD_CATS.get(id);
-        if (!allowedCats.has(modCat)) continue;
+    if (weaponExilusSet) {
+      for (const mod of MODS) {
+        if (!weaponExilusSet.has(mod.name)) continue;
+        if (!q || mod.name.toLowerCase().includes(q)) {
+          results.push([OF_MOD_ID.get(mod.name) ?? null, mod.name]);
+        }
       }
-      if (!q || name.toLowerCase().includes(q)) {
-        results.push([id, name]);
-        if (results.length >= 12) break;
+    } else {
+      // Determine allowed categories for this slot
+      let allowedCats = null;
+      if (typeof OVERFRAME_MOD_CATS !== 'undefined') {
+        if (slotType === 'aura')          allowedCats = new Set(['aura']);
+        else if (slotType === 'stance')   allowedCats = new Set(['stance']);
+        else if (slotType === 'exilus')   allowedCats = new Set(['exilus']);
+        else if (slotType === 'precept')  allowedCats = new Set(['companion', 'universal']);
+        else if (slotType.startsWith('arcane-')) allowedCats = new Set([slotType]);
+        else {
+          // For exalted sub-forms, look up mod cats based on the exalted weapon type
+          const exType = blpCurrentExaltedType();
+          const exTabKey = exType === 'companion' ? 'companions'
+                         : exType === 'claws'     ? 'companions' // claw weapon mods are companion-category
+                         : exType === 'melee'     ? 'melee'
+                         : exType === 'primary'   ? 'primary'
+                         : exType === 'secondary' ? 'secondary'
+                         : null;
+          const _modTabKey = exTabKey || (_resolvedTab === 'kitguns'
+            ? (KITGUN_PRIMARY_GRIP_NAMES.has(blpCurrentBuild()?.kitgunGrip) ? 'primary' : 'secondary')
+            : _resolvedTab);
+          allowedCats = new Set(BLP_TAB_MOD_CATS[_modTabKey] || ['universal']);
+        }
+      }
+
+      // Stance slots: filter by weapon-type compatibility
+      const _stanceCompatArr = slotType === 'stance'
+        ? (_resolvedTab === 'zaws' ? blpZawStanceCompat() : (STANCE_WEAPON_COMPATS.get(_blpItem) || STANCE_CAT_COMPATS[blpItemCat()] || null))
+        : null;
+      const stanceCompats = _stanceCompatArr ? new Set(_stanceCompatArr) : null;
+
+      // Pre-compute ability mutual-exclusion and helminth state for this search
+      const build = blpCurrentBuild();
+      const helminthAbilityName = build?.helminthAbility?.name ?? null;
+      const helminthSlot        = build?.helminthAbility?.slot ?? null;
+      // Work out which native ability was replaced by helminth (requires WARFRAME_ABILITIES)
+      let replacedAbility = null;
+      if (helminthSlot !== null && _blpItem) {
+        const base = _blpItem.replace(' Prime', '').replace(' Umbra', '');
+        replacedAbility = (WARFRAME_ABILITIES[_blpItem] || WARFRAME_ABILITIES[base] || [])[helminthSlot] ?? null;
+      }
+      const blockedAbilities = new Set();
+      if (build?.slots) {
+        for (let si = 0; si < build.slots.length; si++) {
+          if (si === slotIdx) continue;
+          const a = AUGMENT_ABILITY.get(build.slots[si]?.modName || '');
+          if (a) blockedAbilities.add(a);
+        }
+      }
+      if (replacedAbility) blockedAbilities.add(replacedAbility);
+
+      for (const [id, name] of OVERFRAME_MODS) {
+        if (allowedCats) {
+          const modCat = OVERFRAME_MOD_CATS.get(id);
+          if (!allowedCats.has(modCat)) continue;
+        }
+        if (stanceCompats) {
+          const mc = MOD_MAP.get(name)?.compatName || '';
+          if (!stanceCompats.has(mc)) continue;
+        }
+        const restrict = MOD_ITEM_RESTRICT.get(name);
+        if (restrict && _blpItem && !_blpItem.includes(restrict)) {
+          // Wrong warframe/weapon — allow only if this augments the helminth-infused ability
+          const ability = AUGMENT_ABILITY.get(name);
+          if (!ability || ability !== helminthAbilityName) continue;
+        }
+        // Block augments for abilities already used in another slot, or for the helminth-replaced ability
+        const ability = AUGMENT_ABILITY.get(name);
+        if (ability && blockedAbilities.has(ability)) continue;
+        if (!q || name.toLowerCase().includes(q)) {
+          results.push([id, name]);
+        }
       }
     }
   }
   if (!results.length) { dd.style.display = 'none'; return; }
+
+  // Sort: matching-polarity mods first, mismatching after
+  const slotPol     = blpCurrentData()?.slots[slotIdx]?.polarity ?? 0;
+  const slotPolName = POLARITY_NAMES[slotPol] || '';
+  if (slotPol) {
+    results.sort((a, b) => {
+      const pa = MOD_MAP.get(a[1])?.polarity || '';
+      const pb = MOD_MAP.get(b[1])?.polarity || '';
+      const ra = (pa === slotPolName || slotPolName === 'Any') ? 0 : 1;
+      const rb = (pb === slotPolName || slotPolName === 'Any') ? 0 : 1;
+      return ra - rb;
+    });
+  }
+
   dd.style.display = 'block';
-  dd.innerHTML = results.map(([id, name]) =>
-    `<div class="blp-mod-opt" onmousedown="blpPickMod(${slotIdx},${id},'${jsStr(name)}')">${esc(name)}</div>`
-  ).join('');
+  dd.innerHTML = results.slice(0, 15).map(([id, name]) => {
+    const modPolName = MOD_MAP.get(name)?.polarity || '';
+    const polInt     = POLARITY_INT.get(modPolName) || 0;
+    const icon       = polInt ? blpPolarityLabel(polInt) : '<span class="blp-mod-opt-pol-placeholder"></span>';
+    return `<div class="blp-mod-opt" onmousedown="blpPickMod(${slotIdx},${id},'${jsStr(name)}')">${icon}${esc(name)}</div>`;
+  }).join('');
 }
 
 function blpCloseModPicker(slotIdx) {
@@ -1401,13 +2057,62 @@ function blpCloseModPicker(slotIdx) {
 
 function blpPickMod(slotIdx, modId, modName) {
   blpUpdateSlot(slotIdx, { modId, modName });
-  const input = document.querySelector(`.blp-tile[data-slot="${slotIdx}"] .blp-mod-input`);
-  if (input) input.value = modName;
+  const tile = document.querySelector(`.blp-tile[data-slot="${slotIdx}"]`);
+  if (tile) {
+    const modInput = tile.querySelector('.blp-mod-input');
+    if (modInput) {
+      modInput.value = modName;
+      const polInt = POLARITY_INT.get(MOD_MAP.get(modName)?.polarity || '') || 0;
+      modInput.classList.toggle('blp-mod-input--has-icon', !!polInt);
+    }
+    const iconEl = document.getElementById(`blp-pol-icon-${slotIdx}`);
+    if (iconEl) {
+      const polInt = POLARITY_INT.get(MOD_MAP.get(modName)?.polarity || '') || 0;
+      iconEl.innerHTML = polInt ? blpPolarityLabel(polInt) : '';
+    }
+    const rnkInput = tile.querySelector('.blp-rank-input');
+    if (rnkInput) {
+      const isArc  = tile.dataset.slotType?.startsWith('arcane-');
+      const maxRnk = modName
+        ? (isArc ? (ARCANE_MAP.get(modName)?.[3] ?? 5) : (MOD_MAP.get(modName)?.maxRank ?? 10))
+        : (isArc ? 5 : 10);
+      rnkInput.max = maxRnk;
+      if (+rnkInput.value > maxRnk) rnkInput.value = maxRnk;
+    }
+  }
   blpCloseModPicker(slotIdx);
+  blpRefreshPolWrap(slotIdx);
+  blpRefreshCapacity();
+  blpRefreshStatDesc(slotIdx);
 }
 
 function blpSetRank(slotIdx, val) {
-  blpUpdateSlot(slotIdx, { rank: Math.min(10, Math.max(0, parseInt(val, 10) || 0)) });
+  const slot = blpCurrentData()?.slots[slotIdx];
+  const modName = slot?.modName || '';
+  const isArc   = (slot?.type || '').startsWith('arcane-');
+  const maxRank  = modName
+    ? (isArc ? (ARCANE_MAP.get(modName)?.[3] ?? 5) : (MOD_MAP.get(modName)?.maxRank ?? 10))
+    : (isArc ? 5 : 10);
+  blpUpdateSlot(slotIdx, { rank: Math.min(maxRank, Math.max(0, parseInt(val, 10) || 0)) });
+  blpRefreshCapacity();
+  blpRefreshStatDesc(slotIdx);
+}
+
+function blpRefreshStatDesc(slotIdx) {
+  const el = document.getElementById(`blp-stat-${slotIdx}`);
+  if (!el) return;
+  const slot = blpCurrentData()?.slots[slotIdx];
+  const modName = slot?.modName || '';
+  const rank = slot?.rank ?? 0;
+  const isArcane = el.closest('.blp-tile')?.dataset.slotType?.startsWith('arcane-');
+  if (!modName) { el.textContent = ''; return; }
+  if (isArcane) {
+    const ls = ARCANE_LEVEL_STATS?.[modName];
+    el.innerHTML = esc(ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '').replace(/\\n/g, '<br>');
+    return;
+  }
+  const ls = MOD_MAP.get(modName)?.levelStats;
+  el.textContent = ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '';
 }
 
 function blpClearSlot(slotIdx) {
@@ -1416,9 +2121,14 @@ function blpClearSlot(slotIdx) {
   if (row) {
     const inp = row.querySelector('.blp-mod-input');
     const rnk = row.querySelector('.blp-rank-input');
-    if (inp) inp.value = '';
+    if (inp) { inp.value = ''; inp.classList.remove('blp-mod-input--has-icon'); }
     if (rnk) rnk.value = 0;
+    const iconEl = document.getElementById(`blp-pol-icon-${slotIdx}`);
+    if (iconEl) iconEl.innerHTML = '';
   }
+  blpRefreshPolWrap(slotIdx);
+  blpRefreshCapacity();
+  blpRefreshStatDesc(slotIdx);
 }
 
 function blpUpdateSlot(slotIdx, changes) {
@@ -1560,7 +2270,7 @@ function parseOFBuildString(bs) {
   try { return JSON.parse(atob(bs)); } catch { return null; }
 }
 
-function slotsFromBuildString(arr, tab, item, cat) {
+function slotsFromBuildString(arr, tab, item, cat, components) {
   const mods = arr[4] || [];
   const mk = (entry, type) => ({
     type,
@@ -1589,15 +2299,21 @@ function slotsFromBuildString(arr, tab, item, cat) {
   }
   if (tab === 'secondary') {
     // buildString: [r8..r1, exilus, arc]
-    const result = [g(8,'exilus'), ...rs(0,8), g(9,'arcane-secondary')];
-    if (cat === 'Kitgun') result.push(e('arcane-pax'));
-    return result;
+    return [g(8,'exilus'), ...rs(0,8), g(9,'arcane-secondary')];
+  }
+  if (tab === 'kitguns') {
+    // buildString: [r8..r1, exilus, pax-arcane, arcane]
+    const isPrimary = KITGUN_PRIMARY_GRIP_NAMES.has(components?.grip);
+    const arcType   = isPrimary ? 'arcane-primary' : 'arcane-secondary';
+    return [g(8,'exilus'), ...rs(0,8), g(10, arcType), g(9,'arcane-pax')];
   }
   if (tab === 'melee') {
     // buildString: [r8..r1, stance, exilus, arc]
-    const result = [g(8,'stance'), g(9,'exilus'), ...rs(0,8), g(10,'arcane-melee')];
-    if (cat === 'Zaw') result.push(e('arcane-exodia'));
-    return result;
+    return [g(8,'stance'), g(9,'exilus'), ...rs(0,8), g(10,'arcane-melee')];
+  }
+  if (tab === 'zaws') {
+    // buildString: [r8..r1, stance, exodia-arcane, exilus, melee-arcane]
+    return [g(8,'stance'), g(10,'exilus'), ...rs(0,8), g(11,'arcane-melee'), g(9,'arcane-exodia')];
   }
   if (tab === 'companions') {
     if (blpCurrentExaltedType() === 'claws') {
@@ -1635,10 +2351,27 @@ async function blpLoadOFBuild(buildId) {
     const cat    = blpItemCat();
     const parsed = parseOFBuildString(build.buildstring || build.buildString);
     let slots;
+    let importedComponents = null;
+
+    if (parsed && Array.isArray(parsed[5])) {
+      if (tab === 'kitguns') {
+        const [gripId, loaderId] = parsed[5];
+        importedComponents = {
+          grip:   KITGUN_GRIP_MAP.get(gripId)   || null,
+          loader: KITGUN_LOADER_MAP.get(loaderId) || null,
+        };
+      } else if (tab === 'zaws') {
+        const [gripId, linkId] = parsed[5];
+        importedComponents = {
+          grip: ZAW_GRIP_MAP.get(gripId) || null,
+          link: ZAW_LINK_MAP.get(linkId) || null,
+        };
+      }
+    }
 
     if (parsed && Array.isArray(parsed[4])) {
       console.log('[blpLoadOFBuild] using buildString', parsed);
-      slots = slotsFromBuildString(parsed, tab, _blpItem, cat);
+      slots = slotsFromBuildString(parsed, tab, _blpItem, cat, importedComponents);
     } else {
       console.log('[blpLoadOFBuild] fallback to slots heuristic', { buildString: build.buildString, parsed });
       const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
@@ -1763,6 +2496,10 @@ async function blpLoadOFBuild(buildId) {
         baseBuildUrl: build.url, baseAuthor: build.author.username,
         slots, helminthAbility, isModified: false, potatoed: true, formas: build.formas ?? null,
       };
+      if (importedComponents) {
+        if (tab === 'kitguns') { entry.kitgunGrip = importedComponents.grip; entry.kitgunLoader = importedComponents.loader; }
+        if (tab === 'zaws')    { entry.zawGrip = importedComponents.grip; entry.zawLink = importedComponents.link; }
+      }
       myBuilds[_blpItem].push(entry);
       _blpBuildId = entry.id;
     } else {
@@ -1780,6 +2517,10 @@ async function blpLoadOFBuild(buildId) {
         mainBuild.potatoed        = true;
         mainBuild.helminthAbility = helminthAbility;
         mainBuild.formas          = build.formas ?? null;
+        if (importedComponents) {
+          if (tab === 'kitguns') { mainBuild.kitgunGrip = importedComponents.grip; mainBuild.kitgunLoader = importedComponents.loader; }
+          if (tab === 'zaws')    { mainBuild.zawGrip = importedComponents.grip; mainBuild.zawLink = importedComponents.link; }
+        }
       }
     }
     saveMyBuilds();
@@ -2081,14 +2822,11 @@ ${sortedRes.map(([rName, total]) => {
 
 let activeCategory = '';
 let activeType = '';
-let activeUse = '';
 let activeArcaneType     = '';
 let activeArcaneRarity   = '';
 let activeArcaneCategory = '';
 let groupedView = false;
 let listView = false;
-let modShowConclave = false;
-let modShowFlawed   = false;
 let collapsedGroups = new Set(); // "tab:groupName"
 let wfTileImages = localStorage.getItem('wf-ui-wftile') !== '0';
 let wfBgImages   = localStorage.getItem('wf-ui-wfbg')   !== '0';
@@ -2495,6 +3233,18 @@ function potentialXP() {
 
 function fmt(n) { return n.toLocaleString(); }
 
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.className = 'wf-toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('wf-toast--in'));
+  setTimeout(() => {
+    el.classList.remove('wf-toast--in');
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+  }, 4000);
+}
+
 // ─────────────────────────────────────────────
 // HEADER UPDATE
 // ─────────────────────────────────────────────
@@ -2541,7 +3291,6 @@ function switchTab(tabEl) {
   filters = { status: '', incarnon: false, hasParts: false };
   activeCategory = '';
   activeType = '';
-  activeUse = '';
   activeArcaneType     = '';
   activeArcaneRarity   = '';
   activeArcaneCategory = '';
@@ -2581,8 +3330,6 @@ function switchTab(tabEl) {
   const _cwWfInd = document.getElementById('circuit-wf-week-ind');
   _cwWfInd.textContent = 'Circuit: Week ' + CIRCUIT_WF_WEEK_NOW;
   _cwWfInd.style.display = activeTab === 'warframes' ? '' : 'none';
-  document.getElementById('fb-conclave').style.display = isMods ? '' : 'none';
-  document.getElementById('fb-flawed').style.display   = isMods ? '' : 'none';
   const wfTileBtn = document.getElementById('fb-wftile');
   const wfBgBtn   = document.getElementById('fb-wfbg');
   wfTileBtn.style.display = CARD_IMAGE_TABS.has(activeTab) ? '' : 'none';
@@ -2662,18 +3409,10 @@ function setTypeFilter(val) {
   render();
 }
 
-function setUseFilter(val) {
-  activeUse = val;
-  localStorage.setItem('wf-filt-use-mods', val);
-  buildModDropdowns();
-  render();
-}
-
 function restoreFilters() {
   activeCategory = localStorage.getItem('wf-filt-cat-' + activeTab) || '';
   if (activeTab === 'mods') {
     activeType = localStorage.getItem('wf-filt-type-mods') || '';
-    activeUse  = localStorage.getItem('wf-filt-use-mods')  || '';
   }
   if (activeTab === 'arcanes') {
     activeArcaneType     = localStorage.getItem('wf-filt-arc-type')    || '';
@@ -2766,14 +3505,11 @@ function buildModDropdowns() {
   const wrap = document.createElement('div');
   wrap.id = 'mod-dropdowns';
 
-  const visible = MODS.filter(m => (modShowConclave || m[1] !== 'Conclave Only') && (modShowFlawed || m[1] !== 'Flawed'));
-  const cats  = [...new Set(visible.map(m => m[1]))].sort();
-  const types = [...new Set(visible.map(m => m[8]).filter(Boolean))].sort();
-  const uses  = [...new Set(visible.flatMap(m => m[10] || []).filter(Boolean))].sort();
+  const cats   = [...new Set(MODS.map(m => m.category))].sort();
+  const compats = [...new Set(MODS.map(m => m.compatName).filter(Boolean))].sort();
 
-  wrap.appendChild(makeDd('dd-cat',  'Category', cats,  activeCategory, setCatFilter));
-  wrap.appendChild(makeDd('dd-type', 'Type',     types, activeType,     setTypeFilter));
-  wrap.appendChild(makeDd('dd-use',  'Use',      uses,  activeUse,      setUseFilter));
+  wrap.appendChild(makeDd('dd-cat',  'Category', cats,    activeCategory, setCatFilter));
+  wrap.appendChild(makeDd('dd-type', 'Compat',   compats, activeType,     setTypeFilter));
   container.appendChild(wrap);
 }
 
@@ -3316,16 +4052,11 @@ function getVisibleMods() {
   const q   = document.getElementById('search').value.toLowerCase();
   const cat = activeCategory;
   const ty  = activeType;
-  const use = activeUse;
   return MODS.filter(m => {
-    const [name, category,,maxRank] = m;
-    const type = m[8];
-    if (!modShowConclave && category === 'Conclave Only') return false;
-    if (!modShowFlawed   && category === 'Flawed')        return false;
+    const { name, category, maxRank } = m;
     if (q && !name.toLowerCase().includes(q)) return false;
     if (cat && category !== cat) return false;
-    if (ty && type !== ty) return false;
-    if (use && !(m[10] || []).includes(use)) return false;
+    if (ty && m.compatName !== ty) return false;
     const rank  = getModRank(name);
     const isOwn = rank > 0 || !!progress[modAqKey(name)];
     const isMax = maxRank === 0 ? isOwn : rank >= maxRank;
@@ -3340,7 +4071,7 @@ function getVisibleMods() {
 
 function maxAllVisible() {
   if (activeTab === 'mods') {
-    for (const [name,,, maxRank] of getVisibleMods()) {
+    for (const { name, maxRank } of getVisibleMods()) {
       if (maxRank > 0) { progress[modKey(name)] = maxRank; }
       progress[modAqKey(name)] = true;
     }
@@ -3361,7 +4092,7 @@ function maxAllVisible() {
 }
 function zeroAllVisible() {
   if (activeTab === 'mods') {
-    for (const [name] of getVisibleMods()) {
+    for (const { name } of getVisibleMods()) {
       delete progress[modKey(name)];
       delete progress[modAqKey(name)];
     }
@@ -3805,25 +4536,6 @@ function modSliderInput(el, name, maxRank) {
   updateTabStat();
 }
 
-function toggleConclaveFilter(btn) {
-  modShowConclave = !modShowConclave;
-  btn.classList.toggle('on', modShowConclave);
-  activeCategory = '';
-  activeType = '';
-  activeUse = '';
-  populateCatFilter();
-  render();
-}
-
-function toggleFlawedFilter(btn) {
-  modShowFlawed = !modShowFlawed;
-  btn.classList.toggle('on', modShowFlawed);
-  activeCategory = '';
-  activeType = '';
-  activeUse = '';
-  populateCatFilter();
-  render();
-}
 
 // ─────────────────────────────────────────────
 // RANKING COST LOOKUP
@@ -3894,7 +4606,8 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
   const isMax     = rank >= maxRank;
   const cardCls = isMax ? 'maxed' : rank > 0 ? 'partial' : copies > 0 ? 'acquired' : '';
   const ename     = jsStr(name);
-  const desc      = ARCANE_DESC[name] || '';
+  const _ls = ARCANE_LEVEL_STATS?.[name];
+  const desc = _ls ? _ls[_ls.length - 1].join('\n') : '';
   const pct       = (copies / maxCopies * 100).toFixed(1);
 
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(modMarketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
@@ -3985,21 +4698,66 @@ function buildAcqTags(acq) {
   return `<div class="acq-tags"><span class="acq-label">Obtain</span>${tags}</div>`;
 }
 
-function buildModItem(name, cat, acq, maxRank, polarity, rarity, exilus, tradable, type, subType, listMode) {
+let _modDropsBtn = null;
+
+function toggleModDrops(event, btn) {
+  event.stopPropagation();
+  const overlay = document.getElementById('mod-drops-overlay');
+  if (_modDropsBtn === btn) {
+    overlay.style.display = 'none';
+    _modDropsBtn = null;
+    return;
+  }
+  const drops = JSON.parse(btn.dataset.drops);
+  const shown = drops.slice(0, 10);
+  const extra = drops.length - shown.length;
+  overlay.innerHTML = shown.map(s => `<li>${esc(s)}</li>`).join('') +
+    (extra > 0 ? `<li class="mod-drops-more">+${extra} more…</li>` : '');
+
+  const rect = btn.getBoundingClientRect();
+  overlay.style.display = 'block';
+  overlay.style.top  = (rect.bottom + 3) + 'px';
+  overlay.style.left = rect.left + 'px';
+
+  // Keep within viewport horizontally
+  const ow = overlay.offsetWidth;
+  if (rect.left + ow > window.innerWidth - 8)
+    overlay.style.left = Math.max(8, window.innerWidth - ow - 8) + 'px';
+  // Flip above if too close to bottom
+  if (rect.bottom + overlay.offsetHeight > window.innerHeight - 8)
+    overlay.style.top = (rect.top - overlay.offsetHeight - 3) + 'px';
+
+  _modDropsBtn = btn;
+}
+
+document.addEventListener('click', () => {
+  const overlay = document.getElementById('mod-drops-overlay');
+  if (overlay) overlay.style.display = 'none';
+  _modDropsBtn = null;
+});
+
+function buildModDropsBtn(acq) {
+  if (!acq || acq.length === 0) return '<div class="acq-tags"></div>';
+  return `<button class="mod-drops-btn" onclick="toggleModDrops(event,this)" data-drops="${esc(JSON.stringify(acq))}">Obtain <span class="mod-drops-count">(${acq.length})</span></button>`;
+}
+
+function buildModItem(mod, listMode) {
+  const { name, category: cat, drops: acq, maxRank, polarity, rarity, isExilus: exilus, tradable, compatName } = mod;
   const rank = getModRank(name);
   const isOwn = isModOwned(name);
   const isMax = maxRank === 0 ? isOwn : rank >= maxRank;
   const isPartial = maxRank > 0 && rank > 0 && !isMax;
   const cardCls = isMax ? 'maxed' : isPartial ? 'partial' : isOwn ? 'acquired' : '';
   const ename = jsStr(name);
-  const desc = MOD_DESC[name] || '';
+  const ls   = mod.levelStats;
+  const desc = ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '';
   const pct = maxRank > 0 ? (rank / maxRank * 100).toFixed(1) : 0;
   const rarityLow = rarity.toLowerCase().replace(/ /g, '-');
 
   const tradableTag  = tradable ? `<a class="card-tradable" href="${esc(modMarketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
   const exilusTag    = exilus   ? `<div class="mod-exilus">Exilus</div>` : '';
   const polarityTag  = polarity ? `<div class="mod-polarity">${esc(polarity)}</div>` : '';
-  const subTypeTags  = (subType || []).filter(st => st && st !== type && st !== cat).map(st => `<div class="card-subtype">${esc(st)}</div>`).join('');
+  const compatTag    = compatName ? `<div class="card-subtype">${esc(compatName)}</div>` : '';
 
   const rankSection = maxRank > 0 ? `
   <div class="card-row"${listMode ? ' style="flex-shrink:0;width:200px;gap:8px"' : ''}>
@@ -4025,9 +4783,9 @@ function buildModItem(name, cat, acq, maxRank, polarity, rarity, exilus, tradabl
     return `<div class="card list-row${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}" data-cat="${esc(cat)}">
   <div class="list-name-col">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
-    <div class="list-badges">${type && type !== cat ? `<div class="card-type">${esc(type)}</div>` : ''}${subTypeTags}${exilusTag}${polarityTag}</div>
+    <div class="list-badges">${compatTag}${exilusTag}${polarityTag}</div>
   </div>
-  <div class="card-obtain-row">${buildAcqTags(acq)}${tradableTag}</div>
+  <div class="card-obtain-row">${buildModDropsBtn(acq)}${tradableTag}</div>
   ${rankSection}
   ${xpCell}
   <div class="qbtns" style="flex-shrink:0;gap:5px;min-width:112px">${qbtns}</div>
@@ -4039,9 +4797,9 @@ function buildModItem(name, cat, acq, maxRank, polarity, rarity, exilus, tradabl
   return `<div class="card${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}" data-cat="${esc(cat)}">
   <div class="card-top">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
-    <div style="display:flex;gap:3px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:flex-end">${type && type !== cat ? `<div class="card-type">${esc(type)}</div>` : ''}${subTypeTags}${exilusTag}${polarityTag}</div>
+    <div style="display:flex;gap:3px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:flex-end">${compatTag}${exilusTag}${polarityTag}</div>
   </div>
-  <div class="card-obtain-row">${buildAcqTags(acq)}${tradableTag}</div>
+  <div class="card-obtain-row">${buildModDropsBtn(acq)}${tradableTag}</div>
   ${rankSection}
   <div class="card-foot">${footLeft}<div class="qbtns">${qbtns}</div></div>
 </div>`;
@@ -4059,16 +4817,13 @@ function renderMods() {
   }
 
   if (groupedView) {
-    const allCats = [...new Set(MODS
-      .filter(m => (modShowConclave || m[1] !== 'Conclave Only') && (modShowFlawed || m[1] !== 'Flawed'))
-      .map(m => m[1])
-    )].sort();
+    const allCats = [...new Set(MODS.map(m => m.category))].sort();
     grid.innerHTML = allCats.flatMap(grpCat => {
-      const catVisible = visible.filter(([,c]) => c === grpCat);
+      const catVisible = visible.filter(m => m.category === grpCat);
       if (catVisible.length === 0) return [];
-      const catAll = MODS.filter(([,c]) => c === grpCat);
+      const catAll = MODS.filter(m => m.category === grpCat);
       let owned = 0, maxed = 0;
-      for (const [n,,, mr] of catAll) {
+      for (const { name: n, maxRank: mr } of catAll) {
         const r = getModRank(n);
         const isOwn = r > 0 || !!progress[modAqKey(n)];
         if (isOwn) owned++;
@@ -4080,10 +4835,10 @@ function renderMods() {
   <span class="sc-group-title"><span class="grp-arrow">${collapsed ? '▶' : '▼'}</span>${esc(grpCat)}</span>
   <span style="color:var(--text-muted);font-weight:400;font-size:10px"><b style="color:var(--gold)">${owned}</b>/${catAll.length} owned · ${maxed} maxed</span>
 </div>`;
-      return collapsed ? [hdr] : [hdr + catVisible.map(([n,c,a,mr,pol,rar,ex,tr,ty,st]) => buildModItem(n,c,a,mr,pol,rar,ex,tr,ty,st,listView)).join('')];
+      return collapsed ? [hdr] : [hdr + catVisible.map(m => buildModItem(m, listView)).join('')];
     }).join('');
   } else {
-    grid.innerHTML = visible.map(([n,c,a,mr,pol,rar,ex,tr,ty,st]) => buildModItem(n,c,a,mr,pol,rar,ex,tr,ty,st,listView)).join('');
+    grid.innerHTML = visible.map(m => buildModItem(m, listView)).join('');
   }
 
   updateBulkLabel(visible.length, MODS.length);
@@ -5383,8 +6138,6 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _cwWfInd2 = document.getElementById('circuit-wf-week-ind');
   _cwWfInd2.textContent = 'Circuit: Week ' + CIRCUIT_WF_WEEK_NOW;
   _cwWfInd2.style.display = activeTab === 'warframes' ? '' : 'none';
-  document.getElementById('fb-conclave').style.display = _isMods ? '' : 'none';
-  document.getElementById('fb-flawed').style.display   = _isMods ? '' : 'none';
   const _wfTileBtn = document.getElementById('fb-wftile');
   const _wfBgBtn   = document.getElementById('fb-wfbg');
   _wfTileBtn.style.display = CARD_IMAGE_TABS.has(activeTab) ? '' : 'none';
