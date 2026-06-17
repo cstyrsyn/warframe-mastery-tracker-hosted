@@ -151,7 +151,7 @@ function loadMyBuilds() {
 
   if (dirty) saveMyBuilds();
 }
-function saveMyBuilds() { localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds)); }
+function saveMyBuilds() { localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds)); deferCloudSync(); }
 
 function blpItemBuilds(name) {
   const val = myBuilds[name ?? _blpItem];
@@ -2282,7 +2282,7 @@ function slotsFromBuildString(arr, tab, item, cat, components) {
   });
   const e  = type => ({ type, modId: null, modName: '', rank: 0, polarity: 0 });
   const g  = (i, type) => mods[i] ? mk(mods[i], type) : e(type);
-  const rs = (start, count) => Array.from({ length: count }, (_, i) => mods[start + i] ? mk(mods[start + i], 'regular') : e('regular'));
+  const rs = (start, count) => Array.from({ length: count }, (_, i) => { const idx = start + (count - 1 - i); return mods[idx] ? mk(mods[idx], 'regular') : e('regular'); });
 
   if (tab === 'warframes') {
     const r8 = rs(0, 8);
@@ -2322,7 +2322,7 @@ function slotsFromBuildString(arr, tab, item, cat, components) {
     }
     // buildString: [r10..r1]; precept mods have polarity 5
     return Array.from({ length: 10 }, (_, i) => {
-      const m = mods[i];
+      const m = mods[9 - i];
       if (!m) return e('regular');
       const s = mk(m, 'regular');
       if (s.polarity === 5) s.type = 'precept';
@@ -5712,7 +5712,7 @@ async function loadFromCloud() {
   try {
     const { data, error } = await _sb
       .from('saves')
-      .select('progress, checklist, ui_prefs, custom_items, modular_builds, updated_at')
+      .select('progress, checklist, ui_prefs, custom_items, modular_builds, my_builds, updated_at')
       .eq('user_id', currentUser.id)
       .single();
 
@@ -5750,6 +5750,11 @@ async function loadFromCloud() {
         modularOwned = data.modular_builds.owned;
         localStorage.setItem(MOD_OWNED_KEY, JSON.stringify(modularOwned));
       }
+    }
+
+    if (data.my_builds && typeof data.my_builds === 'object') {
+      myBuilds = data.my_builds;
+      localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds));
     }
 
     if (data.ui_prefs) {
@@ -5794,6 +5799,7 @@ async function syncToCloud() {
       ui_prefs,
       custom_items: customItems,
       modular_builds: { builds: modularBuilds, owned: modularOwned },
+      my_builds:    myBuilds,
       updated_at:   new Date().toISOString(),
     });
 
