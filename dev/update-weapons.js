@@ -14,16 +14,35 @@
 
 'use strict';
 
-const fs       = require('fs');
-const path     = require('path');
-const https    = require('https');
-const luaparse = require('luaparse');
+const fs           = require('fs');
+const path         = require('path');
+const https        = require('https');
+const luaparse     = require('luaparse');
+const { execSync } = require('child_process');
 
 const DATA_ITEMS   = path.join(__dirname, '..', 'data-items.js');
 const WFCD_DIR     = path.join(__dirname, 'node_modules/@wfcd/items/data/json');
 const WIKI_BASE    = 'https://wiki.warframe.com/w/Module:Weapons/data';
 const BACKUP_DIR   = path.join(__dirname, 'backups', 'weapons');
 const KEEP_BACKUPS = 5;
+
+// ── WFCD refresh ─────────────────────────────────────────────────────────────
+
+function refreshWfcd() {
+  console.log('Updating @wfcd/items…');
+  try {
+    execSync('npm update @wfcd/items', {
+      cwd: __dirname,
+      encoding: 'utf-8',
+      stdio: 'pipe',
+      timeout: 60000,
+    });
+    console.log('  @wfcd/items up to date.');
+  } catch (e) {
+    console.warn(`  WFCD update failed — ${e.message.split('\n')[0]}`);
+    console.warn('  Continuing with installed version.');
+  }
+}
 
 // Founders weapons — permanently unobtainable, like Excalibur Prime
 const ALWAYS_EXCLUDE = new Set(['Lato Prime', 'Skana Prime']);
@@ -436,8 +455,11 @@ async function main() {
   const doApply    = args.includes('--apply');
   const doImages   = args.includes('--images');
   const doRevert   = args.includes('--revert');
+  const skipUpdate = args.includes('--skip-update');
 
   if (doRevert) { revert(); process.exit(0); }
+
+  if (!wikiOnly && !skipUpdate) refreshWfcd();
 
   if (!fs.existsSync(DATA_ITEMS)) {
     console.error('data-items.js not found at ' + DATA_ITEMS);

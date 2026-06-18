@@ -4687,7 +4687,7 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
   const cardCls = isMax ? 'maxed' : rank > 0 ? 'partial' : copies > 0 ? 'acquired' : '';
   const ename     = jsStr(name);
   const _ls = ARCANE_LEVEL_STATS?.[name];
-  const desc = _ls ? _ls[_ls.length - 1].join('\n') : '';
+  const desc = _ls?.length ? _ls[_ls.length - 1].join('\n') : '';
   const pct       = (copies / maxCopies * 100).toFixed(1);
 
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(modMarketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
