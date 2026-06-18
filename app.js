@@ -3775,7 +3775,8 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(marketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
   const _clOn = incarnonGenesis ? (inCl || isInIncarnonChecklist(name)) : inCl;
   const _clClick = incarnonGenesis ? `openChecklistMenu(event,'${tab}','${ename}')` : `toggleChecklist('${tab}','${ename}')`;
-  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div><button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
+  const swapBtn = name === 'Sirius & Orion' ? `<button class="card-addlist" onclick="toggleSiriusOrionImg(this)" title="Switch Sirius / Orion">⇄</button>` : '';
+  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div>${swapBtn}<button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
   const slider = `<div class="card-row">
     <span class="rank-num">${rank}</span>
     <input class="rank-slider" type="range" min="0" max="${maxRank}"
@@ -3813,9 +3814,8 @@ ${recipe}
 
   const _imgSrc = wfTileImages ? getCardImage(tab, name, cat) : null;
   const _imgCls = (tab === 'warframes' || tab === 'intrinsics') ? 'card-wf-img' : 'card-wf-img card-wf-img--lg';
-  const _imgExtra = name === 'Sirius & Orion' ? ' onclick="toggleSiriusOrionImg(this)" style="cursor:pointer" title="Click to switch between Sirius and Orion"' : '';
   const wfImg = _imgSrc
-    ? `<img class="${_imgCls}" src="${esc(_imgSrc)}" alt="" loading="lazy"${_imgExtra} onerror="this.style.display='none'">`
+    ? `<img class="${_imgCls}" src="${esc(_imgSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">`
     : '';
   return `<div class="card${cardCls ? ' '+cardCls : ''}">
 <div class="card-front">${wfImg}
@@ -3938,7 +3938,9 @@ function wikiUrl(name) {
   return 'https://wiki.warframe.com/w/' + name.replace(/ /g, '_');
 }
 const CARD_IMAGE_TABS = new Set(['warframes', 'primary', 'secondary', 'melee', 'companions', 'compWeapons', 'vehicles', 'archWeapons', 'amps', 'intrinsics']);
-function toggleSiriusOrionImg(img) {
+function toggleSiriusOrionImg(btn) {
+  const img = btn.closest('.card').querySelector('.card-wf-img');
+  if (!img) return;
   img.src = img.src.includes('Orion') ? 'Images/warframes/SiriusHelmet.png' : 'Images/warframes/OrionHelmet.png';
 }
 function getCardImage(tab, name, cat) {
