@@ -4053,7 +4053,7 @@ function updateTabStat() {
   if (['starChart','summary','checklist','ducats','kitgunBuilder'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
-    for (const [name,, , maxRank] of MODS) {
+    for (const { name, maxRank } of MODS) {
       const rank = getModRank(name);
       const isOwn = rank > 0 || !!progress[modAqKey(name)];
       if (isOwn) owned++;
@@ -4409,7 +4409,7 @@ function renderSummary() {
   if (!maCollapsed) {
     const modTotal = MODS.length;
     let modOwned = 0, modMaxed = 0;
-    for (const [name,,, maxRank] of MODS) {
+    for (const { name, maxRank } of MODS) {
       const rank = progress[modKey(name)] || 0;
       const isOwn = rank > 0 || !!progress[modAqKey(name)];
       if (isOwn) modOwned++;
