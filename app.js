@@ -737,7 +737,6 @@ function blpGetItems() {
   }
   return items
     .filter(item => {
-      if (!OVERFRAME_MAP.get(item[0])) return false;
       if (search && !item[0].toLowerCase().includes(search)) return false;
       return true;
     })
@@ -858,13 +857,18 @@ function blpPolBadgeHtml(effect) {
 // Aura matching polarity doubles the capacity contribution.
 function blpComputeCapacity(build) {
   if (!build) return { used: 0, total: 0 };
-  const itemRank = _blpSubForm
+  const isWfSubForm   = _blpSubForm && blpCurrentExaltedType() === 'warframe';
+  const isDualReactor = isWfSubForm && _blpItem === 'Sirius & Orion';
+  // Warframe sub-forms share the main build's rank; weapon sub-forms have their own
+  const itemRank = (_blpSubForm && !isWfSubForm)
     ? (build.subForms[_blpSubForm]?.itemRank ?? 30)
     : (build.itemRank ?? blpItemMaxRank());
-  const baseCapacity = _blpSubForm
-    ? itemRank * 2  // exalted weapons always have Orokin Catalyst
-    : itemRank * (build.potatoed ? 2 : 1);
   const data         = _blpSubForm ? (build.subForms[_blpSubForm] || null) : build;
+  // Sirius & Orion each have an independent Orokin Reactor; other wf sub-forms share the main
+  const potatoed     = isDualReactor ? (data?.potatoed ?? false) : build.potatoed;
+  const baseCapacity = (_blpSubForm && !isWfSubForm)
+    ? itemRank * 2  // exalted weapons always have Orokin Catalyst
+    : itemRank * (potatoed ? 2 : 1);
   const slots        = data?.slots || [];
 
   let auraBonus   = 0;
@@ -995,7 +999,8 @@ function blpRenderEditor() {
   }
 
   const exalted        = blpGetActiveExalted(_blpItem);
-  const mainLabel      = blpResolvedTab() === 'companions' ? 'Companion' : 'Warframe';
+  const mainLabel      = exalted?.[0]?.mainLabel
+    ?? (blpResolvedTab() === 'companions' ? 'Companion' : 'Warframe');
   const subFormHtml = exalted
     ? `<div id="blp-subform-strip">
         <button class="blp-subform-btn${_blpSubForm === null ? ' active' : ''}" onclick="blpSetSubForm(null)">${mainLabel}</button>
@@ -1020,7 +1025,9 @@ function blpRenderEditor() {
   const _itemRank = build.itemRank ?? _maxRank;
   const _cap      = blpComputeCapacity(build);
 
-  const _sfRank = _blpSubForm ? (data?.itemRank ?? 30) : null;
+  const isWfSubForm   = _blpSubForm && blpCurrentExaltedType() === 'warframe';
+  const isDualReactor = isWfSubForm && _blpItem === 'Sirius & Orion';
+  const _sfRank = (_blpSubForm && !isWfSubForm) ? (data?.itemRank ?? 30) : null;
   const metaBarHtml = !_blpSubForm
     ? `<div id="blp-meta-bar">
         <button id="blp-potato-btn" class="blp-potato-btn${build.potatoed ? ' active' : ''}"
@@ -1038,18 +1045,37 @@ function blpRenderEditor() {
          <span class="blp-cap-sep">/</span>
          <span id="blp-cap-total">${_cap.total}</span>
        </div>`
-    : `<div id="blp-capacity-bar">
-         <span class="blp-cap-label">Rank</span>
-         <input type="range" id="blp-rank-slider" min="0" max="30" value="${_sfRank}"
-           oninput="blpSetSubFormRank(+this.value)">
-         <span id="blp-rank-val">${_sfRank}</span>
-         <span class="blp-cap-sep">·</span>
-         <span class="blp-cap-label">Capacity</span>
-         <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
-         <span class="blp-cap-sep">/</span>
-         <span id="blp-cap-total">${_cap.total}</span>
-         <span class="blp-cap-sep">·</span><span class="blp-cap-label" title="Exalted weapons always have an Orokin Catalyst installed">◇ Catalyst</span>
-       </div>`;
+    : isDualReactor
+      ? `<div id="blp-meta-bar">
+          <button id="blp-potato-btn" class="blp-potato-btn${data?.potatoed ? ' active' : ''}"
+            onclick="blpToggleSubFormPotato()" title="Double mod capacity">${blpPotatoLabel()}</button>
+          <span id="blp-forma-count">◆ ${blpSubFormFormaCount()} Forma</span>
+         </div>
+         <div id="blp-capacity-bar">
+           <span class="blp-cap-label">Capacity</span>
+           <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
+           <span class="blp-cap-sep">/</span>
+           <span id="blp-cap-total">${_cap.total}</span>
+         </div>`
+      : isWfSubForm
+        ? `<div id="blp-capacity-bar">
+             <span class="blp-cap-label">Capacity</span>
+             <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
+             <span class="blp-cap-sep">/</span>
+             <span id="blp-cap-total">${_cap.total}</span>
+           </div>`
+        : `<div id="blp-capacity-bar">
+             <span class="blp-cap-label">Rank</span>
+             <input type="range" id="blp-rank-slider" min="0" max="30" value="${_sfRank}"
+               oninput="blpSetSubFormRank(+this.value)">
+             <span id="blp-rank-val">${_sfRank}</span>
+             <span class="blp-cap-sep">·</span>
+             <span class="blp-cap-label">Capacity</span>
+             <span id="blp-cap-used" class="${_cap.used > _cap.total ? 'cap-over' : ''}">${_cap.used}</span>
+             <span class="blp-cap-sep">/</span>
+             <span id="blp-cap-total">${_cap.total}</span>
+             <span class="blp-cap-sep">·</span><span class="blp-cap-label" title="Exalted weapons always have an Orokin Catalyst installed">◇ Catalyst</span>
+           </div>`;
 
   inner.innerHTML = `
     <div id="blp-item-title">${esc(_blpItem)}</div>
@@ -1067,7 +1093,7 @@ function blpRenderEditor() {
     ${blpAbilitiesHtml(build)}
     ${blpComponentsHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
-    ${blpResolvedTab() === 'warframes' && !_blpSubForm ? blpShardsHtml(build) : ''}
+    ${blpResolvedTab() === 'warframes' && (!_blpSubForm || _blpItem === 'Sirius & Orion') ? blpShardsHtml(build) : ''}
     <div id="blp-actions">
       <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
@@ -1122,6 +1148,27 @@ function blpTogglePotato() {
   const btn = document.getElementById('blp-potato-btn');
   if (btn) btn.classList.toggle('active', build.potatoed);
   blpRefreshCapacity();
+}
+
+// Toggle the Orokin Reactor on the active warframe sub-form (Sirius & Orion only)
+function blpToggleSubFormPotato() {
+  const data = blpCurrentOrCreate();
+  if (!data) return;
+  data.potatoed = !data.potatoed;
+  saveMyBuilds();
+  const btn = document.getElementById('blp-potato-btn');
+  if (btn) btn.classList.toggle('active', data.potatoed);
+  blpRefreshCapacity();
+}
+
+// Forma count for the active sub-form (used in the Orion meta bar)
+function blpSubFormFormaCount() {
+  if (!_blpItem || !_blpSubForm) return 0;
+  const build = blpCurrentBuild();
+  const data  = build?.subForms?.[_blpSubForm] || null;
+  if (!data) return 0;
+  if (!data.isModified && data.baseBuildId != null && data.formas != null) return data.formas;
+  return (data.slots || []).filter(s => (s?.polarity || 0) !== 0).length;
 }
 
 function blpComponentsHtml(build) {
@@ -1338,6 +1385,7 @@ const WARFRAME_EXALTED = new Map([
   ['Mesa',      [{name: 'Regulators',       type: 'secondary', ofId: 2399, ofPrimeId: 2405}]],
   ['Sevagoth',  [{name: "Sevagoth's Shadow",type: 'warframe',  ofId: 5444, ofPrimeId: 6634},
                  {name: 'Shadow Claws',     type: 'melee',     ofId: 5442, ofPrimeId: 6633}]],
+  ['Sirius & Orion', [{name: 'Orion',       type: 'warframe',  mainLabel: 'Sirius'}]],
   ['Temple',    [{name: 'Lizzie',           type: 'primary',   ofId: 7360}]],
   ['Titania',   [{name: 'Dex Pixia',        type: 'secondary', ofId: 2402, ofPrimeId: 4303},
                  {name: 'Diwata',           type: 'melee',     ofId: 4322, ofPrimeId: 4304}]],
@@ -1563,7 +1611,9 @@ const HELMINTH_FORCED_SLOT = {
 
 // Returns a predicate for whether a Helminth ability is valid for the given slot index.
 function blpHelminthFilter(slot) {
-  const baseAbilities = (typeof WARFRAME_ABILITIES !== 'undefined' && WARFRAME_ABILITIES[_blpItem]) || [];
+  const mainLabel     = blpGetActiveExalted()?.[0]?.mainLabel;
+  const abilityKey    = mainLabel ?? _blpItem;
+  const baseAbilities = (typeof WARFRAME_ABILITIES !== 'undefined' && WARFRAME_ABILITIES[abilityKey]) || [];
   const ownSet        = new Set(baseAbilities);
   const forcedAbility = HELMINTH_FORCED_SLOT[_blpItem];
   const forcedSlot    = forcedAbility != null ? baseAbilities.indexOf(forcedAbility) : -1;
@@ -1575,8 +1625,27 @@ function blpHelminthFilter(slot) {
 }
 
 function blpAbilitiesHtml(build) {
-  if (!_blpItem || _blpSubForm) return '';
-  const baseAbilities = typeof WARFRAME_ABILITIES !== 'undefined' ? WARFRAME_ABILITIES[_blpItem] : null;
+  if (!_blpItem) return '';
+
+  if (_blpSubForm) {
+    // Show read-only abilities for warframe-type sub-forms (e.g. Orion in Sirius & Orion)
+    if (blpCurrentExaltedType() !== 'warframe') return '';
+    const abilities = typeof WARFRAME_ABILITIES !== 'undefined' ? WARFRAME_ABILITIES[_blpSubForm] : null;
+    if (!abilities) return '';
+    return `<div id="blp-abilities">${
+      abilities.map((name, i) =>
+        `<div class="blp-ability-tile">
+          <span class="blp-ability-num">${i + 1}</span>
+          <span class="blp-ability-name">${esc(name)}</span>
+        </div>`
+      ).join('')
+    }</div>`;
+  }
+
+  // For dual-form warframes, use mainLabel as the ability key (e.g. 'Sirius' for 'Sirius & Orion')
+  const mainLabel     = blpGetActiveExalted()?.[0]?.mainLabel;
+  const abilityKey    = mainLabel ?? _blpItem;
+  const baseAbilities = typeof WARFRAME_ABILITIES !== 'undefined' ? WARFRAME_ABILITIES[abilityKey] : null;
   if (!baseAbilities || _blpItem === 'Helminth') return '';
 
   const isWarframe  = blpResolvedTab() === 'warframes';
@@ -1672,8 +1741,10 @@ function blpPickHelminthAbility(slot, name) {
   if (!build) return;
 
   // Remove any mods that augment the ability being replaced by this helminth slot
-  const base = _blpItem.replace(' Prime', '').replace(' Umbra', '');
-  const abilities = WARFRAME_ABILITIES[_blpItem] || WARFRAME_ABILITIES[base] || [];
+  const _mainLabel  = blpGetActiveExalted()?.[0]?.mainLabel;
+  const _abilityKey = _mainLabel ?? _blpItem;
+  const base        = _abilityKey.replace(' Prime', '').replace(' Umbra', '');
+  const abilities   = WARFRAME_ABILITIES[_abilityKey] || WARFRAME_ABILITIES[base] || [];
   const replacedAbility = abilities[slot] ?? null;
   const removed = [];
   if (replacedAbility && build.slots) {
@@ -1988,8 +2059,10 @@ function blpSearchMod(slotIdx, query) {
       // Work out which native ability was replaced by helminth (requires WARFRAME_ABILITIES)
       let replacedAbility = null;
       if (helminthSlot !== null && _blpItem) {
-        const base = _blpItem.replace(' Prime', '').replace(' Umbra', '');
-        replacedAbility = (WARFRAME_ABILITIES[_blpItem] || WARFRAME_ABILITIES[base] || [])[helminthSlot] ?? null;
+        const _ml  = blpGetActiveExalted()?.[0]?.mainLabel;
+        const _ak  = _ml ?? _blpItem;
+        const base = _ak.replace(' Prime', '').replace(' Umbra', '');
+        replacedAbility = (WARFRAME_ABILITIES[_ak] || WARFRAME_ABILITIES[base] || [])[helminthSlot] ?? null;
       }
       const blockedAbilities = new Set();
       if (build?.slots) {
@@ -3700,8 +3773,6 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const _mr = WEAPON_MR_TABS.has(tab) && typeof WEAPON_MR !== 'undefined' ? (WEAPON_MR.get(name) ?? -1) : -1;
   const mrTag = _mr > 0 ? `<div class="card-mr">MR ${_mr}</div>` : '';
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(marketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
-  const _ofId = typeof OVERFRAME_MAP !== 'undefined' ? OVERFRAME_MAP.get(name) : null;
-  const buildsTag = _ofId ? `<button class="card-builds" onclick="openBuildsPanel('${ename}','${_ofId}')">Builds</button>` : '';
   const _clOn = incarnonGenesis ? (inCl || isInIncarnonChecklist(name)) : inCl;
   const _clClick = incarnonGenesis ? `openChecklistMenu(event,'${tab}','${ename}')` : `toggleChecklist('${tab}','${ename}')`;
   const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div><button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
@@ -3721,7 +3792,7 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
       <button class="qbtn mx" onclick="setRank('${tab}','${ename}',${maxRank})">Max</button>
       <button class="qbtn zr" onclick="setRank('${tab}','${ename}',0)">0</button>
     </div>`;
-  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}${buildsTag}</div>`;
+  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}</div>`;
   const recipe = hasRecipe ? buildRecipeBack(name) : '';
 
   if (listMode) {
@@ -5787,7 +5858,6 @@ async function syncToCloud() {
         ui_prefs[k] = localStorage.getItem(k);
       }
     }
-
     const { error } = await _sb.from('saves').upsert({
       user_id:      currentUser.id,
       progress,
@@ -5804,6 +5874,7 @@ async function syncToCloud() {
     });
 
     if (!error) localStorage.setItem('wf-cloud-ts', String(Date.now()));
+    else console.warn('[WF Tracker] syncToCloud error:', error.message);
   } catch (e) {
     console.warn('[WF Tracker] syncToCloud failed:', e.message);
   }

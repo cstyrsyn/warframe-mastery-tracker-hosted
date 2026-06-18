@@ -35,6 +35,8 @@ const INCARNON_WEAPONS = new Map([
   ['Sybaris','Sybaris Incarnon Genesis'],
   ['Dex Sybaris','Sybaris Incarnon Genesis'],
   ['Sybaris Prime','Sybaris Incarnon Genesis'],
+  ['Vectis','Vectis Incarnon Genesis'],
+  ['Vectis Prime','Vectis Incarnon Genesis'],
   // Secondary
   ['Lato','Lato Incarnon Genesis'],
   ['Lato Vandal','Lato Incarnon Genesis'],
@@ -59,6 +61,9 @@ const INCARNON_WEAPONS = new Map([
   ['Cestra','Cestra Incarnon Genesis'],
   ['Sicarus','Sicarus Incarnon Genesis'],
   ['Sicarus Prime','Sicarus Incarnon Genesis'],
+  ['Ballistica','Ballistica Incarnon Genesis'],
+  ['Ballistica Prime','Ballistica Incarnon Genesis'],
+  ['Stug','Stug Incarnon Genesis'],
   // Melee
   ['Skana','Skana Incarnon Genesis'],
   ['Prisma Skana','Skana Incarnon Genesis'],
@@ -81,6 +86,10 @@ const INCARNON_WEAPONS = new Map([
   ['Hate','Hate Incarnon Genesis'],
   ['Okina','Okina Incarnon Genesis'],
   ['Okina Prime','Okina Incarnon Genesis'],
+  ['Obex','Obex Incarnon Genesis'],
+  ['Prisma Obex','Obex Incarnon Genesis'],
+  ['Destreza','Destreza Incarnon Genesis'],
+  ['Destreza Prime','Destreza Incarnon Genesis'],
 ]);
 
 // ── BLUEPRINT COMPONENTS ─────────────────────────────────────────
@@ -125,6 +134,11 @@ const INCARNON_REQUIREMENTS = new Map([
   ["Torid Incarnon Genesis",[["Pathos Clamp",20],["Rune Marrow",60],["Maw Fang",20]]],
   ["Vasto Incarnon Genesis",[["Pathos Clamp",20],["Yao Shrub",70],["Saggen Pearl",150]]],
   ["Zylok Incarnon Genesis",[["Pathos Clamp",20],["Yao Shrub",70],["Nacreous Pebble",100]]],
+  ["Vectis Incarnon Genesis",[["Pathos Clamp",20],["Dracroot",70],["Ariette Scale",300]]],
+  ["Obex Incarnon Genesis",[["Pathos Clamp",20],["Dracroot",70],["Ariette Scale",300]]],
+  ["Destreza Incarnon Genesis",[["Pathos Clamp",20],["Dracroot",70],["Ariette Scale",300]]],
+  ["Ballistica Incarnon Genesis",[["Pathos Clamp",20],["Dracroot",70],["Ariette Scale",300]]],
+  ["Stug Incarnon Genesis",[["Pathos Clamp",20],["Dracroot",70],["Ariette Scale",300]]],
 ]);
 
 // Maps blueprint/item name → {currencyName: amount} for vendor-purchased blueprints.
@@ -295,6 +309,28 @@ const CURRENCIES = new Map([
   ["Voruna Chassis",{"Lua Thrax Plasm":25}],
   ["Voruna Neuroptics",{"Lua Thrax Plasm":25}],
   ["Voruna Systems",{"Lua Thrax Plasm":25}],
+  // Sirius & Orion - Emerald Talents
+  ["Sirius & Orion Blueprint",{"Emerald Talents":275}],
+  ["Sirius & Orion Chassis",{"Emerald Talents":90}],
+  ["Sirius & Orion Neuroptics",{"Emerald Talents":90}],
+  ["Sirius & Orion Systems",{"Emerald Talents":90}],
+  // Pride - Emerald Talents
+  ["Pride Blueprint",{"Emerald Talents":90}],
+  ["Pride Handle",{"Emerald Talents":45}],
+  ["Pride Blade",{"Emerald Talents":45}],
+  // War Prime - Emerald Talents
+  ["War Prime",{"Emerald Talents":12}],
+  // Sirius & Orion - Crimson Talents
+  ["Sirius & Orion Blueprint",{"Crimson Talents":275}],
+  ["Sirius & Orion Chassis",{"Crimson Talents":90}],
+  ["Sirius & Orion Neuroptics",{"Crimson Talents":90}],
+  ["Sirius & Orion Systems",{"Crimson Talents":90}],
+  // Wrath - Crimson Talents
+  ["Wrath Blueprint",{"Crimson Talents":90}],
+  ["Wrath Handle",{"Crimson Talents":45}],
+  ["Wrath Blade",{"Crimson Talents":45}],
+  // War Prime - Crimson Talents
+  ["War Prime",{"Crimson Talents":12}],
 ]);
 
 const BLUEPRINTS = new Map([

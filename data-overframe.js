@@ -20,6 +20,7 @@ const OF_POLARITY = new Map([
 // Maps item name → 4-digit Overframe arsenal ID
 // URL: https://overframe.gg/items/arsenal/{id}/
 const OVERFRAME_MAP = new Map([
+  // Warframe
   ["Ash","0042"],
   ["Atlas","0013"],
   ["Banshee","0008"],
@@ -70,6 +71,7 @@ const OVERFRAME_MAP = new Map([
   ["Rhino","0049"],
   ["Saryn","0052"],
   ["Sevagoth","5429"],
+  ["Sirius & Orion","7962"],
   ["Styanax","5927"],
   ["Temple","7285"],
   ["Titania","0021"],
@@ -122,6 +124,7 @@ const OVERFRAME_MAP = new Map([
   ["Rhino Prime","0050"],
   ["Saryn Prime","0053"],
   ["Sevagoth Prime","6615"],
+  ["Styanax Prime","7954"],
   ["Titania Prime","4305"],
   ["Trinity Prime","0059"],
   ["Valkyr Prime","0012"],
@@ -134,6 +137,7 @@ const OVERFRAME_MAP = new Map([
   ["Yareli Prime","7376"],
   ["Zephyr Prime","0055"],
   ["Excalibur Umbra","0020"],
+  // Companion
   ["Carrier","2235"],
   ["Dethcube","2236"],
   ["Diriga","2234"],
@@ -188,13 +192,16 @@ const OVERFRAME_MAP = new Map([
   ["Nautilus Prime","6628"],
   ["Shade Prime","6128"],
   ["Wyrm Prime","2241"],
+  // Archwing
   ["Amesha","0007"],
   ["Elytron","0003"],
   ["Itzal","0006"],
   ["Odonata","0005"],
   ["Odonata Prime","0004"],
+  // Necramech
   ["Voidrig","5158"],
   ["Bonewidow","5276"],
+  // Primary
   ["Acceltra","2717"],
   ["Aeolak","5833"],
   ["Alternox","5829"],
@@ -387,6 +394,8 @@ const OVERFRAME_MAP = new Map([
   ["Vadarya Prime","7468"],
   ["Vectis Prime","1089"],
   ["Zhuge Prime","2681"],
+  ["Afentis Prime","7984"],
+  // Secondary
   ["Acrid","0906"],
   ["Angstrum","0944"],
   ["Arca Scisco","0946"],
@@ -505,6 +514,7 @@ const OVERFRAME_MAP = new Map([
   ["Aksomati Prime","4235"],
   ["Akstiletto Prime","1209"],
   ["Akvasto Prime","1444"],
+  ["Athodai Prime","7990"],
   ["Ballistica Prime","1210"],
   ["Bronco Prime","1194"],
   ["Epitaph Prime","6631"],
@@ -538,6 +548,7 @@ const OVERFRAME_MAP = new Map([
   ["Tenet Diplos","5567"],
   ["Tenet Plinx","5996"],
   ["Tenet Spirex","5569"],
+  // Melee
   ["Azothane","6178"],
   ["Broken War","1182"],
   ["Cronus","1107"],
@@ -708,6 +719,8 @@ const OVERFRAME_MAP = new Map([
   ["Ripkas","0971"],
   ["Venka","1106"],
   ["Keratinos","5114"],
+  ["Pride","7988"],
+  ["Wrath","7986"],
   ["Balla","2548"],
   ["Cyath","2547"],
   ["Dehtat","2546"],
@@ -832,6 +845,7 @@ const OVERFRAME_MAP = new Map([
 // 0=none 1=Madurai 2=Vazarin 3=Naramon 4=Zenurik 5=Penjaga 7=Unairu 8=Umbra 9=Omni
 // ─────────────────────────────────────────────
 const DEFAULT_POLARITIES = {
+  // Warframe
   "Ash":[1,[0,0,0,1,0,0,0,1]],
   "Atlas":[1,[1,0,0,2,0,0,3,0]],
   "Banshee":[1,[0,0,0,1,0,0,0,1]],
@@ -882,6 +896,7 @@ const DEFAULT_POLARITIES = {
   "Rhino":[1,[0,0,0,2,0,0,0,2]],
   "Saryn":[2,[0,0,0,2,0,0,0,3]],
   "Sevagoth":[0,[0,0,0,1,0,0,0,2]],
+  "Sirius & Orion":[2,[3,0,0,0,2,0,0,9]],
   "Styanax":[3,[3,0,0,0,2,0,0,0]],
   "Temple":[3,[2,0,0,0,0,0,0,1]],
   "Titania":[1,[0,1,2,0,0,0,0,0]],
@@ -934,6 +949,7 @@ const DEFAULT_POLARITIES = {
   "Rhino Prime":[1,[0,3,0,2,0,0,0,2]],
   "Saryn Prime":[2,[0,1,0,2,0,0,0,3]],
   "Sevagoth Prime":[0,[0,0,0,1,3,0,0,2]],
+  "Styanax Prime":[3,[0,0,0,2,0,3,0,3]],
   "Titania Prime":[1,[0,1,2,0,1,3,0,0]],
   "Trinity Prime":[2,[0,0,3,2,0,0,1,2]],
   "Valkyr Prime":[1,[0,0,0,1,0,1,0,1]],
@@ -946,6 +962,7 @@ const DEFAULT_POLARITIES = {
   "Yareli Prime":[1,[0,0,2,0,3,0,0,1]],
   "Zephyr Prime":[2,[0,0,0,3,2,1,0,1]],
   "Excalibur Umbra":[1,[0,0,0,1,0,8,8,8]],
+  // Companion
   "Carrier":[5,0,0,0,5,5,0,2,0,5],
   "Dethcube":[5,0,0,0,5,5,0,0,0,5],
   "Diriga":[5,0,0,0,5,5,0,0,0,5],
@@ -975,12 +992,15 @@ const DEFAULT_POLARITIES = {
   "Nautilus Prime":[5,0,0,2,5,5,0,0,0,5],
   "Shade Prime":[5,0,0,5,5,5,0,0,3,5],
   "Wyrm Prime":[5,0,0,0,5,5,0,0,0,5],
+  // Archwing
   "Amesha":[2,0,0,3,0,0,0,1],
   "Itzal":[2,0,0,3,0,0,0,1],
   "Odonata":[2,0,0,3,0,0,0,1],
   "Odonata Prime":[2,0,0,3,0,0,3,1],
+  // Necramech
   "Voidrig":[0,0,0,0,0,0,0,0,3,0,2,1],
   "Bonewidow":[0,0,0,1,0,0,0,2,0,0,0,2],
+  // Weapon
   "Acceltra":[1,[0,0,0,0,0,0,0,3]],
   "Argonak":[1,[1,3,0,0,0,0,0,0]],
   "AX-52":[1,[0,0,0,0,0,1,1,0]],
@@ -1020,6 +1040,7 @@ const DEFAULT_POLARITIES = {
   "Prisma Lenz":[1,[3,3,0,0,0,0,0,1]],
   "Zhuge":[3,[1,0,0,0,0,0,0,0]],
   "Afentis":[1,[0,0,3,0,0,0,1,1]],
+  "Afentis Prime":[1,[0,0,3,0,0,0,1,1]],
   "Scourge":[1,[0,0,0,0,0,0,3,1]],
   "Secura Penta":[3,[0,3,2,0,1,0,0,0]],
   "Simulor":[1,[0,0,0,2,0,0,3,0]],
@@ -1188,6 +1209,8 @@ const DEFAULT_POLARITIES = {
   "Caustacyst":[4,[0,1,0,0,0,0,0,0],0],
   "Ether Reaper":[4,[0,1,0,0,0,0,0,0],0],
   "Harmony":[3,[1,2,0,0,0,0,0,0],0],
+  "Pride":[1,[0,0,0,0,0,0,0,1],0],
+  "Wrath":[1,[0,0,0,0,0,0,0,1],0],
   "Ekhein":[1,[0,0,0,1,0,0,0,0],0],
   "Heliocor":[1,[0,0,0,0,0,0,0,0],0],
   "Jat Kittag":[1,[0,0,0,0,0,0,3,1],0],
@@ -1445,6 +1468,7 @@ const DEFAULT_POLARITIES = {
   "Acrid":[1,[0,0,0,0,0,0,0,0]],
   "Arca Scisco":[3,[0,0,0,0,1,0,1,0]],
   "Athodai":[3,[0,0,0,0,0,1,0,0]],
+  "Athodai Prime":[3,[0,0,0,0,1,1,1,0]],
   "Azima":[1,[3,0,0,1,0,0,0,0]],
   "Bolto":[3,[2,0,0,0,0,0,0,0]],
   "Catabolyst":[1,[0,0,0,0,1,0,0,0]],

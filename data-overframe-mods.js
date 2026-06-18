@@ -1505,7 +1505,15 @@ const OVERFRAME_MODS = new Map([
   [7660,'Truth\'s Flame'],
   [7661,'Primed Venomous Clip'],
   [7662,'Sentient Incision'],
-  [7663,'Velox Conclusion']
+  [7663,'Velox Conclusion'],
+  [7998,'Kumihimo Loading'],
+  [7999,'Reroot Rampage'],
+  [8000,'Noctua Swarm'],
+  [8001,'Rhythm Guard'],
+  [8002,'Melee Assimilation'],
+  [8003,'Secondary Cryogenic'],
+  [8004,'Arcane Sculptor'],
+  [8005,'Primary Compression'],
 ]);
 
 

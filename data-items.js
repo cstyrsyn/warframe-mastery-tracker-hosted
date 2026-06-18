@@ -51,6 +51,7 @@ const WARFRAMES = [
   ['Rhino','Base','Boss: The Jackal (Venus)',30],
   ['Saryn','Base','Boss: Kela De Thaym (Sedna)',30],
   ['Sevagoth','Base','Quest: Call of the Tempestarii & Void Storms',30],
+  ['Sirius & Orion','Base','TODO: obtain method',30],
   ['Styanax','Base','Kahls Garrison: Chipper inventory',30],
   ['Temple','Base','Mission: Stage Defense (Höllvania)',30],
   ['Titania','Base','Quest: The Silver Grove',30],
@@ -103,6 +104,7 @@ const WARFRAMES = [
   ['Rhino Prime','Prime','Relics',30,1],
   ['Saryn Prime','Prime','Relics',30,1],
   ['Sevagoth Prime','Prime','Relics',30,1],
+  ['Styanax Prime','Prime','Relics',30,1],
   ['Titania Prime','Prime','Relics',30,1],
   ['Trinity Prime','Prime','Relics',30,1],
   ['Valkyr Prime','Prime','Relics (Perma-unvaulted)',30,1],
@@ -140,7 +142,7 @@ const CIRCUIT_WF_SCHEDULE = [
   ['Garuda','Baruuk','Hildryn'],
 ];
 
-// 8-week rotating Circuit incarnon genesis schedule (index 0 = Week 1)
+// 9-week rotating Circuit incarnon genesis schedule (index 0 = Week 1)
 const CIRCUIT_INCARNON_SCHEDULE = [
   ['Braton Incarnon Genesis','Lato Incarnon Genesis','Skana Incarnon Genesis','Paris Incarnon Genesis','Kunai Incarnon Genesis'],
   ['Boar Incarnon Genesis','Gammacor Incarnon Genesis','Angstrum Incarnon Genesis','Gorgon Incarnon Genesis','Anku Incarnon Genesis'],
@@ -150,6 +152,7 @@ const CIRCUIT_INCARNON_SCHEDULE = [
   ['Ack & Brunt Incarnon Genesis','Soma Incarnon Genesis','Vasto Incarnon Genesis','Nami Solo Incarnon Genesis','Burston Incarnon Genesis'],
   ['Zylok Incarnon Genesis','Sibear Incarnon Genesis','Dread Incarnon Genesis','Despair Incarnon Genesis','Hate Incarnon Genesis'],
   ['Dera Incarnon Genesis','Sybaris Incarnon Genesis','Cestra Incarnon Genesis','Sicarus Incarnon Genesis','Okina Incarnon Genesis'],
+  ['Vectis Incarnon Genesis','Stug Incarnon Genesis','Ballistica Incarnon Genesis','Obex Incarnon Genesis','Destreza Incarnon Genesis'],
 ];
 
 // Prime warframes currently in the vault
@@ -160,8 +163,9 @@ const VAULTED_WF = new Set([
   'Inaros Prime','Ivara Prime','Khora Prime','Limbo Prime','Loki Prime',
   'Mag Prime','Mesa Prime','Mirage Prime','Nekros Prime','Nezha Prime',
   'Nidus Prime','Nova Prime','Oberon Prime','Octavia Prime','Protea Prime',
-  'Revenant Prime','Rhino Prime','Saryn Prime','Titania Prime','Trinity Prime',
-  'Vauban Prime','Volt Prime','Wisp Prime','Wukong Prime','Zephyr Prime',
+  'Revenant Prime','Rhino Prime','Saryn Prime','Sevagoth Prime','Titania Prime',
+  'Trinity Prime','Vauban Prime','Volt Prime','Wisp Prime','Wukong Prime',
+  'Zephyr Prime',
 ]);
 
 // ── COMPANIONS ───────────────────────────────────────────────────
