@@ -3813,8 +3813,9 @@ ${recipe}
 
   const _imgSrc = wfTileImages ? getCardImage(tab, name, cat) : null;
   const _imgCls = (tab === 'warframes' || tab === 'intrinsics') ? 'card-wf-img' : 'card-wf-img card-wf-img--lg';
+  const _imgExtra = name === 'Sirius & Orion' ? ' onclick="toggleSiriusOrionImg(this)" style="cursor:pointer" title="Click to switch between Sirius and Orion"' : '';
   const wfImg = _imgSrc
-    ? `<img class="${_imgCls}" src="${esc(_imgSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    ? `<img class="${_imgCls}" src="${esc(_imgSrc)}" alt="" loading="lazy"${_imgExtra} onerror="this.style.display='none'">`
     : '';
   return `<div class="card${cardCls ? ' '+cardCls : ''}">
 <div class="card-front">${wfImg}
@@ -3937,9 +3938,15 @@ function wikiUrl(name) {
   return 'https://wiki.warframe.com/w/' + name.replace(/ /g, '_');
 }
 const CARD_IMAGE_TABS = new Set(['warframes', 'primary', 'secondary', 'melee', 'companions', 'compWeapons', 'vehicles', 'archWeapons', 'amps', 'intrinsics']);
+function toggleSiriusOrionImg(img) {
+  img.src = img.src.includes('Orion') ? 'Images/warframes/SiriusHelmet.png' : 'Images/warframes/OrionHelmet.png';
+}
 function getCardImage(tab, name, cat) {
   const base = name.replace(/ /g, '');
-  if (tab === 'warframes') return 'Images/warframes/'  + base + 'Helmet.png';
+  if (tab === 'warframes') {
+    if (name === 'Sirius & Orion') return 'Images/warframes/SiriusHelmet.png';
+    return 'Images/warframes/' + base + 'Helmet.png';
+  }
   if (tab === 'primary')   return 'Images/primary/'    + base + '.png';
   if (tab === 'secondary') return 'Images/secondary/'  + base + '.png';
   if (tab === 'melee')        return 'Images/melee/'         + base + '.png';
