@@ -114,11 +114,12 @@ function fetch(url) {
   });
 }
 
-function fetchBinary(url) {
+function fetchBinary(url, notFoundOk = false) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'WFMasteryTracker/1.0' } }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location)
-        return fetchBinary(res.headers.location).then(resolve).catch(reject);
+        return fetchBinary(res.headers.location, notFoundOk).then(resolve).catch(reject);
+      if (res.statusCode === 404 && notFoundOk) { res.resume(); return resolve(null); }
       if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
       const chunks = [];
       res.on('data', c => chunks.push(c));
@@ -129,12 +130,9 @@ function fetchBinary(url) {
 
 async function downloadWikiImage(wikiFilename, destPath) {
   if (fs.existsSync(destPath)) return 'exists';
-  const apiUrl = `https://wiki.warframe.com/w/api.php?action=query&titles=File:${encodeURIComponent(wikiFilename)}&prop=imageinfo&iiprop=url&format=json`;
-  const json = JSON.parse(await fetch(apiUrl));
-  const page = Object.values(json?.query?.pages || {})[0];
-  const url  = page?.imageinfo?.[0]?.url;
-  if (!url) return 'not-found';
-  const data = await fetchBinary(url);
+  const url  = `https://wiki.warframe.com/w/Special:FilePath/${encodeURIComponent(wikiFilename)}`;
+  const data = await fetchBinary(url, true);
+  if (data === null) return 'not-found';
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   fs.writeFileSync(destPath, data);
   return 'downloaded';
@@ -631,30 +629,35 @@ async function main() {
   }
 
   // ── Image download ────────────────────────────────────────────────
+  // Scans all tracked warframes for missing image files — not just newly-detected ones.
   if (doImages) {
-    const imgNames = [
-      ...readyToAdd,
-      ...newPaired.map(p => p.combinedName),
-    ];
-    if (!imgNames.length) {
-      console.log('\nNo new warframes detected — nothing to download images for.');
+    const IMAGES_DIR = path.join(__dirname, '..', 'Images', 'warframes');
+    const missing = [...existing.keys()].filter(name => {
+      const dest = path.join(IMAGES_DIR, name.replace(/ /g, '') + 'Helmet.png');
+      return !fs.existsSync(dest);
+    });
+    if (!missing.length) {
+      console.log('\nAll warframe images already present.');
     } else {
-      const IMAGES_DIR = path.join(__dirname, '..', 'Images', 'warframes');
-      console.log(`\n── Downloading warframe images (${imgNames.length}) ────────────────────`);
-      for (const name of imgNames) {
-        const base     = name.replace(/ /g, '');
-        const filename = `${base}Helmet.png`;
+      let downloaded = 0, notFound = 0;
+      console.log(`\n── Downloading warframe images (${missing.length} missing) ────────────────────`);
+      for (const name of missing) {
+        const filename = name.replace(/ /g, '') + 'Helmet.png';
         const destPath = path.join(IMAGES_DIR, filename);
         try {
           const result = await downloadWikiImage(filename, destPath);
           const icon = result === 'downloaded' ? '✓' : result === 'exists' ? '=' : '?';
           console.log(`  ${icon} ${name}: ${result}`);
+          if (result === 'downloaded') downloaded++;
+          else if (result === 'not-found') notFound++;
         } catch (e) {
-          console.warn(`  ✗ ${name}: ${e.message}`);
+          console.error(`  ✗ ${name}: FAILED — ${e.message}`);
+          notFound++;
         }
       }
+      console.log(`\n  Downloaded: ${downloaded}  Not found on wiki: ${notFound}`);
     }
   }
 }
 
-main().catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+main().then(() => process.exit(0)).catch(err => { console.error('ERROR:', err.message); process.exit(1); });

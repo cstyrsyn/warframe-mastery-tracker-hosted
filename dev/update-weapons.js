@@ -9,7 +9,7 @@
 //   node dev/update-weapons.js --wiki-only  # skip WFCD
 //   node dev/update-weapons.js --all        # check both WFCD and wiki regardless
 //   node dev/update-weapons.js --apply      # write stubs into data-items.js (backs up first)
-//   node dev/update-weapons.js --images     # download images for detected new weapons
+//   node dev/update-weapons.js --images     # download images for detected new weapons (independent of --apply)
 //   node dev/update-weapons.js --revert     # restore data-items.js from latest backup
 
 'use strict';
@@ -195,11 +195,12 @@ function fetch(url) {
   });
 }
 
-function fetchBinary(url) {
+function fetchBinary(url, notFoundOk = false) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'WFMasteryTracker/1.0' } }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location)
-        return fetchBinary(res.headers.location).then(resolve).catch(reject);
+        return fetchBinary(res.headers.location, notFoundOk).then(resolve).catch(reject);
+      if (res.statusCode === 404 && notFoundOk) { res.resume(); return resolve(null); }
       if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
       const chunks = [];
       res.on('data', c => chunks.push(c));
@@ -210,12 +211,9 @@ function fetchBinary(url) {
 
 async function downloadWikiImage(wikiFilename, destPath) {
   if (fs.existsSync(destPath)) return 'exists';
-  const apiUrl = `https://wiki.warframe.com/w/api.php?action=query&titles=File:${encodeURIComponent(wikiFilename)}&prop=imageinfo&iiprop=url&format=json`;
-  const json = JSON.parse(await fetch(apiUrl));
-  const page = Object.values(json?.query?.pages || {})[0];
-  const url  = page?.imageinfo?.[0]?.url;
-  if (!url) return 'not-found';
-  const data = await fetchBinary(url);
+  const url  = `https://wiki.warframe.com/w/Special:FilePath/${encodeURIComponent(wikiFilename)}`;
+  const data = await fetchBinary(url, true);
+  if (data === null) return 'not-found';
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   fs.writeFileSync(destPath, data);
   return 'downloaded';
@@ -554,77 +552,80 @@ async function main() {
 
   if (totalNew === 0) {
     console.log('\nAll weapon arrays are up to date.');
-    return;
+    if (!doImages) return;
   }
 
-  console.log('\n' + '─'.repeat(60));
-  if (!doApply) {
-    console.log(`${totalNew} new weapon(s) found. Copy stubs above into data-items.js and fill in the obtain method.`);
-    console.log('Run with --apply to insert stubs automatically (obtain method will be set to TODO).');
-    return;
+  if (totalNew > 0) {
+    console.log('\n' + '─'.repeat(60));
+    if (!doApply) {
+      console.log(`${totalNew} new weapon(s) found. Copy stubs above into data-items.js and fill in the obtain method.`);
+      console.log('Run with --apply to insert stubs automatically (obtain method will be set to TODO).');
+    }
   }
 
   // ── Apply ──────────────────────────────────────────────────────────────────
-  console.log('\nApplying changes…');
-  saveBackup();
+  if (doApply && totalNew > 0) {
+    console.log('\nApplying changes…');
+    saveBackup();
 
-  const stubsByVar = new Map();
-  for (const cfg of CONFIGS) {
-    const wfcd = wfcdResults.get(cfg.varName);
-    const wiki = wikiResults.get(cfg.varName);
-
-    const wfcdNew     = wfcd?.newItems || [];
-    const wikiNew     = wiki?.newItems || [];
-    const wfcdNames   = new Set(wfcdNew.map(w => w.name.toLowerCase()));
-    const wikiOnlyNew = wikiNew.filter(w => !wfcdNames.has(w.name.toLowerCase()));
-
-    const lines = [];
-    for (const w of wfcdNew) {
-      lines.push(buildStub(w.name, cfg.varName, w.type, '', w.isPrime, w.tradable, null));
-    }
-    for (const w of wikiOnlyNew) {
-      lines.push(buildStub(w.name, cfg.varName, '', w.wikiClass, w.isPrime, false, w.maxRank));
-    }
-    if (lines.length) stubsByVar.set(cfg.varName, lines);
-  }
-
-  const wrote = applyNewWeapons(stubsByVar);
-  if (wrote) {
-    console.log('\ndata-items.js updated. Search for "TODO: obtain method" to fill in the missing fields.');
-  }
-
-  // ── Image download ──────────────────────────────────────────────────────────
-  if (doImages) {
-    let imgCount = 0;
-    console.log('\n── Downloading weapon images ────────────────────────────────────────');
+    const stubsByVar = new Map();
     for (const cfg of CONFIGS) {
       const wfcd = wfcdResults.get(cfg.varName);
       const wiki = wikiResults.get(cfg.varName);
-      const wfcdNew    = wfcd?.newItems || [];
-      const wikiNew    = wiki?.newItems || [];
-      const wfcdNames  = new Set(wfcdNew.map(w => w.name.toLowerCase()));
-      const allNew     = [
-        ...wfcdNew.map(w => w.name),
-        ...wikiNew.filter(w => !wfcdNames.has(w.name.toLowerCase())).map(w => w.name),
-      ];
-      if (!allNew.length) continue;
-      console.log(`  ${cfg.varName}:`);
-      for (const name of allNew) {
-        const base     = name.replace(/ /g, '');
-        const filename = `${base}.png`;
+
+      const wfcdNew     = wfcd?.newItems || [];
+      const wikiNew     = wiki?.newItems || [];
+      const wfcdNames   = new Set(wfcdNew.map(w => w.name.toLowerCase()));
+      const wikiOnlyNew = wikiNew.filter(w => !wfcdNames.has(w.name.toLowerCase()));
+
+      const lines = [];
+      for (const w of wfcdNew) {
+        lines.push(buildStub(w.name, cfg.varName, w.type, '', w.isPrime, w.tradable, null));
+      }
+      for (const w of wikiOnlyNew) {
+        lines.push(buildStub(w.name, cfg.varName, '', w.wikiClass, w.isPrime, false, w.maxRank));
+      }
+      if (lines.length) stubsByVar.set(cfg.varName, lines);
+    }
+
+    const wrote = applyNewWeapons(stubsByVar);
+    if (wrote) {
+      console.log('\ndata-items.js updated. Search for "TODO: obtain method" to fill in the missing fields.');
+    }
+  }
+
+  // ── Image download ──────────────────────────────────────────────────────────
+  // Scans all tracked items for missing image files — not just newly-detected ones.
+  // This means --images works correctly even after --apply has already inserted the stubs.
+  if (doImages) {
+    let downloaded = 0, notFound = 0;
+    console.log('\n── Downloading weapon images ────────────────────────────────────────');
+    for (const cfg of CONFIGS) {
+      const allNames = [...getExistingNames(cfg.varName).keys()];
+      const missing  = allNames.filter(name => {
+        const dest = path.join(__dirname, '..', cfg.imageDir, name.replace(/ /g, '') + '.png');
+        return !fs.existsSync(dest);
+      });
+      if (!missing.length) continue;
+      console.log(`  ${cfg.varName} (${missing.length} missing):`);
+      for (const name of missing) {
+        const filename = name.replace(/ /g, '') + '.png';
         const destPath = path.join(__dirname, '..', cfg.imageDir, filename);
         try {
           const result = await downloadWikiImage(filename, destPath);
           const icon = result === 'downloaded' ? '✓' : result === 'exists' ? '=' : '?';
           console.log(`    ${icon} ${name}: ${result}`);
-          imgCount++;
+          if (result === 'downloaded') downloaded++;
+          else if (result === 'not-found') notFound++;
         } catch (e) {
-          console.warn(`    ✗ ${name}: ${e.message}`);
+          console.error(`    ✗ ${name}: FAILED — ${e.message}`);
+          notFound++;
         }
       }
     }
-    if (imgCount === 0) console.log('  No new weapons detected — nothing to download.');
+    if (downloaded === 0 && notFound === 0) console.log('  All weapon images already present.');
+    else console.log(`\n  Downloaded: ${downloaded}  Not found on wiki: ${notFound}`);
   }
 }
 
-main().catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+main().then(() => process.exit(0)).catch(err => { console.error('ERROR:', err.message); process.exit(1); });

@@ -3919,6 +3919,8 @@ function render() {
     return;
   }
 
+  visible.sort((a, b) => a[0].localeCompare(b[0]));
+
   if (groupedView) {
     const allCats = [...new Set(items.map(i => i[1]))];
     if (allCats.length > 1) {
@@ -4779,6 +4781,7 @@ function renderArcanes() {
     updateTabStat();
     return;
   }
+  visible.sort((a, b) => a[0].localeCompare(b[0]));
   if (groupedView) {
     const allCats = [...new Set(ARCANES.map(a => a[6]).filter(Boolean))].sort();
     grid.innerHTML = allCats.flatMap(grpCat => {
@@ -4929,6 +4932,8 @@ function renderMods() {
     updateTabStat();
     return;
   }
+
+  visible.sort((a, b) => a.name.localeCompare(b.name));
 
   if (groupedView) {
     const allCats = [...new Set(MODS.map(m => m.category))].sort();

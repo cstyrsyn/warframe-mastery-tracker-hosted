@@ -413,6 +413,7 @@ const PRIMARY = [
   ["Vadarya Prime","Prime","Relics",30,1],
   ["Vectis Prime","Prime","Relics",30,1],
   ["Zhuge Prime","Prime","Relics",30,1],
+  ["Afentis Prime","Prime","Relics",30,1],
 ];
 
 // ── SECONDARY WEAPONS ─────────────────────────────────────────────
@@ -555,6 +556,7 @@ const SECONDARY = [
   ["Velox Prime","Prime","Relics",30,1],
   ["Zakti Prime","Prime","Relics",30,1],
   ["Zylok Prime","Prime","Relics",30,1],
+  ["Athodai Prime","Prime","Relics",30,1],
   // ── Coda (maxRank 40) ──
   ["Coda Catabolyst","Coda","Syndicate: The Hex (Eleanor)",40],
   ["Dual Coda Torxica","Coda","Syndicate: The Hex (Eleanor)",40],
@@ -812,6 +814,9 @@ const MELEE = [
   ["Tenet Exec","Tenet","Sister of Parvos",40],
   ["Tenet Grigori","Tenet","Sister of Parvos",40],
   ["Tenet Livia","Tenet","Sister of Parvos",40],
+  ["Pride","Heavy Scythes","TODO: obtain method",30],
+  ["War Prime","Prime","TODO: obtain method",30],
+  ["Wrath","Heavy Scythes","TODO: obtain method",30],
 ];
 
 // ── VEHICLES ──────────────────────────────────────────────────────
