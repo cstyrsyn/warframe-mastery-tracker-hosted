@@ -2422,6 +2422,11 @@ async function blpLoadOFBuild(buildId) {
     const build  = await res.json();
     const tab    = _blpTab;
     const cat    = blpItemCat();
+    const exType = blpCurrentExaltedType();
+    const effectiveTab = !exType ? tab
+      : exType === 'companion' ? 'companions'
+      : exType === 'warframe'  ? 'warframes'
+      : exType; // 'melee', 'primary', 'secondary' match tab key names
     const parsed = parseOFBuildString(build.buildstring || build.buildString);
     let slots;
     let importedComponents = null;
@@ -2444,7 +2449,7 @@ async function blpLoadOFBuild(buildId) {
 
     if (parsed && Array.isArray(parsed[4])) {
       console.log('[blpLoadOFBuild] using buildString', parsed);
-      slots = slotsFromBuildString(parsed, tab, _blpItem, cat, importedComponents);
+      slots = slotsFromBuildString(parsed, effectiveTab, _blpItem, cat, importedComponents);
     } else {
       console.log('[blpLoadOFBuild] fallback to slots heuristic', { buildString: build.buildString, parsed });
       const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
@@ -2465,7 +2470,7 @@ async function blpLoadOFBuild(buildId) {
       const arcIds   = new Set(arcanes.map(s => s.id));
       const modSlots = raw.filter(s => !arcIds.has(s.id));
 
-      if (tab === 'warframes') {
+      if (effectiveTab === 'warframes') {
         const auraSlots = modSlots.filter(s => s.drain < 0);
         const rest      = modSlots.filter(s => s.drain >= 0);
         if (_blpItem === 'Jade') {
@@ -2487,7 +2492,7 @@ async function blpLoadOFBuild(buildId) {
         slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-warframe') : empty('arcane-warframe'));
         slots.push(arcanes[1] ? toSlot(arcanes[1], 'arcane-warframe') : empty('arcane-warframe'));
 
-      } else if (tab === 'primary') {
+      } else if (effectiveTab === 'primary') {
         const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
         const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
         slots = [
@@ -2497,7 +2502,7 @@ async function blpLoadOFBuild(buildId) {
         while (slots.length < 9) slots.push(empty('regular'));
         slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-primary') : empty('arcane-primary'));
 
-      } else if (tab === 'secondary') {
+      } else if (effectiveTab === 'secondary') {
         const exilusSlot = modSlots.find(s => modCat(s.mod) === 'exilus') || null;
         const rest       = modSlots.filter(s => s.id !== exilusSlot?.id);
         slots = [
@@ -2510,7 +2515,7 @@ async function blpLoadOFBuild(buildId) {
         slots.push(regArcane ? toSlot(regArcane, 'arcane-secondary') : empty('arcane-secondary'));
         if (cat === 'Kitgun') slots.push(paxSlot ? toSlot(paxSlot, 'arcane-pax') : empty('arcane-pax'));
 
-      } else if (tab === 'melee') {
+      } else if (effectiveTab === 'melee') {
         const stanceSlot = modSlots.find(s => s.drain < 0) || null;
         const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
         const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
@@ -2526,7 +2531,7 @@ async function blpLoadOFBuild(buildId) {
         slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
         if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
 
-      } else if (tab === 'companions') {
+      } else if (effectiveTab === 'companions') {
         if (blpCurrentExaltedType() === 'claws') {
           const stanceSlot = modSlots.find(s => s.drain < 0) || null;
           const rest       = modSlots.filter(s => s.id !== stanceSlot?.id);
@@ -2540,7 +2545,7 @@ async function blpLoadOFBuild(buildId) {
           while (slots.length < 10) slots.push(empty('regular'));
         }
 
-      } else if (tab === 'archWeapons') {
+      } else if (effectiveTab === 'archWeapons') {
         slots = modSlots.map(s => toSlot(s, 'regular'));
         while (slots.length < 8) slots.push(empty('regular'));
         if (cat === 'Arch-Gun') {
