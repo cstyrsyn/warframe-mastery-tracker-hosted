@@ -2343,7 +2343,7 @@ function parseOFBuildString(bs) {
   try { return JSON.parse(atob(bs)); } catch { return null; }
 }
 
-function slotsFromBuildString(arr, tab, item, cat, components) {
+function slotsFromBuildString(arr, tab, item, cat, components, exType = null) {
   const mods = arr[4] || [];
   const mk = (entry, type) => ({
     type,
@@ -2381,6 +2381,10 @@ function slotsFromBuildString(arr, tab, item, cat, components) {
     return [g(8,'exilus'), ...rs(0,8), g(10, arcType), g(9,'arcane-pax')];
   }
   if (tab === 'melee') {
+    if (exType === 'melee') {
+      // Exalted melee (no stance/exilus): Overframe puts arcane at buildstring idx 9
+      return [...rs(0,8), g(9,'arcane-melee')];
+    }
     // buildString: [r8..r1, stance, exilus, arc]
     return [g(8,'stance'), g(9,'exilus'), ...rs(0,8), g(10,'arcane-melee')];
   }
@@ -2449,7 +2453,7 @@ async function blpLoadOFBuild(buildId) {
 
     if (parsed && Array.isArray(parsed[4])) {
       console.log('[blpLoadOFBuild] using buildString', parsed);
-      slots = slotsFromBuildString(parsed, effectiveTab, _blpItem, cat, importedComponents);
+      slots = slotsFromBuildString(parsed, effectiveTab, _blpItem, cat, importedComponents, exType);
     } else {
       console.log('[blpLoadOFBuild] fallback to slots heuristic', { buildString: build.buildString, parsed });
       const raw    = (build.slots || []).slice().sort((a, b) => a.slot_id - b.slot_id);
@@ -2516,20 +2520,27 @@ async function blpLoadOFBuild(buildId) {
         if (cat === 'Kitgun') slots.push(paxSlot ? toSlot(paxSlot, 'arcane-pax') : empty('arcane-pax'));
 
       } else if (effectiveTab === 'melee') {
-        const stanceSlot = modSlots.find(s => s.drain < 0) || null;
-        const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
-        const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
-        const rest       = nonStance.filter(s => s.id !== exilusSlot?.id);
-        slots = [
-          stanceSlot ? toSlot(stanceSlot, 'stance')  : empty('stance'),
-          exilusSlot ? toSlot(exilusSlot, 'exilus')  : empty('exilus'),
-          ...rest.map(s => toSlot(s, 'regular')),
-        ];
-        while (slots.length < 10) slots.push(empty('regular'));
-        const exodiaSlot = arcanes.find(s => modCat(s.mod) === 'arcane-exodia');
-        const regArcane  = arcanes.find(s => s.id !== exodiaSlot?.id);
-        slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
-        if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
+        if (exType === 'melee') {
+          // Exalted melee: no stance/exilus
+          slots = modSlots.map(s => toSlot(s, 'regular'));
+          while (slots.length < 8) slots.push(empty('regular'));
+          slots.push(arcanes[0] ? toSlot(arcanes[0], 'arcane-melee') : empty('arcane-melee'));
+        } else {
+          const stanceSlot = modSlots.find(s => s.drain < 0) || null;
+          const nonStance  = modSlots.filter(s => s.id !== stanceSlot?.id);
+          const exilusSlot = nonStance.find(s => modCat(s.mod) === 'exilus') || null;
+          const rest       = nonStance.filter(s => s.id !== exilusSlot?.id);
+          slots = [
+            stanceSlot ? toSlot(stanceSlot, 'stance')  : empty('stance'),
+            exilusSlot ? toSlot(exilusSlot, 'exilus')  : empty('exilus'),
+            ...rest.map(s => toSlot(s, 'regular')),
+          ];
+          while (slots.length < 10) slots.push(empty('regular'));
+          const exodiaSlot = arcanes.find(s => modCat(s.mod) === 'arcane-exodia');
+          const regArcane  = arcanes.find(s => s.id !== exodiaSlot?.id);
+          slots.push(regArcane ? toSlot(regArcane, 'arcane-melee') : empty('arcane-melee'));
+          if (cat === 'Zaw') slots.push(exodiaSlot ? toSlot(exodiaSlot, 'arcane-exodia') : empty('arcane-exodia'));
+        }
 
       } else if (effectiveTab === 'companions') {
         if (blpCurrentExaltedType() === 'claws') {
