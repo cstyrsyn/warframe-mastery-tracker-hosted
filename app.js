@@ -2393,7 +2393,7 @@ function slotsFromBuildString(arr, tab, item, cat, components, exType = null) {
     return [g(8,'stance'), g(10,'exilus'), ...rs(0,8), g(11,'arcane-melee'), g(9,'arcane-exodia')];
   }
   if (tab === 'companions') {
-    if (blpCurrentExaltedType() === 'claws') {
+    if (exType === 'claws') {
       // buildString: [r8..r1, stance]
       return [g(8,'stance'), ...rs(0,8)];
     }
@@ -2424,11 +2424,12 @@ async function blpLoadOFBuild(buildId) {
     const res = await fetch(`${OF_API}/builds/${buildId}/`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const build  = await res.json();
-    const tab    = _blpTab;
+    const tab    = blpResolvedTab();
     const cat    = blpItemCat();
     const exType = blpCurrentExaltedType();
     const effectiveTab = !exType ? tab
       : exType === 'companion' ? 'companions'
+      : exType === 'claws'     ? 'companions'
       : exType === 'warframe'  ? 'warframes'
       : exType; // 'melee', 'primary', 'secondary' match tab key names
     const parsed = parseOFBuildString(build.buildstring || build.buildString);
@@ -2543,7 +2544,7 @@ async function blpLoadOFBuild(buildId) {
         }
 
       } else if (effectiveTab === 'companions') {
-        if (blpCurrentExaltedType() === 'claws') {
+        if (exType === 'claws') {
           const stanceSlot = modSlots.find(s => s.drain < 0) || null;
           const rest       = modSlots.filter(s => s.id !== stanceSlot?.id);
           slots = [
@@ -2570,7 +2571,7 @@ async function blpLoadOFBuild(buildId) {
       }
     }
     let helminthAbility = null;
-    if (parsed && tab === 'warframes' && Array.isArray(parsed[5]) && parsed[5].length >= 2) {
+    if (parsed && effectiveTab === 'warframes' && !_blpSubForm && Array.isArray(parsed[5]) && parsed[5].length >= 2) {
       const [slot, ofId] = parsed[5];
       const name = HELMINTH_BY_OF_ID[ofId] || null;
       if (name && slot >= 0 && slot <= 3) helminthAbility = { slot, name };
@@ -2579,18 +2580,35 @@ async function blpLoadOFBuild(buildId) {
     if (!_blpBuildId) {
       // No build selected yet — auto-create one named after the OF build
       if (!myBuilds[_blpItem]) myBuilds[_blpItem] = [];
-      const entry = {
-        id: blpGenId(), name: build.title, subForms: {},
-        baseBuildId: build.id, baseBuildTitle: build.title,
-        baseBuildUrl: build.url, baseAuthor: build.author.username,
-        slots, helminthAbility, isModified: false, potatoed: true, formas: build.formas ?? null,
-      };
-      if (importedComponents) {
-        if (tab === 'kitguns') { entry.kitgunGrip = importedComponents.grip; entry.kitgunLoader = importedComponents.loader; }
-        if (tab === 'zaws')    { entry.zawGrip = importedComponents.grip; entry.zawLink = importedComponents.link; }
+      if (_blpSubForm) {
+        // Importing into a sub-form with no existing builds: create a default main build first,
+        // then store the imported slots in the sub-form entry (same as the existing-build path).
+        const prevSF = _blpSubForm;
+        _blpSubForm  = null;
+        const entry  = blpNewBuildEntry(build.title);
+        _blpSubForm  = prevSF;
+        myBuilds[_blpItem].push(entry);
+        _blpBuildId = entry.id;
+        const data = blpEnsureCurrentData();
+        if (data) {
+          data.baseBuildId = build.id; data.baseBuildTitle = build.title;
+          data.baseBuildUrl = build.url; data.baseAuthor = build.author.username;
+          data.slots = slots; data.isModified = false;
+        }
+      } else {
+        const entry = {
+          id: blpGenId(), name: build.title, subForms: {},
+          baseBuildId: build.id, baseBuildTitle: build.title,
+          baseBuildUrl: build.url, baseAuthor: build.author.username,
+          slots, helminthAbility, isModified: false, potatoed: true, formas: build.formas ?? null,
+        };
+        if (importedComponents) {
+          if (tab === 'kitguns') { entry.kitgunGrip = importedComponents.grip; entry.kitgunLoader = importedComponents.loader; }
+          if (tab === 'zaws')    { entry.zawGrip = importedComponents.grip; entry.zawLink = importedComponents.link; }
+        }
+        myBuilds[_blpItem].push(entry);
+        _blpBuildId = entry.id;
       }
-      myBuilds[_blpItem].push(entry);
-      _blpBuildId = entry.id;
     } else {
       const data = blpEnsureCurrentData();
       if (data) {
