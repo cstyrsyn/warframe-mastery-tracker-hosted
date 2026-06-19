@@ -1376,6 +1376,8 @@ const OVERFRAME_MODS = new Map([
   [6762,'Primed Deadly Efficiency'],
   [6763,'Primed Dual Rounds'],
   [6764,'Unseen Dread'],
+  [6836, 'Galvanised Steel'],
+  [6851, 'Galvanised Elementalist'],
   [6955,'Brute Conditioning'],
   [6956,'Cull The Weak'],
   [6957,'Disabling Conditioning'],
