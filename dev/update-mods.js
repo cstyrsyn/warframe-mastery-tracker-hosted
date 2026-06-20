@@ -56,6 +56,56 @@ const WFCD_EXCLUDE_TYPES = new Set([
 
 const WFCD_EXCLUDE_NAMES = new Set(['Unfused Artifact', 'Sampleantiqueupgrade', 'Helminth Ferocity']);
 
+// Wiki mods flagged _IgnoreEntry=true that we already know about and are not tracking.
+// Only NEW entries not in this set will appear in the unreleased section of the report.
+const WIKI_KNOWN_IGNORED = new Set([
+  'Affinity Amp', 'Cannonade', 'Divebomb Vortex', 'Electrical Resistance',
+  'Fire Resistance', 'Frost Insulation', 'Iron Vault', 'Laser Deflection',
+  'Primed Streamline', 'Resilient Focus', 'Retarget', 'Shield Transference',
+  'Striker', 'Swift Deth', 'Warrior',
+]);
+
+// Mods in data-mods.js with null WFCD fields that WFCD will never provide data for.
+// Suppressed from the "still waiting" section to reduce noise.
+const WFCD_NEVER_TRACKED = new Set([
+  'Corroding Barrage', 'Curative Undertow', 'Fatal Teleport',
+  'Flawed Ammo Drum', 'Flawed Ammo Stock', 'Flawed Antitoxin',
+  'Flawed Bane of Corpus', 'Flawed Bane of Grineer', 'Flawed Bane of Infested',
+  'Flawed Barrel Diffusion', 'Flawed Berserker Fury', 'Flawed Blunderbuss',
+  'Flawed Charged Shell', 'Flawed Chilling Grasp', 'Flawed Cleanse Corpus',
+  'Flawed Cleanse Grineer', 'Flawed Cleanse Infested', 'Flawed Concussion Rounds',
+  'Flawed Contagious Spread', 'Flawed Continuity', 'Flawed Convulsion',
+  'Flawed Cryo Rounds', 'Flawed Deep Freeze', 'Flawed Diamond Skin',
+  'Flawed Disruptor', 'Flawed Enemy Sense', 'Flawed Equilibrium',
+  'Flawed Expel Corpus', 'Flawed Expel Grineer', 'Flawed Expel Infested',
+  'Flawed Fast Deflection', 'Flawed Fast Hands', 'Flawed Fever Strike',
+  'Flawed Flame Repellent', 'Flawed Flechette', 'Flawed Flow',
+  'Flawed Fury', 'Flawed Gunslinger', 'Flawed Heated Charge',
+  'Flawed Heavy Impact', 'Flawed Heavy Trauma', "Flawed Hell's Chamber",
+  'Flawed Hellfire', 'Flawed Hornet Strike', 'Flawed Incendiary Coat',
+  'Flawed Infected Clip', 'Flawed Intruder', 'Flawed Insulation',
+  'Flawed Intensify', 'Flawed Jagged Edge', 'Flawed Lightning Rod',
+  'Flawed Magazine Warp', 'Flawed Maglev', 'Flawed Melee Prowess',
+  'Flawed Metal Auger', 'Flawed Molten Impact', 'Flawed No Return',
+  'Flawed North Wind', 'Flawed Organ Shatter', 'Flawed Parry',
+  'Flawed Pathogen Rounds', 'Flawed Piercing Hit', 'Flawed Pistol Gambit',
+  'Flawed Point Blank', 'Flawed Point Strike', 'Flawed Power Throw',
+  'Flawed Pressure Point', 'Flawed Provoked', 'Flawed Quick Thinking',
+  'Flawed Quickdraw', 'Flawed Ravage', 'Flawed Razor Shot',
+  'Flawed Redirection', 'Flawed Reflection', 'Flawed Reflex Coil',
+  'Flawed Rifle Aptitude', 'Flawed Rupture', 'Flawed Rush',
+  'Flawed Sawtooth Clip', 'Flawed Seeker', 'Flawed Seeking Force',
+  'Flawed Serration', 'Flawed Shell Compression', 'Flawed Shredder',
+  'Flawed Shocking Touch', 'Flawed Shotgun Barrage', 'Flawed Shotgun Savvy',
+  'Flawed Slip Magazine', 'Flawed Smite Corpus', 'Flawed Smite Grineer',
+  'Flawed Smite Infested', 'Flawed Speed Trigger', 'Flawed Split Chamber',
+  'Flawed Steel Fiber', 'Flawed Stormbringer', 'Flawed Streamline',
+  'Flawed Stretch', 'Flawed Sundering Strike', 'Flawed Sure Shot',
+  'Flawed Tactical Pump', 'Flawed Target Cracker', "Flawed Thief's Wit",
+  'Flawed Trick Mag', 'Flawed True Steel', 'Flawed Vital Sense',
+  'Flawed Vitality', 'Flawed Whirlwind',
+]);
+
 // ── Weapon exilus overrides (WFCD isExilus field is unreliable for weapons) ──
 
 const WEAPON_EXILUS = new Set([
@@ -507,9 +557,10 @@ async function main() {
     for (const m of wikiOnlyNew) console.log(buildStubFromWiki(m));
   }
 
-  if (wikiIgnored.length) {
-    console.log(`\nUnreleased (_IgnoreEntry=true) — do not add (${wikiIgnored.length}):`);
-    wikiIgnored.forEach(n => console.log(`  # ${n}`));
+  const newIgnored = wikiIgnored.filter(n => !WIKI_KNOWN_IGNORED.has(n));
+  if (newIgnored.length) {
+    console.log(`\nUnreleased (_IgnoreEntry=true) — do not add (${newIgnored.length}):`);
+    newIgnored.forEach(n => console.log(`  # ${n}`));
   }
 
   if (patchable.length) {
@@ -521,13 +572,14 @@ async function main() {
     }
   }
 
-  if (stillWaiting.length) {
-    console.log(`\nIncomplete entries still waiting for WFCD data (${stillWaiting.length}):`);
-    for (const e of stillWaiting) console.log(`  ${e.name}`);
+  const visibleWaiting = stillWaiting.filter(e => !WFCD_NEVER_TRACKED.has(e.name));
+  if (visibleWaiting.length) {
+    console.log(`\nIncomplete entries still waiting for WFCD data (${visibleWaiting.length}):`);
+    for (const e of visibleWaiting) console.log(`  ${e.name}`);
   }
 
   console.log('\n' + '─'.repeat(60));
-  console.log(`${totalNew} new | ${patchable.length} patchable | ${stillWaiting.length} waiting`);
+  console.log(`${totalNew} new | ${patchable.length} patchable | ${visibleWaiting.length} waiting`);
 
   if (totalNew === 0 && patchable.length === 0) {
     console.log('Nothing to update.');
