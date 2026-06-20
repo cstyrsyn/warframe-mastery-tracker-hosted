@@ -65,7 +65,20 @@ jobs:
           git add -A
           git commit -m "chore: apply content updates $(date -u '+%Y-%m-%d')"
           git push origin "$BRANCH"
-          BODY=$(printf '```\n%s\n```' "$(cat /tmp/apply-output.txt)")
+
+          ISSUE_NUM=$(gh issue list \
+            --search "Content gaps found" \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$ISSUE_NUM" ]; then
+            CLOSES="Closes #${ISSUE_NUM}"
+          else
+            CLOSES=""
+          fi
+
+          BODY=$(printf '%s\n\n```\n%s\n```' "$CLOSES" "$(cat /tmp/apply-output.txt)")
           gh pr create \
             --title "Content updates — $(date -u '+%Y-%m-%d')" \
             --body "$BODY" \
