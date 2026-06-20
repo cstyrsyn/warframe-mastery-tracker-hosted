@@ -1,0 +1,76 @@
+name: Apply Content Updates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: dev
+        run: npm install
+
+      - name: Run update scripts with --apply
+        run: |
+          {
+            echo "=== WARFRAMES ==="
+            node dev/update-warframes.js --apply || true
+            echo ""
+            echo "=== WEAPONS ==="
+            node dev/update-weapons.js --apply || true
+            echo ""
+            echo "=== BLUEPRINTS ==="
+            node dev/update-blueprints.js --apply || true
+            echo ""
+            echo "=== ARCANES ==="
+            node dev/update-arcanes.js --apply || true
+            echo ""
+            echo "=== MODS ==="
+            node dev/update-mods.js --apply || true
+            echo ""
+            echo "=== RELICS ==="
+            node dev/update-relics.js || true
+          } 2>&1 | tee /tmp/apply-output.txt
+
+      - name: Check for file changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create pull request
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="content-update/$(date -u '+%Y-%m-%d')"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "chore: apply content updates $(date -u '+%Y-%m-%d')"
+          git push origin "$BRANCH"
+          BODY=$(printf '```\n%s\n```' "$(cat /tmp/apply-output.txt)")
+          gh pr create \
+            --title "Content updates — $(date -u '+%Y-%m-%d')" \
+            --body "$BODY" \
+            --base main
+
+      - name: Nothing to apply
+        if: steps.changes.outputs.has_changes == 'false'
+        run: echo "No file changes after --apply — nothing to PR."
