@@ -67,10 +67,12 @@ jobs:
           git push origin "$BRANCH"
 
           ISSUE_NUM=$(gh issue list \
-            --search "Content gaps found" \
+            --search "in:title Content gaps found" \
             --state open \
             --json number \
-            --jq '.[0].number' 2>/dev/null || echo "")
+            --jq '.[0].number // empty' 2>/dev/null || echo "")
+          echo "Linked issue: ${ISSUE_NUM:-none found}"
+
 
           if [ -n "$ISSUE_NUM" ]; then
             CLOSES="Closes #${ISSUE_NUM}"
