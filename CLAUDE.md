@@ -8,14 +8,14 @@ Warframe mastery tracker, hosted version with Supabase cloud sync.
 |------|---------|
 | `index.html` | Main HTML — all CSS inline, loads external scripts |
 | `app.js` | All UI logic (~4950 lines) |
-| `data-meta.js` | `MASTERY` rank table (~57 lines) |
-| `data-items.js` | All item arrays (warframes/weapons/etc.), circuit schedules, star chart, `TAB_DATA`, `PFX` (~968 lines) |
-| `data-blueprints.js` | `INCARNON_WEAPONS`, `INCARNON_REQUIREMENTS`, `CURRENCIES`, `BLUEPRINTS` (~1455 lines) |
-| `data-mods.js` | `MODS`, `MOD_DESC` (~3015 lines) |
-| `data-arcanes.js` | `ARCANE_RANK_COPIES`, `ARCANES`, `ARCANE_DESC` (~338 lines) |
-| `data-kitguns.js` | `KITGUN_*`, `ZAW_*` component maps (~102 lines) |
-| `data-overframe.js` | `OF_POLARITY`, `OVERFRAME_MAP`, `DEFAULT_POLARITIES` (~1264 lines) |
-| `data-overframe-mods.js` | `OVERFRAME_MODS`, `OVERFRAME_MOD_CATS` (~3022 lines) |
+| `data/data-meta.js` | `MASTERY` rank table (~57 lines) |
+| `data/data-items.js` | All item arrays (warframes/weapons/etc.), circuit schedules, star chart, `TAB_DATA`, `PFX` (~968 lines) |
+| `data/data-blueprints.js` | `INCARNON_WEAPONS`, `INCARNON_REQUIREMENTS`, `CURRENCIES`, `BLUEPRINTS` (~1455 lines) |
+| `data/data-mods.js` | `MODS`, `MOD_DESC` (~3015 lines) |
+| `data/data-arcanes.js` | `ARCANE_RANK_COPIES`, `ARCANES`, `ARCANE_DESC` (~338 lines) |
+| `data/data-kitguns.js` | `KITGUN_*`, `ZAW_*` component maps (~102 lines) |
+| `data/data-overframe.js` | `OF_POLARITY`, `OVERFRAME_MAP`, `DEFAULT_POLARITIES` (~1264 lines) |
+| `data/data-overframe-mods.js` | `OVERFRAME_MODS`, `OVERFRAME_MOD_CATS` (~3022 lines) |
 | `data.js` | **Original monolith — kept as reference, not loaded by index.html** |
 | `relics.js` | Relic drop data |
 | `weapon-mr.js` | Extra weapon MR data |
