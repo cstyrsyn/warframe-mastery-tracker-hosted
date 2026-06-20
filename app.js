@@ -2973,15 +2973,15 @@ const AQ_TABS = new Set(['warframes','companions','primary','secondary','melee',
 const WEAPON_MR_TABS = new Set(['primary','secondary','melee','archWeapons','compWeapons']);
 const TAB_XP_PER_LEVEL = { warframes:200, companions:200, vehicles:200, primary:100, secondary:100, melee:100, compWeapons:100, archWeapons:100, amps:100, intrinsics:1500 };
 
-// Circuit week rolling — both circuits share the same Thursday reset epoch (2026-05-29)
-// Incarnon: 8-week cycle, currently Week 6. Warframe: 11-week cycle, currently Week 8.
-const CIRCUIT_EPOCH = new Date('2026-05-29T00:00:00Z');
+// Circuit week rolling — both circuits reset Monday 00:00 UTC, epoch anchor = 2026-04-27
+// Incarnon: 9-week cycle, epoch = week 1 (idx 0). Warframe: 11-week cycle, epoch = week 3 (idx 2).
+const CIRCUIT_EPOCH = new Date('2026-04-27T00:00:00Z');
 function _circuitWeek(epochWeekIdx, cycle) {
   const w = Math.floor((Date.now() - CIRCUIT_EPOCH.getTime()) / 604800000);
   return ((epochWeekIdx + w) % cycle) + 1;
 }
-const CIRCUIT_WEEK_NOW     = _circuitWeek(5, 8);  // incarnon: epoch = week 6 (idx 5)
-const CIRCUIT_WF_WEEK_NOW  = _circuitWeek(7, 11); // warframe: epoch = week 8 (idx 7)
+const CIRCUIT_WEEK_NOW     = _circuitWeek(0, 9);  // incarnon: 9-week cycle, epoch = week 1 (idx 0)
+const CIRCUIT_WF_WEEK_NOW  = _circuitWeek(2, 11); // warframe: 11-week cycle, epoch = week 3 (idx 2)
 const CIRCUIT_INCARNON_NOW = new Set(
   typeof CIRCUIT_INCARNON_SCHEDULE !== 'undefined' ? CIRCUIT_INCARNON_SCHEDULE[CIRCUIT_WEEK_NOW - 1] : []
 );
