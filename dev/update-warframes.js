@@ -7,6 +7,7 @@
 //   node dev/update-warframes.js              # detect new warframes + vaulted/ability changes
 //   node dev/update-warframes.js --wfcd-only  # skip wiki fallback
 //   node dev/update-warframes.js --wiki-only  # skip WFCD, use wiki directly
+//   node dev/update-warframes.js --all        # always fetch wiki (ensures ability data when WFCD has new frames)
 //   node dev/update-warframes.js --apply      # insert stubs + write VAULTED_WF + ability changes
 //   node dev/update-warframes.js --images     # download images for detected new warframes
 //   node dev/update-warframes.js --revert     # restore most recent backup
@@ -25,9 +26,10 @@ const BACKUP_DIR     = path.join(__dirname, 'backups', 'warframes');
 const KEEP_BACKUPS   = 5;
 const WIKI_URL       = 'https://wiki.warframe.com/w/Module:Warframes/data?action=raw';
 
-// Names always excluded regardless of source — founder-exclusive, Orion&Sirius and non-game items. 
-// O&S  has been added manually as it is considered by the game to be a Warframe with an Exalted Warframe.
-const ALWAYS_EXCLUDE = new Set(['Excalibur Prime', 'Excalibur Umbra Prime', 'Orion','Sirius','Stalker']);
+// Names always excluded regardless of source — founder-exclusive, Orion&Sirius and non-game items.
+// O&S has been added manually as it is considered by the game to be a Warframe with an Exalted Warframe.
+// 'Sirius & Orion' is the combined key used in data-items.js; all three forms must be excluded.
+const ALWAYS_EXCLUDE = new Set(['Excalibur Prime', 'Excalibur Umbra Prime', 'Orion', 'Sirius', 'Sirius & Orion', 'Stalker']);
 
 // WFCD puts Necramechs (Bonewidow, Voidrig) and Helminth in the Warframes category.
 // Filter by uniqueName prefix to exclude them — our data tracks these in other tabs.
@@ -398,6 +400,7 @@ async function main() {
   const args     = process.argv.slice(2);
   const wfcdOnly = args.includes('--wfcd-only');
   const wikiOnly = args.includes('--wiki-only');
+  const showAll  = args.includes('--all');
   const apply    = args.includes('--apply');
   const doImages = args.includes('--images');
 
@@ -408,10 +411,14 @@ async function main() {
   const currentVaulted = getVaultedWF();
 
   // ── Source selection ──────────────────────────────────────────────
-  let wfNames;                 // Map<name, { vaulted: bool }> — standard warframes only
-  let wfcdNames = new Set();   // names confirmed by WFCD (used to flag wiki-only entries)
-  let wikiPaired  = [];        // [{ combinedName, members, vaulted }]
-  let wikiSpecial = [];        // [{ name, entry }]
+  let wfNames;                   // Map<name, { vaulted: bool, abilities: string[]|null }>
+  let wfNamesSource = 'wiki';    // 'wiki' or 'WFCD' — used to tag ability gap sources
+  let wfcdNames = new Set();     // names confirmed by WFCD (used to flag wiki-only entries)
+  let wikiPaired  = [];          // [{ combinedName, members, vaulted }]
+  let wikiSpecial = [];          // [{ name, entry }]
+
+  const wfcdAbilities = v =>
+    Array.isArray(v.abilities) ? v.abilities.map(a => a.name).filter(Boolean) : null;
 
   if (wikiOnly) {
     console.log('Wiki-only mode');
@@ -427,8 +434,9 @@ async function main() {
     console.log(`  WFCD: ${wfcdMap.size} warframes, ${wfcdNew.length} new vs data-items.js`);
     wfcdNew.forEach(n => console.log(`    + ${n}`));
 
-    if (!wfcdOnly && wfcdNew.length === 0) {
-      console.log('  No new warframes in WFCD — checking wiki for updates…');
+    if (!wfcdOnly && (wfcdNew.length === 0 || showAll)) {
+      if (wfcdNew.length === 0) console.log('  No new warframes in WFCD — checking wiki for updates…');
+      else                      console.log('  Fetching wiki data…');
       try {
         const wiki  = await extractFromWiki();
         wikiPaired  = wiki.paired;
@@ -439,10 +447,16 @@ async function main() {
         wfNames = wiki.standard;
       } catch (e) {
         console.warn(`  Wiki fetch failed (${e.message}) — using WFCD only`);
-        wfNames = new Map([...wfcdMap.keys()].map(n => [n, { vaulted: false }]));
+        wfNames = new Map([...wfcdMap.entries()].map(([n, v]) => [n, {
+          vaulted: false, abilities: wfcdAbilities(v),
+        }]));
+        wfNamesSource = 'WFCD';
       }
     } else {
-      wfNames = new Map([...wfcdMap.entries()].map(([n, v]) => [n, { vaulted: !!v.vaulted }]));
+      wfNames = new Map([...wfcdMap.entries()].map(([n, v]) => [n, {
+        vaulted: !!v.vaulted, abilities: wfcdAbilities(v),
+      }]));
+      wfNamesSource = 'WFCD';
     }
   }
 
@@ -464,7 +478,8 @@ async function main() {
 
   const totalNew = newWarframes.length + newPaired.length + newSpecial.length;
 
-  console.log(`\n── New warframes (${totalNew}) ─────────────────────────────────────`);
+  console.log('\n' + '─'.repeat(60));
+  console.log(`\nNew warframes (${totalNew}):`);
   if (totalNew === 0) {
     console.log('  None — data-items.js is up to date.');
   } else {
@@ -515,7 +530,8 @@ async function main() {
   const toAdd    = [...shouldBeVaulted].filter(n => !currentVaulted.has(n) && existingNames.has(n)).sort();
   const toRemove = [...currentVaulted].filter(n => !shouldBeVaulted.has(n)).sort();
 
-  console.log(`\n── VAULTED_WF changes (${toAdd.length + toRemove.length}) ──────────────────────────────────────`);
+  console.log('\n' + '─'.repeat(60));
+  console.log(`\nVAULTED_WF changes (${toAdd.length + toRemove.length}):`);
   if (!toAdd.length && !toRemove.length) {
     console.log('  None — VAULTED_WF is already in sync.');
   } else {
@@ -529,6 +545,7 @@ async function main() {
 
   for (const name of [...existingNames].sort()) {
     if (existingAbilities.has(name)) continue;
+    if (ALWAYS_EXCLUDE.has(name)) continue;
 
     // For primes: copy abilities from the base variant
     if (name.endsWith(' Prime')) {
@@ -540,10 +557,10 @@ async function main() {
       }
     }
 
-    // Use wiki abilities if available (standard entry)
-    const wikiAbils = wfNames.get(name)?.abilities ?? null;
-    if (wikiAbils && wikiAbils.length) {
-      abilityGaps.push({ name, abilities: wikiAbils, source: 'wiki' });
+    // Use abilities from wfNames (WFCD or wiki depending on which source was loaded)
+    const knownAbils = wfNames.get(name)?.abilities ?? null;
+    if (knownAbils && knownAbils.length) {
+      abilityGaps.push({ name, abilities: knownAbils, source: wfNamesSource });
       continue;
     }
 
@@ -573,7 +590,8 @@ async function main() {
 
   const autoApplicable = abilityGaps.filter(g => !g.abilities.includes('TODO'));
 
-  console.log(`\n── WARFRAME_ABILITIES gaps (${abilityGaps.length}) ──────────────────────────────────`);
+  console.log('\n' + '─'.repeat(60));
+  console.log(`\nWARFRAME_ABILITIES gaps (${abilityGaps.length}):`);
   if (!abilityGaps.length) {
     console.log('  None — data-abilities.js is up to date.');
   } else {
@@ -597,8 +615,14 @@ async function main() {
   const hasManualAbilities = abilityGaps.length > autoApplicable.length;
   const hasAnyChanges      = hasNewWarframes || hasVaultedChanges || hasAbilityChanges;
 
-  if (apply) {
+  console.log('\n' + '─'.repeat(60));
+  console.log(`${totalNew} new warframes | ${toAdd.length + toRemove.length} vaulted changes | ${abilityGaps.length} ability gaps`);
+
+  if (!hasAnyChanges && !hasManualAbilities) {
+    console.log('Nothing to update.');
+  } else if (apply) {
     if (hasAnyChanges) {
+      console.log('\nApplying changes…');
       saveBackup();
       if (hasNewWarframes) {
         applyWarframeStubs(newStubs);
@@ -617,20 +641,22 @@ async function main() {
       }
     } else if (hasManualAbilities) {
       console.log('\nNo auto-derivable changes — fill in the TODO abilities above, then re-run --apply.');
-    } else {
-      console.log('\nNothing to apply — everything is up to date.');
     }
-  } else if (hasAnyChanges) {
+  } else {
     const parts = [];
     if (hasNewWarframes)   parts.push(`${newStubs.length} new warframe stub(s)`);
     if (hasVaultedChanges) parts.push(`${toAdd.length + toRemove.length} VAULTED_WF change(s)`);
     if (hasAbilityChanges) parts.push(`${autoApplicable.length} abilities`);
-    console.log(`\nRe-run with --apply to write: ${parts.join(', ')}.`);
+    if (hasManualAbilities && !hasAnyChanges)
+      console.log('\nNo auto-derivable changes — fill in the TODO abilities above, then re-run --apply.');
+    else if (parts.length)
+      console.log(`Run with --apply to write: ${parts.join(', ')}.`);
   }
 
   // ── Image download ────────────────────────────────────────────────
   // Scans all tracked warframes for missing image files — not just newly-detected ones.
-  if (doImages) {
+  // Also runs automatically during --apply so new stubs get their images in the same pass.
+  if (doImages || apply) {
     const IMAGES_DIR = path.join(__dirname, '..', 'Images', 'warframes');
     const missing = [...existing.keys()].filter(name => {
       const dest = path.join(IMAGES_DIR, name.replace(/ /g, '') + 'Helmet.png');
@@ -656,6 +682,8 @@ async function main() {
         }
       }
       console.log(`\n  Downloaded: ${downloaded}  Not found on wiki: ${notFound}`);
+      if (apply && notFound > 0)
+        console.log(`  ${notFound} image(s) not yet on wiki — re-run with --images once available.`);
     }
   }
 }

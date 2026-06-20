@@ -526,12 +526,14 @@ async function main() {
     for (const e of stillWaiting) console.log(`  ${e.name}`);
   }
 
+  console.log('\n' + '─'.repeat(60));
+  console.log(`${totalNew} new | ${patchable.length} patchable | ${stillWaiting.length} waiting`);
+
   if (totalNew === 0 && patchable.length === 0) {
-    console.log('\nAll mods are up to date.');
+    console.log('Nothing to update.');
     return;
   }
 
-  console.log('\n' + '─'.repeat(60));
   if (!doApply) {
     if (totalNew > 0)
       console.log(`${totalNew} new mod(s) found. Review stubs above, then run with --apply to insert.`);

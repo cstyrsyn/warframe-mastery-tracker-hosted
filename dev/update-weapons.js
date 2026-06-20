@@ -263,7 +263,7 @@ function getExistingNames(varName) {
   const end     = rest.search(/\n\];/);
   const section = end === -1 ? rest : rest.slice(0, end);
   const names   = new Map();
-  for (const m of section.matchAll(/^\s*\["([^"]+)"/gm)) names.set(m[1], m[1].toLowerCase());
+  for (const m of section.matchAll(/^\s*\[["']([^"']+)["']/gm)) names.set(m[1], m[1].toLowerCase());
   return names;
 }
 
@@ -276,7 +276,7 @@ function getExistingCategories(varName) {
   const end     = rest.search(/\n\];/);
   const section = end === -1 ? rest : rest.slice(0, end);
   const cats = new Set();
-  for (const m of section.matchAll(/^\s*\["[^"]+","([^"]+)"/gm)) cats.add(m[1]);
+  for (const m of section.matchAll(/^\s*\[["'][^"']+["'],["']([^"']+)["']/gm)) cats.add(m[1]);
   return cats;
 }
 
@@ -550,17 +550,14 @@ async function main() {
     }
   }
 
-  if (totalNew === 0) {
-    console.log('\nAll weapon arrays are up to date.');
-    if (!doImages) return;
-  }
+  console.log('\n' + '─'.repeat(60));
+  console.log(`${totalNew} new weapons`);
 
-  if (totalNew > 0) {
-    console.log('\n' + '─'.repeat(60));
-    if (!doApply) {
-      console.log(`${totalNew} new weapon(s) found. Copy stubs above into data-items.js and fill in the obtain method.`);
-      console.log('Run with --apply to insert stubs automatically (obtain method will be set to TODO).');
-    }
+  if (totalNew === 0) {
+    console.log('Nothing to update.');
+    if (!doImages) return;
+  } else if (!doApply) {
+    console.log('Run with --apply to insert stubs automatically (obtain method will be set to TODO).');
   }
 
   // ── Apply ──────────────────────────────────────────────────────────────────

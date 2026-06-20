@@ -12,6 +12,7 @@
 //   node dev/update-blueprints.js --revert
 //   node dev/update-blueprints.js --wfcd-only  # skip wiki fallback
 //   node dev/update-blueprints.js --wiki-only  # skip WFCD, use wiki for everything
+//   node dev/update-blueprints.js --all        # always fetch wiki even if WFCD resolved all items
 
 'use strict';
 
@@ -440,6 +441,7 @@ async function main() {
   const doRevert   = args.includes('--revert');
   const wfcdOnly   = args.includes('--wfcd-only');
   const wikiOnly   = args.includes('--wiki-only');
+  const showAll    = args.includes('--all');
   const skipUpdate = args.includes('--skip-update');
 
   if (doRevert) { revert(); process.exit(0); }
@@ -499,8 +501,9 @@ async function main() {
 
   // ── Wiki fallback ──────────────────────────────────────────────────────────
   const unknown = [];
-  if (!wfcdOnly && needsWiki.length > 0) {
-    console.log(`${needsWiki.length} items need wiki lookup…`);
+  if (!wfcdOnly && (needsWiki.length > 0 || showAll)) {
+    if (needsWiki.length > 0) console.log(`${needsWiki.length} items need wiki lookup…`);
+    else                      console.log('Fetching wiki data…');
     try {
       const wikiData = await fetchWikiBlueprints();
       for (const item of needsWiki) {
@@ -586,7 +589,7 @@ async function main() {
   console.log(`${autoStubs.length} auto-stubs | ${unknown.length} unknown | ${noBpItems.length} no-blueprint`);
 
   if (autoStubs.length === 0) {
-    console.log('Nothing to apply.');
+    console.log('Nothing to update.');
     return;
   }
 

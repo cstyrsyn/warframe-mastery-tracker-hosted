@@ -2,11 +2,16 @@
 // Generates relics.json from @wfcd/items, falling back to the wiki Lua module
 // if WFCD has no new items compared to the existing relics.js.
 //
+// Without --apply : read-only; prints gap report.
+// With --apply    : backs up relics.json then writes updated data.
+// With --revert   : restores relics.json from the latest backup.
+//
 // Usage:
 //   node dev/update-relics.js              # auto (WFCD + wiki fallback)
 //   node dev/update-relics.js --wfcd-only  # skip wiki fallback
 //   node dev/update-relics.js --wiki-only  # skip WFCD, use wiki directly
-//   node dev/update-relics.js --dry-run    # show what would change, write nothing
+//   node dev/update-relics.js --all        # always merge WFCD + wiki
+//   node dev/update-relics.js --apply      # write relics.json (backs up first)
 //   node dev/update-relics.js --revert     # restore most recent backup
 //
 // Then run:  node dev/generate-relics-map.js
@@ -249,10 +254,12 @@ async function main() {
   const args     = process.argv.slice(2);
   const wfcdOnly = args.includes('--wfcd-only');
   const wikiOnly = args.includes('--wiki-only');
-  const dryRun   = args.includes('--dry-run');
+  const showAll  = args.includes('--all');
+  const doApply  = args.includes('--apply');
 
   if (args.includes('--revert')) { revert(); return; }
 
+  const existActive = getExistingItems();
   let primeData;
 
   if (wikiOnly) {
@@ -260,9 +267,8 @@ async function main() {
     primeData = await extractFromWiki();
   } else {
     console.log('Extracting from WFCD…');
-    const wfcdData     = extractFromWfcd();
-    const wfcdActive   = activeItems(wfcdData);
-    const existActive  = getExistingItems();
+    const wfcdData   = extractFromWfcd();
+    const wfcdActive = activeItems(wfcdData);
 
     // Count active items that are new vs existing relics.js
     const newInWfcd = [...wfcdActive].filter(k => !existActive.has(k));
@@ -270,8 +276,9 @@ async function main() {
     console.log(`  New vs existing relics.js: ${newInWfcd.length} item(s)`);
     newInWfcd.forEach(i => console.log(`    + ${i}`));
 
-    if (!wfcdOnly && newInWfcd.length === 0) {
-      console.log('  No new items in WFCD — checking wiki for updates…');
+    if (!wfcdOnly && (newInWfcd.length === 0 || showAll)) {
+      if (newInWfcd.length === 0) console.log('  No new items in WFCD — checking wiki for updates…');
+      else                        console.log('  Fetching wiki data…');
       try {
         const wikiData   = await extractFromWiki();
         const wikiActive = activeItems(wikiData);
@@ -288,11 +295,24 @@ async function main() {
     }
   }
 
-  const total   = Object.keys(primeData).length;
-  const vaulted = Object.values(primeData).filter(v => v.IsVaulted).length;
-  console.log(`Result: ${total} items (${total - vaulted} active, ${vaulted} vaulted)`);
+  const total    = Object.keys(primeData).length;
+  const vaulted  = Object.values(primeData).filter(v => v.IsVaulted).length;
+  const newCount = [...activeItems(primeData)].filter(k => !existActive.has(k)).length;
 
-  if (dryRun) { console.log('Dry run — relics.json not written.'); return; }
+  console.log('\n' + '─'.repeat(60));
+  console.log(`Result: ${total} items (${total - vaulted} active, ${vaulted} vaulted)`);
+  console.log(`${newCount} new item(s) vs existing relics.js`);
+
+  if (newCount === 0) {
+    console.log('Nothing to update.');
+  } else {
+    console.log(`New items found (${newCount}).`);
+  }
+
+  if (!doApply) {
+    console.log('Run with --apply to write relics.json (backs up first).');
+    return;
+  }
 
   saveBackup();
   fs.writeFileSync(OUT_JSON, JSON.stringify(primeData, null, 2), 'utf-8');

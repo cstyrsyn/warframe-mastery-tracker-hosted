@@ -537,12 +537,14 @@ async function main() {
     for (const m of missingDescs)              console.log(`  ARCANE_DESC:        ${m.arcane.name}`);
   }
 
+  console.log('\n' + '─'.repeat(60));
+  console.log(`${totalNew} new | ${totalPatchable} patchable`);
+
   if (totalNew === 0 && totalPatchable === 0) {
-    console.log('\nAll arcanes are up to date.');
+    console.log('Nothing to update.');
     return;
   }
 
-  console.log('\n' + '─'.repeat(60));
   if (!doApply) {
     if (totalNew > 0) {
       console.log(`${totalNew} new arcane(s) found. Review stubs above, then run with --apply to insert.`);
