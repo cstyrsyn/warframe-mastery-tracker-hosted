@@ -1,0 +1,64 @@
+name: Content Update Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install and update dependencies
+        working-directory: dev
+        run: |
+          npm install
+          npm update @wfcd/items
+
+      - name: Run all update checks
+        id: check
+        run: |
+          {
+            echo "=== BLUEPRINTS ==="
+            node dev/update-blueprints.js 
+            echo ""
+            echo "=== ARCANES ==="
+            node dev/update-arcanes.js 
+            echo ""
+            echo "=== MODS ==="
+            node dev/update-mods.js 
+            echo ""
+            echo "=== WEAPONS ==="
+            node dev/update-weapons.js 
+            echo ""
+            echo "=== WARFRAMES ==="
+            node dev/update-warframes.js
+            echo ""
+            echo "=== RELICS ==="
+            node dev/update-relics.js
+          } > /tmp/check-output.txt 2>&1 || true
+          cat /tmp/check-output.txt
+          if grep -qE \
+            'Auto-stubs \(|Needs manual research \(|No traditional blueprint \([1-9]|New arcanes confirmed by WFCD \(|Wiki-only — verify released before adding \(|Incomplete entries with WFCD.Wiki data now available \(|New mods confirmed by WFCD \(|Incomplete entries now patchable from WFCD \(|New weapons confirmed by WFCD \(|New warframes \([1-9]|VAULTED_WF changes \([1-9]|WARFRAME_ABILITIES gaps \([1-9]|New items found \(' \
+            /tmp/check-output.txt; then
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Open GitHub issue
+        if: steps.check.outputs.has_updates == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BODY=$(printf '```\n%s\n```' "$(cat /tmp/check-output.txt)")
+          gh issue create \
+            --title "Content gaps found — $(date -u '+%Y-%m-%d')" \
+            --body "$BODY"
