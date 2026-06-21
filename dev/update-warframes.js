@@ -29,7 +29,7 @@ const WIKI_URL       = 'https://wiki.warframe.com/w/Module:Warframes/data?action
 // Names always excluded regardless of source — founder-exclusive, Orion&Sirius and non-game items.
 // O&S has been added manually as it is considered by the game to be a Warframe with an Exalted Warframe.
 // 'Sirius & Orion' is the combined key used in data-items.js; all three forms must be excluded.
-const ALWAYS_EXCLUDE = new Set(['Excalibur Prime', 'Excalibur Umbra Prime', 'Orion', 'Sirius', 'Sirius & Orion', 'Stalker']);
+const ALWAYS_EXCLUDE = new Set(['Excalibur Prime', 'Excalibur Umbra Prime', 'Orion', 'Sirius', 'Sirius & Orion', 'Orion & Sirius', 'Stalker']);
 
 // WFCD puts Necramechs (Bonewidow, Voidrig) and Helminth in the Warframes category.
 // Filter by uniqueName prefix to exclude them — our data tracks these in other tabs.
