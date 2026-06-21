@@ -20,8 +20,8 @@ const https    = require('https');
 const luaparse = require('luaparse');
 
 const WFCD_WARFRAMES = path.join(__dirname, 'node_modules/@wfcd/items/data/json/Warframes.json');
-const DATA_ITEMS     = path.join(__dirname, '..', 'data-items.js');
-const DATA_ABILITIES = path.join(__dirname, '..', 'data-abilities.js');
+const DATA_ITEMS     = path.join(__dirname, '..', 'data', 'data-items.js');
+const DATA_ABILITIES = path.join(__dirname, '..', 'data', 'data-abilities.js');
 const BACKUP_DIR     = path.join(__dirname, 'backups', 'warframes');
 const KEEP_BACKUPS   = 5;
 const WIKI_URL       = 'https://wiki.warframe.com/w/Module:Warframes/data?action=raw';
@@ -268,7 +268,7 @@ async function extractFromWiki() {
 // Returns a Set of prime item names that have active (non-vaulted) relic drops.
 // Used to corroborate wiki-only new primes as genuinely released.
 function getActiveRelicItems() {
-  const relicsJs = path.join(__dirname, '..', 'relics.js');
+  const relicsJs = path.join(__dirname, '..', 'data', 'data-relics.js');
   if (!fs.existsSync(relicsJs)) return new Set();
   const js  = fs.readFileSync(relicsJs, 'utf-8');
   const out = new Set();

@@ -20,7 +20,7 @@ const https        = require('https');
 const luaparse     = require('luaparse');
 const { execSync } = require('child_process');
 
-const DATA_MODS    = path.join(__dirname, '..', 'data-mods.js');
+const DATA_MODS    = path.join(__dirname, '..', 'data', 'data-mods.js');
 const WFCD_DIR     = path.join(__dirname, 'node_modules/@wfcd/items/data/json');
 const WIKI_URL     = 'https://wiki.warframe.com/w/Module:Mods/data?action=raw';
 const BACKUP_DIR   = path.join(__dirname, 'backups', 'mods');
