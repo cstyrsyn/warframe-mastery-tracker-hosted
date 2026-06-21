@@ -12,7 +12,7 @@ const https = require('https');
 const fs    = require('fs');
 const path  = require('path');
 
-const DATA_FILE = path.resolve(__dirname, '..', 'data-mods.js');
+const DATA_FILE = path.resolve(__dirname, '..', 'data', 'data-mods.js');
 const API_URL   = 'https://api.warframestat.us/mods';
 const DRY_RUN   = process.argv.includes('--dry-run');
 

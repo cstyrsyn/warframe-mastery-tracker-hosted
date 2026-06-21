@@ -19,7 +19,7 @@ const https        = require('https');
 const luaparse     = require('luaparse');
 const { execSync } = require('child_process');
 
-const DATA_ARCANES = path.join(__dirname, '..', 'data-arcanes.js');
+const DATA_ARCANES = path.join(__dirname, '..', 'data', 'data-arcanes.js');
 const WFCD_DIR     = path.join(__dirname, 'node_modules/@wfcd/items/data/json');
 const WIKI_URL     = 'https://wiki.warframe.com/w/Module:Arcane/data?action=raw';
 const BACKUP_DIR   = path.join(__dirname, 'backups', 'arcanes');

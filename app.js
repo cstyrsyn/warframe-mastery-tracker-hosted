@@ -76,21 +76,6 @@ const CL_OWN_KEY = 'wf-checklist-owned';
 const CL_BP_KEY  = 'wf-checklist-bp-owned';
 
 // ─────────────────────────────────────────────
-// BUILD PICKS STATE
-// ─────────────────────────────────────────────
-const BP_PICKS_KEY = 'wf-build-picks';
-let buildPicks = {};
-let _bpItemName = '';
-let _bpOfId     = null;
-let _bpBuilds   = [];
-let _bpBuild    = null; // currently displayed detail build
-
-function loadBuildPicks() {
-  try { buildPicks = JSON.parse(localStorage.getItem(BP_PICKS_KEY) || '{}'); } catch { buildPicks = {}; }
-}
-function saveBuildPicks() { localStorage.setItem(BP_PICKS_KEY, JSON.stringify(buildPicks)); }
-
-// ─────────────────────────────────────────────
 // MY BUILDS STATE (Builds page)
 // ─────────────────────────────────────────────
 const MY_BUILDS_KEY = 'wf-my-builds';
@@ -123,7 +108,7 @@ function loadMyBuilds() {
     myBuilds[key] = [{
       id: blpGenId(), name: 'Build 1', subForms: {},
       baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
-      baseBuildUrl: val.baseBuildUrl ?? null, baseAuthor: val.baseAuthor ?? null,
+      baseBuildUrl: isSafeOfPath(val.baseBuildUrl) ? val.baseBuildUrl : null, baseAuthor: val.baseAuthor ?? null,
       slots: val.slots ?? [], isModified: val.isModified ?? false,
     }];
   }
@@ -144,7 +129,7 @@ function loadMyBuilds() {
     }
     myBuilds[itemName][0].subForms[sfName] = {
       baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
-      baseBuildUrl: val.baseBuildUrl ?? null, baseAuthor: val.baseAuthor ?? null,
+      baseBuildUrl: isSafeOfPath(val.baseBuildUrl) ? val.baseBuildUrl : null, baseAuthor: val.baseAuthor ?? null,
       slots: val.slots ?? [], isModified: val.isModified ?? false,
     };
   }
@@ -523,109 +508,12 @@ function openAcqMenu(evt, tab, name) {
   setTimeout(() => document.addEventListener('click', closeChecklistMenu, { once: true }), 0);
 }
 
-// ─────────────────────────────────────────────
-// BUILDS PANEL
-// ─────────────────────────────────────────────
-
-function openBuildsPanel(name, ofId) {
-  _bpItemName = name;
-  _bpOfId     = ofId;
-  _bpBuilds   = [];
-  _bpBuild    = null;
-  document.getElementById('bp-item-name').textContent = name;
-  document.getElementById('bp-of-link').href = `https://overframe.gg/items/arsenal/${parseInt(ofId)}/`;
-  document.getElementById('bp-body').innerHTML = '<div id="bp-status">Loading builds…</div>';
-  document.getElementById('bp-overlay').classList.add('open');
-  fetchBuildList();
-}
-
-function closeBuildsPanel() {
-  document.getElementById('bp-overlay').classList.remove('open');
-}
-
-function bpOverlayClick(evt) {
-  if (evt.target.id === 'bp-overlay') closeBuildsPanel();
-}
-
-async function fetchBuildList() {
-  const body = document.getElementById('bp-body');
-  try {
-    const res = await fetch(`${OF_API}/builds/?item_id=${parseInt(_bpOfId)}&ordering=-score&limit=20`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    _bpBuilds = data.results || [];
-    renderBuildList();
-  } catch (e) {
-    body.innerHTML = `<div id="bp-status">Failed to load builds: ${esc(e.message)}</div>`;
-  }
-}
-
-function renderBuildList() {
-  const body = document.getElementById('bp-body');
-  if (!_bpBuilds.length) { body.innerHTML = '<div id="bp-status">No builds found.</div>'; return; }
-  const pickedId = buildPicks[_bpItemName];
-  body.innerHTML = _bpBuilds.map(b => {
-    const isPicked = b.id === pickedId;
-    return `<div class="bp-build${isPicked ? ' picked' : ''}" onclick="fetchBuildDetail(${b.id})">
-      <div class="bp-build-title">${esc(b.title)}</div>
-      <div class="bp-build-meta">
-        <span class="bp-score">▲ ${b.score.toLocaleString()}</span>
-        <span>${b.formas} forma</span>
-        <span>by ${esc(b.author.username)}</span>
-      </div>
-      ${isPicked ? '<div class="bp-tracking">★ Currently using</div>' : ''}
-    </div>`;
-  }).join('');
-}
-
-async function fetchBuildDetail(buildId) {
-  const body = document.getElementById('bp-body');
-  body.innerHTML = '<div id="bp-status">Loading build…</div>';
-  try {
-    const res = await fetch(`${OF_API}/builds/${buildId}/`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    _bpBuild = await res.json();
-    renderBuildDetail();
-  } catch (e) {
-    body.innerHTML = `<div id="bp-status">Failed to load build: ${esc(e.message)}</div>
-      <button id="bp-back" onclick="renderBuildList()">← Back to builds</button>`;
-  }
-}
-
-function renderBuildDetail() {
-  const build    = _bpBuild;
-  const pickedId = buildPicks[_bpItemName];
-  const isPicked = build.id === pickedId;
-
-  const slots = (build.slots || [])
-    .slice().sort((a, b) => a.slot_id - b.slot_id)
-    .map(s => {
-      const modName = (typeof OVERFRAME_MODS !== 'undefined' && OVERFRAME_MODS.get(s.mod)) || `Mod #${s.mod}`;
-      const rank    = s.rank > 0 ? `R${s.rank}` : 'Unranked';
-      const drain   = s.drain !== 0 ? `${s.drain > 0 ? '+' : ''}${s.drain}` : '0';
-      return `<div class="bp-slot">
-        <span class="bp-slot-name">${esc(modName)}</span>
-        <span class="bp-slot-right"><span>${rank}</span><span>${drain} cap</span></span>
-      </div>`;
-    }).join('');
-
-  document.getElementById('bp-body').innerHTML = `
-    <button id="bp-back" onclick="renderBuildList()">← Back to builds</button>
-    <div id="bp-detail-title">${esc(build.title)}</div>
-    <div id="bp-detail-meta">▲ ${build.score.toLocaleString()} · ${build.formas} forma · by ${esc(build.author.username)}</div>
-    <div class="bp-slots">${slots || '<div id="bp-status">No mod data.</div>'}</div>
-    <button id="bp-use-btn" class="${isPicked ? 'picked' : ''}" onclick="toggleBuildPick(${build.id})">
-      ${isPicked ? '★ Currently using this build' : 'Use this build'}
-    </button>
-    <a id="bp-of-build-link" href="https://overframe.gg${esc(build.url)}" target="_blank" rel="noopener">View full build on Overframe ↗</a>
-  `;
-}
-
-function toggleBuildPick(buildId) {
-  if (buildPicks[_bpItemName] === buildId) delete buildPicks[_bpItemName];
-  else buildPicks[_bpItemName] = buildId;
-  saveBuildPicks();
-  renderBuildDetail();
+function goToBuildsItem(tab, name) {
+  const tabEl = document.querySelector('.tab[data-tab="builds"]');
+  if (!tabEl) return;
+  switchTab(tabEl);
+  blpSetTab(tab);
+  blpSelectItem(name);
 }
 
 // ─────────────────────────────────────────────
@@ -2592,14 +2480,14 @@ async function blpLoadOFBuild(buildId) {
         const data = blpEnsureCurrentData();
         if (data) {
           data.baseBuildId = build.id; data.baseBuildTitle = build.title;
-          data.baseBuildUrl = build.url; data.baseAuthor = build.author.username;
+          data.baseBuildUrl = isSafeOfPath(build.url) ? build.url : null; data.baseAuthor = build.author.username;
           data.slots = slots; data.isModified = false;
         }
       } else {
         const entry = {
           id: blpGenId(), name: build.title, subForms: {},
           baseBuildId: build.id, baseBuildTitle: build.title,
-          baseBuildUrl: build.url, baseAuthor: build.author.username,
+          baseBuildUrl: isSafeOfPath(build.url) ? build.url : null, baseAuthor: build.author.username,
           slots, helminthAbility, isModified: false, potatoed: true, formas: build.formas ?? null,
         };
         if (importedComponents) {
@@ -2614,7 +2502,7 @@ async function blpLoadOFBuild(buildId) {
       if (data) {
         data.baseBuildId    = build.id;
         data.baseBuildTitle = build.title;
-        data.baseBuildUrl   = build.url;
+        data.baseBuildUrl   = isSafeOfPath(build.url) ? build.url : null;
         data.baseAuthor     = build.author.username;
         data.slots          = slots;
         data.isModified     = false;
@@ -2971,6 +2859,7 @@ function aqKey(tab, name)   { return 'aq:' + itemKey(tab, name); }
 
 const AQ_TABS = new Set(['warframes','companions','primary','secondary','melee','vehicles','compWeapons','archWeapons','amps']);
 const WEAPON_MR_TABS = new Set(['primary','secondary','melee','archWeapons','compWeapons']);
+const BUILDS_PAGE_TABS = new Set(['warframes','primary','secondary','melee','companions','compWeapons','vehicles','archWeapons']);
 const TAB_XP_PER_LEVEL = { warframes:200, companions:200, vehicles:200, primary:100, secondary:100, melee:100, compWeapons:100, archWeapons:100, amps:100, intrinsics:1500 };
 
 // Circuit week rolling — both circuits reset Monday 00:00 UTC, epoch anchor = 2026-04-27
@@ -3810,7 +3699,8 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const _clOn = incarnonGenesis ? (inCl || isInIncarnonChecklist(name)) : inCl;
   const _clClick = incarnonGenesis ? `openChecklistMenu(event,'${tab}','${ename}')` : `toggleChecklist('${tab}','${ename}')`;
   const swapBtn = name === 'Sirius & Orion' ? `<button class="card-addlist" onclick="toggleSiriusOrionImg(this)" title="Switch Sirius / Orion">⇄</button>` : '';
-  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div>${swapBtn}<button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
+  const buildsBtn = BUILDS_PAGE_TABS.has(tab) ? `<button class="card-builds" onclick="goToBuildsItem('${tab}','${ename}')">Builds</button>` : '';
+  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div>${swapBtn}${buildsBtn}<button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
   const slider = `<div class="card-row">
     <span class="rank-num">${rank}</span>
     <input class="rank-slider" type="range" min="0" max="${maxRank}"
@@ -3969,6 +3859,21 @@ function jsStr(s) {
     .replace(/\r/g, '\\r')
     .replace(/\n/g, '\\n')
     .replace(/"/g, '&quot;');
+}
+function isSafeOfPath(u) {
+  return typeof u === 'string' && /^\/[\w\-\/\.]+$/.test(u);
+}
+function sanitizeMyBuilds(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out = {};
+  for (const [item, builds] of Object.entries(raw)) {
+    if (!Array.isArray(builds)) continue;
+    out[item] = builds.map(b => ({
+      ...b,
+      baseBuildUrl: isSafeOfPath(b?.baseBuildUrl) ? b.baseBuildUrl : null,
+    }));
+  }
+  return out;
 }
 function wikiUrl(name) {
   return 'https://wiki.warframe.com/w/' + name.replace(/ /g, '_');
@@ -5021,7 +4926,8 @@ function applySave(bundle) {
       typeof it.name === 'string' && it.name.trim() &&
       typeof it.tab === 'string' && VALID_CUSTOM_TABS.has(it.tab)
     );
-    for (const it of customItems) { _mergeCustomItem(it); delete searchIndex[it.tab]; }
+    conflictingCustomItems = [];
+    customItems = _applyCustomItems(customItems, true);
     if (Array.isArray(bundle.modularBuilds)) {
       modularBuilds = bundle.modularBuilds.filter(b =>
         b && typeof b === 'object' && typeof b.id === 'string');
@@ -5570,8 +5476,10 @@ function doReset() {
 // ─────────────────────────────────────────────
 // CUSTOM ITEMS
 // ─────────────────────────────────────────────
-const CUSTOM_LS_KEY = 'wf-custom-items-v1';
+const CUSTOM_LS_KEY    = 'wf-custom-items-v1';
+const CONFLICT_LS_KEY  = 'wf-custom-conflicts-v1';
 let customItems = [];
+let conflictingCustomItems = [];
 
 const ADD_TABS = [
   ['warframes','Warframes'],['primary','Primary Weapons'],['secondary','Secondary Weapons'],
@@ -5581,21 +5489,87 @@ const ADD_TABS = [
 ];
 
 function loadCustomItems() {
+  try { conflictingCustomItems = JSON.parse(localStorage.getItem(CONFLICT_LS_KEY) || '[]'); }
+  catch { conflictingCustomItems = []; }
   try { customItems = JSON.parse(localStorage.getItem(CUSTOM_LS_KEY) || '[]'); }
   catch { customItems = []; }
-  for (const it of customItems) _mergeCustomItem(it);
+  const prevCount = conflictingCustomItems.length;
+  customItems = _applyCustomItems(customItems);
+  if (conflictingCustomItems.length > prevCount) saveCustomItems();
 }
 
 function _mergeCustomItem(it) {
   const arr = TAB_DATA[it.tab];
-  if (!arr) return;
-  if (arr.find(i => i[0] === it.name)) return;
+  if (!arr) return false;
+  const existing = arr.find(i => i[0] === it.name);
+  if (existing) return existing[6] !== true; // official item exists → conflict
   arr.push([it.name, it.cat, it.obtain, it.maxRank, it.tradable ? 1 : 0, it.compFor || undefined, true]);
+  return false;
+}
+
+function _applyCustomItems(items, clearIdx = false) {
+  const newConflicts = [];
+  const kept = [];
+  for (const it of items) {
+    if (_mergeCustomItem(it)) {
+      if (!conflictingCustomItems.some(c => c.name === it.name && c.tab === it.tab))
+        newConflicts.push(it);
+    } else {
+      kept.push(it);
+      if (clearIdx) delete searchIndex[it.tab];
+    }
+  }
+  if (newConflicts.length) {
+    conflictingCustomItems.push(...newConflicts);
+    saveConflicts();
+  }
+  return kept;
 }
 
 function saveCustomItems() {
   localStorage.setItem(CUSTOM_LS_KEY, JSON.stringify(customItems));
   deferCloudSync();
+}
+
+function saveConflicts() {
+  localStorage.setItem(CONFLICT_LS_KEY, JSON.stringify(conflictingCustomItems));
+}
+
+function removeConflict(index) {
+  conflictingCustomItems.splice(index, 1);
+  saveConflicts();
+  renderConflictList();
+  renderConflictNotice();
+}
+
+function renderConflictNotice() {
+  const el = document.getElementById('conflict-notice');
+  const msg = document.getElementById('conflict-notice-msg');
+  if (!el || !msg) return;
+  if (conflictingCustomItems.length === 0) { el.style.display = 'none'; return; }
+  const n = conflictingCustomItems.length;
+  msg.textContent = `${n} custom item${n > 1 ? 's' : ''} now exist in official data and no longer contribute to your counts.`;
+  el.style.display = 'flex';
+}
+
+function dismissConflictNotice() {
+  const el = document.getElementById('conflict-notice');
+  if (el) el.style.display = 'none';
+}
+
+function renderConflictList() {
+  const section = document.getElementById('conflict-list-section');
+  const el = document.getElementById('conflict-items-list');
+  if (!section || !el) return;
+  section.style.display = conflictingCustomItems.length > 0 ? 'block' : 'none';
+  el.innerHTML = conflictingCustomItems.map((it, i) => {
+    const tabLabel = ADD_TABS.find(([v]) => v === it.tab)?.[1] || it.tab;
+    return `<div class="conflict-item-row">
+  <div class="conflict-item-name">${esc(it.name)}</div>
+  <div class="conflict-item-meta">${esc(tabLabel)} · ${esc(it.cat)}</div>
+  <button class="qbtn zr" onclick="removeConflict(${i})" title="Remove">✕</button>
+</div>`;
+  }).join('');
 }
 
 function openAddModal() {
@@ -5610,6 +5584,7 @@ function openAddModal() {
   document.getElementById('add-msg').textContent = '';
   document.getElementById('add-msg').style.color = '';
   renderCustomItemsList();
+  renderConflictList();
   document.getElementById('add-overlay').classList.add('open');
 }
 
@@ -5817,9 +5792,11 @@ async function logout() {
   localStorage.removeItem(CL_OWN_KEY);
   localStorage.removeItem(CL_BP_KEY);
   localStorage.removeItem(CUSTOM_LS_KEY);
+  localStorage.removeItem(CONFLICT_LS_KEY);
   localStorage.removeItem('wf-cloud-ts');
   progress = {};
   customItems = [];
+  conflictingCustomItems = [];
   loadChecklist();
   updateAuthUI();
   updateHeader();
@@ -5855,9 +5832,11 @@ async function loadFromCloud() {
     }
 
     if (Array.isArray(data.custom_items)) {
-      customItems = data.custom_items.filter(it => it && typeof it.name === 'string' && it.name.trim());
+      conflictingCustomItems = [];
+      customItems = _applyCustomItems(
+        data.custom_items.filter(it => it && typeof it.name === 'string' && it.name.trim())
+      );
       localStorage.setItem(CUSTOM_LS_KEY, JSON.stringify(customItems));
-      for (const it of customItems) _mergeCustomItem(it);
     }
 
     if (data.modular_builds) {
@@ -5872,7 +5851,7 @@ async function loadFromCloud() {
     }
 
     if (data.my_builds && typeof data.my_builds === 'object') {
-      myBuilds = data.my_builds;
+      myBuilds = sanitizeMyBuilds(data.my_builds);
       localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds));
     }
 
@@ -6220,9 +6199,9 @@ function renderDucats() {
 // ─────────────────────────────────────────────
 loadProgress();
 loadCustomItems();
+renderConflictNotice();
 loadChecklist();
 loadModularBuilds();
-loadBuildPicks();
 loadMyBuilds();
 initAuth();
 const _savedTab = localStorage.getItem('wf-ui-tab');

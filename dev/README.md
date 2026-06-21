@@ -26,7 +26,7 @@ Open `index.html` via `localhost` and the app routes API calls through it automa
 
 ## Deployment
 
-Static site, no build step. Deploy `index.html`, `app.js`, `data/`, `relics.js`, `weapon-mr.js`, and `functions/` to any static host. Cloudflare Pages is recommended — it picks up `functions/of-proxy/` as a Pages Function automatically.
+Static site, no build step. Deploy `index.html`, `app.js`, `data/`, `weapon-mr.js`, and `functions/` to any static host. Cloudflare Pages is recommended — it picks up `functions/of-proxy/` as a Pages Function automatically.
 
 ## Data maintenance
 
@@ -63,7 +63,7 @@ data/
   data-kitguns.js       Kitgun and Zaw component stats
   data-overframe.js     Overframe item ID map, default polarities
   data-overframe-mods.js  Overframe mod ID map
-relics.js               Relic drop tables
+  data-relics.js        Relic drop tables
 weapon-mr.js            Supplemental weapon MR data
 config.example.js       Supabase credentials template
 config.js               Your credentials (gitignored)
