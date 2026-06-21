@@ -18,7 +18,7 @@ const fs   = require('fs');
 const path = require('path');
 
 const IN_JSON = path.join(__dirname, 'relics.json');
-const OUT_JS  = path.join(__dirname, '..', 'relics.js');
+const OUT_JS  = path.join(__dirname, '..', 'data', 'data-relics.js');
 
 const RARITY_ORDER = { Common: 0, Uncommon: 1, Rare: 2 };
 

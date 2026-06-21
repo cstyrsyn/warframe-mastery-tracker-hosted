@@ -25,7 +25,7 @@ const luaparse = require('luaparse');
 
 const WFCD_RELICS  = path.join(__dirname, 'node_modules/@wfcd/items/data/json/Relics.json');
 const OUT_JSON     = path.join(__dirname, 'relics.json');
-const RELICS_JS    = path.join(__dirname, '..', 'relics.js');
+const RELICS_JS    = path.join(__dirname, '..', 'data', 'data-relics.js');
 const BACKUP_DIR   = path.join(__dirname, 'backups', 'relics');
 const KEEP_BACKUPS = 5;
 const WIKI_URL    = 'https://wiki.warframe.com/w/Module:Void/data?action=raw';

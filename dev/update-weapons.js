@@ -20,7 +20,7 @@ const https        = require('https');
 const luaparse     = require('luaparse');
 const { execSync } = require('child_process');
 
-const DATA_ITEMS   = path.join(__dirname, '..', 'data-items.js');
+const DATA_ITEMS   = path.join(__dirname, '..', 'data', 'data-items.js');
 const WFCD_DIR     = path.join(__dirname, 'node_modules/@wfcd/items/data/json');
 const WIKI_BASE    = 'https://wiki.warframe.com/w/Module:Weapons/data';
 const BACKUP_DIR   = path.join(__dirname, 'backups', 'weapons');

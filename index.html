@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy"
-  content="base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.sheetjs.com; connect-src 'self' https://*.supabase.co; style-src 'unsafe-inline';">
+  content="base-uri 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdn.sheetjs.com; script-src-attr 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'unsafe-inline';">
 <title>Warframe Mastery Tracker</title>
 <style>
+  /* Colour sets across the app*/
 :root {
   --bg: #09090e;
   --surface: #111118;
@@ -27,8 +28,12 @@
   --blue: #4a80c8;
   --tag-bg: #1e1e2a;
   --sticky-offset: 140px;
+  --rarity-common:    150,150,150;
+  --rarity-uncommon:  176,112,64;
+  --rarity-rare:      200,170,110;
+  --rarity-legendary: 160,100,220;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; } /* Ensures consistent spacing across browser types*/
 html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
@@ -119,7 +124,7 @@ body.topbar-mode .tab { border-left: none; border-bottom: 2px solid transparent;
 body.topbar-mode .tab:hover { background: transparent; }
 body.topbar-mode .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
 body.topbar-mode .sidebar-divider { display: none; }
-@media (max-width: 700px) {
+@media (max-width: 700px) { /* Detect screens/size under 700px to force topbar mode*/
   #app-body { display: block; }
   #sidebar { position: static; width: 100%; height: auto; z-index: auto; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; border-right: none; border-bottom: 1px solid var(--border); }
   #tabs { flex-direction: row; padding: 0 12px; }
@@ -257,10 +262,10 @@ body.topbar-mode .sidebar-divider { display: none; }
   z-index: -1;
 }
 .card-wf-img--lg { height: 120px; opacity: 0.30; }
-.card[data-rarity="Common"]    { box-shadow: inset 3px 0 0 rgba(150,150,150,0.45); background: rgba(150,150,150,0.03); }
-.card[data-rarity="Uncommon"]  { box-shadow: inset 3px 0 0 rgba(176,112,64,0.65);  background: rgba(176,112,64,0.04); }
-.card[data-rarity="Rare"]      { box-shadow: inset 3px 0 0 rgba(200,170,110,0.65); background: rgba(200,170,110,0.04); }
-.card[data-rarity="Legendary"] { box-shadow: inset 3px 0 0 rgba(160,100,220,0.65); background: rgba(160,100,220,0.05); }
+.card[data-rarity="Common"]    { box-shadow: inset 3px 0 0 rgba(var(--rarity-common),0.45);    background: rgba(var(--rarity-common),0.03); }
+.card[data-rarity="Uncommon"]  { box-shadow: inset 3px 0 0 rgba(var(--rarity-uncommon),0.65);  background: rgba(var(--rarity-uncommon),0.04); }
+.card[data-rarity="Rare"]      { box-shadow: inset 3px 0 0 rgba(var(--rarity-rare),0.65);      background: rgba(var(--rarity-rare),0.04); }
+.card[data-rarity="Legendary"] { box-shadow: inset 3px 0 0 rgba(var(--rarity-legendary),0.65); background: rgba(var(--rarity-legendary),0.05); }
 .card.maxed  { border-color: rgba(74,150,96,0.7);   background: var(--green-bg); }
 .card.partial { border-color: rgba(200,170,110,0.65); background: rgba(200,170,110,0.05); }
 .card.acquired { border-color: rgba(74,128,200,0.65); background: rgba(74,128,200,0.06); }
@@ -318,7 +323,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   background: #0a2a45; color: #4db3ff;
   border: 1px solid #4db3ff;
   text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
-  white-space: nowrap; flex-shrink: 0; text-decoration: none;
+  white-space: nowrap; flex-shrink: 0; cursor: pointer; font-family: inherit;
 }
 .card-builds:hover { background: #0e3860; }
 .cl-menu {
@@ -333,70 +338,6 @@ body.topbar-mode .sidebar-divider { display: none; }
   cursor: pointer; font-size: 12px; white-space: nowrap; width: 100%;
 }
 .cl-menu-item:hover { background: #2a3a50; color: #fff; }
-
-/* ── BUILDS PANEL ── */
-#bp-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5); z-index: 1200;
-}
-#bp-overlay.open { display: block; }
-#bp-panel {
-  position: fixed; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%;
-  background: var(--surface); border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,0.5);
-}
-#bp-head {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 12px;
-}
-#bp-head-left { flex: 1; min-width: 0; }
-#bp-item-name { font-size: 15px; font-weight: 600; color: var(--gold); margin-bottom: 4px; }
-#bp-of-link { font-size: 10px; color: var(--blue); text-decoration: none; }
-#bp-of-link:hover { text-decoration: underline; }
-#bp-close {
-  background: none; border: none; color: var(--text-muted);
-  font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; flex-shrink: 0;
-}
-#bp-close:hover { color: var(--text); }
-#bp-body { flex: 1; overflow-y: auto; padding: 12px; }
-#bp-status { color: var(--text-muted); font-size: 12px; text-align: center; padding: 24px 12px; }
-.bp-build {
-  padding: 10px 12px; border-radius: 6px; cursor: pointer;
-  border: 1px solid var(--border); margin-bottom: 6px; transition: background 0.1s;
-}
-.bp-build:hover { background: var(--bg); }
-.bp-build.picked { border-color: var(--gold-dim); background: rgba(180,140,60,0.08); }
-.bp-build-title { font-size: 12px; color: var(--text); margin-bottom: 5px; font-weight: 500; }
-.bp-build-meta { display: flex; gap: 10px; font-size: 10px; color: var(--text-muted); flex-wrap: wrap; }
-.bp-score { color: var(--green); }
-.bp-tracking { font-size: 9px; color: var(--gold); margin-top: 4px; letter-spacing: 0.3px; }
-#bp-back {
-  background: none; border: none; color: var(--blue); font-size: 11px;
-  cursor: pointer; padding: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 4px;
-}
-#bp-back:hover { color: var(--text); }
-#bp-detail-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-#bp-detail-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 14px; }
-.bp-slots { display: flex; flex-direction: column; gap: 3px; margin-bottom: 14px; }
-.bp-slot {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 5px 10px; background: var(--bg); border-radius: 4px;
-  font-size: 11px; border: 1px solid var(--border);
-}
-.bp-slot-name { color: var(--text); }
-.bp-slot-right { display: flex; gap: 8px; flex-shrink: 0; color: var(--text-muted); font-size: 10px; }
-#bp-use-btn {
-  width: 100%; padding: 9px; border-radius: 6px; font-size: 12px; font-family: inherit;
-  cursor: pointer; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); transition: background 0.1s, border-color 0.1s;
-}
-#bp-use-btn:hover { background: var(--surface); border-color: var(--gold-dim); color: var(--gold); }
-#bp-use-btn.picked { background: rgba(180,140,60,0.15); border-color: var(--gold); color: var(--gold); }
-#bp-of-build-link {
-  display: block; text-align: center; margin-top: 10px;
-  font-size: 10px; color: var(--blue); text-decoration: none;
-}
-#bp-of-build-link:hover { text-decoration: underline; }
 
 .card-circuit {
   font-size: 8px; padding: 2px 5px; border-radius: 3px;
@@ -483,6 +424,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 .qbtn.rec:hover { background: rgba(200,170,110,0.30); border-color: rgba(200,170,110,0.88); }
 
 /* ── CARD FLIP ── */
+/* Used to toggle recipes on item cards */
 .card-front { display: block; }
 .card-back  { display: none; }
 .card.flipped .card-front { display: none; }
@@ -537,6 +479,22 @@ body.topbar-mode .sidebar-divider { display: none; }
 .sum-xp { font-size: 10px; color: var(--text-muted); margin-top: 8px; text-align: right; }
 .sum-xp span { color: var(--gold-light); font-weight: 600; }
 
+/* ── INTRINSICS ── */
+.intrinsic-group {
+  grid-column: 1 / -1;
+  position: relative; overflow: hidden; border-radius: 6px; padding: 8px;
+}
+.intrinsic-group .grid-group-hdr { grid-column: auto; margin-top: 0; }
+.intrinsic-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0.10; z-index: 0; pointer-events: none; user-select: none;
+}
+.intrinsic-cards-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px; position: relative; z-index: 1;
+}
+
 /* ── STAR CHART ── */
 #sc { display: none; }
 .sc-section { margin-bottom: 28px; }
@@ -580,20 +538,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 .grid-group-hdr:first-child { margin-top: 0; }
 .grid-group-hdr:hover { border-bottom-color: var(--gold); }
 .grp-arrow { font-size: 8px; margin-right: 5px; color: var(--text-muted); }
-.intrinsic-group {
-  grid-column: 1 / -1;
-  position: relative; overflow: hidden; border-radius: 6px; padding: 8px;
-}
-.intrinsic-group .grid-group-hdr { grid-column: auto; margin-top: 0; }
-.intrinsic-bg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover;
-  opacity: 0.10; z-index: 0; pointer-events: none; user-select: none;
-}
-.intrinsic-cards-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 8px; position: relative; z-index: 1;
-}
+
 .sc-group { margin-bottom: 36px; }
 .sc-group-hdr {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -613,6 +558,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 .sc-ovr-note { font-size: 9px; color: var(--gold-dim); }
 .sc-grid.dimmed { opacity: 0.35; pointer-events: none; }
 
+
 /* ── BUTTONS ── */
 .btn {
   padding: 5px 12px; border-radius: 4px;
@@ -627,7 +573,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 }
 .btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); color: var(--bg); }
 
-/* ── MODAL ── */
+/* ── IMPORT/EXPORT MODAL ── */
 #overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.75); z-index: 1000;
@@ -650,7 +596,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 #modal-foot { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
 #modal-msg { font-size: 10px; color: var(--green); align-self: center; margin-right: auto; }
 
-/* ── CONFIRM MODAL ── */
+/* ── CONFIRM IMPORT/EXPORT MODAL ── */
 #confirm-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.8); z-index: 1100;
@@ -665,7 +611,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 #confirm-box p { color: var(--text-muted); font-size: 11px; margin-bottom: 16px; }
 #confirm-foot { display: flex; gap: 8px; justify-content: flex-end; }
 
-/* ── ADD ITEM MODAL ── */
+/* ── ADD CUSTOM ITEM MODAL ── */
 #add-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.75); z-index: 1000;
@@ -704,6 +650,34 @@ body.topbar-mode .sidebar-divider { display: none; }
 .custom-item-name { flex: 1; font-size: 11px; color: var(--text); }
 .custom-item-meta { font-size: 9px; color: var(--text-muted); white-space: nowrap; }
 
+/* ── CONFLICT NOTICE ── */
+#conflict-notice {
+  display: none; align-items: center; gap: 10px;
+  background: rgba(200,140,30,0.12); border-bottom: 1px solid rgba(200,140,30,0.3);
+  padding: 7px 16px; font-size: 11px; color: var(--gold-light);
+}
+#conflict-notice-msg { flex: 1; }
+#conflict-notice a { color: var(--gold); cursor: pointer; text-decoration: underline; }
+#conflict-notice .cn-dismiss { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1; }
+#conflict-notice .cn-dismiss:hover { color: var(--text); }
+
+#conflict-list-section { display: none; margin-top: 18px; border-top: 1px solid rgba(200,140,30,0.3); padding-top: 14px; }
+#conflict-list-section h3 {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: rgba(200,140,30,0.8); margin-bottom: 6px;
+}
+#conflict-list-section .conflict-desc {
+  font-size: 10px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5;
+}
+.conflict-item-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid var(--border-soft);
+  opacity: 0.75;
+}
+.conflict-item-row:last-child { border-bottom: none; }
+.conflict-item-name { flex: 1; font-size: 11px; color: var(--text-muted); }
+.conflict-item-meta { font-size: 9px; color: var(--text-muted); white-space: nowrap; }
+
 /* ── MOD BADGES ── */
 .mod-rarity {
   font-size: 8px; padding: 2px 5px; border-radius: 3px;
@@ -711,10 +685,10 @@ body.topbar-mode .sidebar-divider { display: none; }
   white-space: nowrap; flex-shrink: 0;
   border: 1px solid transparent;
 }
-.rarity-common    { background: rgba(150,150,150,0.1); color: #999; border-color: rgba(150,150,150,0.3); }
-.rarity-uncommon  { background: rgba(176,112,64,0.12); color: #c07840; border-color: rgba(176,112,64,0.35); }
-.rarity-rare      { background: rgba(200,170,110,0.1); color: var(--gold); border-color: rgba(200,170,110,0.35); }
-.rarity-legendary { background: rgba(160,100,220,0.1); color: #b87ce0; border-color: rgba(160,100,220,0.35); }
+.rarity-common    { background: rgba(var(--rarity-common),0.1);    color: #999;    border-color: rgba(var(--rarity-common),0.3); }
+.rarity-uncommon  { background: rgba(var(--rarity-uncommon),0.12); color: #c07840; border-color: rgba(var(--rarity-uncommon),0.35); }
+.rarity-rare      { background: rgba(var(--rarity-rare),0.1);      color: var(--gold); border-color: rgba(var(--rarity-rare),0.35); }
+.rarity-legendary { background: rgba(var(--rarity-legendary),0.1); color: #b87ce0; border-color: rgba(var(--rarity-legendary),0.35); }
 .mod-polarity {
   font-size: 8px; padding: 2px 5px; border-radius: 3px;
   background: var(--tag-bg); color: var(--text-dim);
@@ -1298,40 +1272,46 @@ body.topbar-mode .sidebar-divider { display: none; }
     <div id="pb-bg"><div id="pb-fill" style="width:0%"></div></div>
   </div>
   <div id="hdr-btns">
-    <button class="btn" id="btn-menu" onclick="toggleMenu(event)">☰</button>
+    <button class="btn" id="btn-menu">☰</button>
     <div id="hdr-menu">
-      <button class="btn" id="btn-layout" onclick="toggleLayout()">Top Nav</button>
-      <button class="btn" id="btn-backup" onclick="setBackupFile()">Auto-backup</button>
-      <button class="btn" onclick="openImport()">Import</button>
-      <button class="btn" onclick="openExport()">Export</button>
-      <button class="btn" onclick="openAddModal()">+ Item</button>
-      <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="askReset()">Reset All</button>
-      <button class="btn" id="btn-auth" onclick="currentUser ? logout() : login()">Sign in</button>
+      <button class="btn" id="btn-layout">Top Nav</button>
+      <button class="btn" id="btn-backup">Auto-backup</button>
+      <button class="btn" id="btn-import">Import</button>
+      <button class="btn" id="btn-export">Export</button>
+      <button class="btn" id="btn-add-item">+ Item</button>
+      <button class="btn" id="btn-reset" style="color:var(--red);border-color:var(--red)">Reset All</button>
+      <button class="btn" id="btn-auth">Sign in</button>
     </div>
   </div>
 </div>
 <div id="ctrl">
   <div id="ctrl-row1">
-    <input id="search" type="text" placeholder="Search…" oninput="render()">
-    <button class="filt-btn" id="btn-filters" onclick="toggleFilterRow()">Filters ▾</button>
+    <input id="search" type="text" placeholder="Search…">
+    <button class="filt-btn" id="btn-filters">Filters ▾</button>
     <div id="tab-stat"></div>
   </div>
   <div id="ctrl-filters">
     <div id="cat-btns"></div>
     <div id="status-dd"></div>
-    <button class="filt-btn" id="fb-incarnon" style="display:none" onclick="toggleFilt('incarnon',this)">Incarnon</button>
-    <button class="filt-btn" id="fb-hasparts" style="display:none" onclick="toggleFilt('hasParts',this)">Has Prime Parts</button>
+    <button class="filt-btn" id="fb-incarnon" style="display:none">Incarnon</button>
+    <button class="filt-btn" id="fb-hasparts" style="display:none">Has Prime Parts</button>
     <span id="circuit-week-ind" class="circuit-week-ind" style="display:none"></span>
     <span id="circuit-wf-week-ind" class="circuit-week-ind" style="display:none"></span>
   </div>
   <div id="ctrl-row2" style="display:none">
-    <button class="filt-btn on" id="fb-tile" onclick="setListView(false)">Tile</button>
-    <button class="filt-btn" id="fb-list" onclick="setListView(true)">List</button>
-    <button class="filt-btn" id="fb-grp" onclick="toggleGroupView()">Group</button>
-    <button class="filt-btn" id="fb-wftile" style="display:none" onclick="toggleWfTileImages(this)">Tile Art</button>
-    <button class="filt-btn" id="fb-wfbg"   style="display:none" onclick="toggleWfBgImages(this)">BG Art</button>
+    <button class="filt-btn on" id="fb-tile">Tile</button>
+    <button class="filt-btn" id="fb-list">List</button>
+    <button class="filt-btn" id="fb-grp">Group</button>
+    <button class="filt-btn" id="fb-wftile" style="display:none">Tile Art</button>
+    <button class="filt-btn" id="fb-wfbg"   style="display:none">BG Art</button>
   </div>
 </div>
+</div>
+
+<div id="conflict-notice">
+  <span id="conflict-notice-msg"></span>
+  <a onclick="openAddModal()">Review in + Item</a>
+  <button class="cn-dismiss" onclick="dismissConflictNotice()" title="Dismiss">✕</button>
 </div>
 
 <div id="app-body">
@@ -1363,8 +1343,8 @@ body.topbar-mode .sidebar-divider { display: none; }
 <div id="content">
   <div id="bulk-bar">
     <span id="bulk-label">Showing all items</span>
-    <button class="btn" onclick="maxAllVisible()" style="font-size:10px;padding:3px 9px">Max All Visible</button>
-    <button class="btn" onclick="zeroAllVisible()" style="font-size:10px;padding:3px 9px;color:var(--red)">Reset All Visible</button>
+    <button class="btn" id="btn-maxall" style="font-size:10px;padding:3px 9px">Max All Visible</button>
+    <button class="btn" id="btn-zeroall" style="font-size:10px;padding:3px 9px;color:var(--red)">Reset All Visible</button>
   </div>
   <div id="summary"></div>
   <div id="grid"></div>
@@ -1376,7 +1356,7 @@ body.topbar-mode .sidebar-divider { display: none; }
     <div id="blp-tab-bar"></div>
     <div id="blp-body">
       <div id="blp-items">
-        <input id="blp-search" type="text" placeholder="Search items…" oninput="blpFilterItems()">
+        <input id="blp-search" type="text" placeholder="Search items…">
         <div id="blp-item-list"></div>
       </div>
       <div id="blp-editor">
@@ -1391,21 +1371,21 @@ body.topbar-mode .sidebar-divider { display: none; }
 </div>
 
 <!-- Export/Import Modal -->
-<div id="overlay" onclick="overlayClick(event)">
+<div id="overlay">
   <div id="modal">
     <h2 id="modal-title">Export Save</h2>
     <p id="modal-desc">Copy this text to share your progress or keep as a backup.</p>
     <div id="modal-file-row" style="display:none; margin-bottom:8px; align-items:center; gap:8px;">
-      <input type="file" id="modal-file-input" accept=".json,.xlsx,.xlsm" style="display:none" onchange="handleFileSelect(event)">
-      <button class="btn" onclick="openImportFile()">Open File…</button>
+      <input type="file" id="modal-file-input" accept=".json,.xlsx,.xlsm" style="display:none">
+      <button class="btn" id="btn-import-file">Open File…</button>
       <span id="modal-file-name" style="font-size:10px; color:var(--text-muted);">JSON or .xlsx checklist · or paste below</span>
     </div>
     <div id="modal-sheets-row" style="display:none; margin-bottom:4px; align-items:center; gap:8px; flex-wrap:wrap;">
       <input type="url" id="modal-sheets-url" placeholder="Google Apps Script URL…"
         style="flex:1; min-width:180px; background:var(--surface3); border:1px solid var(--border); color:var(--text); border-radius:4px; padding:4px 8px; font-size:11px; outline:none;">
-      <button class="btn" onclick="fetchFromSheets()">Fetch from Sheets</button>
-      <button class="btn" onclick="testSheetsUrl()" style="font-size:10px;padding:3px 8px;" title="Open the script URL in a new tab to verify it returns data">Test ↗</button>
-      <a id="sheets-help-link" href="#" onclick="toggleSheetsHelp(event)"
+      <button class="btn" id="btn-fetch-sheets">Fetch from Sheets</button>
+      <button class="btn" id="btn-test-sheets" style="font-size:10px;padding:3px 8px;" title="Open the script URL in a new tab to verify it returns data">Test ↗</button>
+      <a id="sheets-help-link" href="#"
         style="font-size:10px; color:var(--text-muted); text-decoration:none; white-space:nowrap;">Setup ▸</a>
     </div>
     <div id="modal-sheets-help" style="display:none; font-size:10px; color:var(--text-dim); line-height:1.7; margin-bottom:8px; padding:8px 10px; background:var(--surface3); border-radius:4px; border:1px solid var(--border-soft);">
@@ -1422,33 +1402,33 @@ body.topbar-mode .sidebar-divider { display: none; }
     <textarea id="modal-ta" spellcheck="false"></textarea>
     <div id="modal-foot">
       <span id="modal-msg"></span>
-      <button class="btn" onclick="closeModal()">Close</button>
-      <button class="btn" id="modal-save-file" style="display:none" onclick="saveProgressToFile()">Save to File…</button>
+      <button class="btn" id="btn-close-modal">Close</button>
+      <button class="btn" id="modal-save-file" style="display:none">Save to File…</button>
       <button class="btn btn-gold" id="modal-act">Copy</button>
     </div>
   </div>
 </div>
 
-<!-- Confirm Modal -->
-<div id="confirm-overlay" onclick="confirmOverlayClick(event)">
+<!-- Confirm Export/Import Modal -->
+<div id="confirm-overlay">
   <div id="confirm-box">
     <h2>Reset All Progress?</h2>
     <p>This will erase all tracked ranks and star chart progress. This cannot be undone.</p>
     <div id="confirm-foot">
-      <button class="btn" onclick="closeConfirm()">Cancel</button>
-      <button class="btn" style="color:var(--red);border-color:var(--red)" onclick="doReset()">Reset Everything</button>
+      <button class="btn" id="btn-close-confirm">Cancel</button>
+      <button class="btn" id="btn-do-reset" style="color:var(--red);border-color:var(--red)">Reset Everything</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <!-- Add Item Modal -->
-<div id="add-overlay" onclick="addOverlayClick(event)">
+<div id="add-overlay">
   <div id="add-modal">
     <h2>Add Custom Item</h2>
     <div class="add-row">
       <span class="add-lbl">Tab</span>
-      <select class="add-ctrl" id="add-tab" onchange="updateAddTabDefaults()"></select>
+      <select class="add-ctrl" id="add-tab"></select>
     </div>
     <div class="add-row">
       <span class="add-lbl">Name</span>
@@ -1481,100 +1461,21 @@ body.topbar-mode .sidebar-divider { display: none; }
     </div>
     <div id="add-msg"></div>
     <div id="add-foot">
-      <button class="btn" onclick="closeAddModal()">Close</button>
-      <button class="btn btn-gold" onclick="submitAddItem()">Add Item</button>
+      <button class="btn" id="btn-close-add">Close</button>
+      <button class="btn btn-gold" id="btn-submit-add">Add Item</button>
     </div>
     <div id="custom-list-section">
       <h3>Custom Items</h3>
       <div id="custom-items-list"></div>
     </div>
+    <div id="conflict-list-section">
+      <h3>Conflicting Custom Items</h3>
+      <p class="conflict-desc">These items now exist in the official data and have been removed from tracking. They do not contribute to any counts. Remove them here once you are done.</p>
+      <div id="conflict-items-list"></div>
+    </div>
   </div>
 </div>
 
-<script>
-function updateStickyOffset(){
-  const el=document.getElementById('sticky-top');
-  if(el) document.documentElement.style.setProperty('--sticky-offset', el.offsetHeight+'px');
-}
-function moveSidebar(toTopbar){
-  const sidebar=document.getElementById('sidebar');
-  if(!sidebar) return;
-  if(toTopbar){
-    const ctrl=document.getElementById('ctrl');
-    if(ctrl && sidebar.parentNode!==ctrl.parentNode) ctrl.parentNode.insertBefore(sidebar,ctrl);
-  } else {
-    const appBody=document.getElementById('app-body');
-    if(appBody && sidebar.parentNode!==appBody) appBody.insertBefore(sidebar,appBody.firstChild);
-  }
-}
-(function(){
-  function applyLayout(){
-    const mobile=window.innerWidth<=700;
-    const btn=document.getElementById('btn-layout');
-    if(mobile){
-      document.body.classList.add('topbar-mode');
-      moveSidebar(true);
-    } else {
-      const pref=localStorage.getItem('navLayout');
-      const topbar=pref==='topbar';
-      document.body.classList.toggle('topbar-mode', topbar);
-      if(btn) btn.textContent=topbar?'Side Nav':'Top Nav';
-      moveSidebar(topbar);
-    }
-    updateStickyOffset();
-  }
-  applyLayout();
-  window.addEventListener('resize', applyLayout);
-  if('ResizeObserver' in window){
-    new ResizeObserver(updateStickyOffset).observe(document.getElementById('sticky-top'));
-  }
-})();
-function toggleLayout(){
-  const topbar=document.body.classList.toggle('topbar-mode');
-  document.getElementById('btn-layout').textContent=topbar?'Side Nav':'Top Nav';
-  localStorage.setItem('navLayout',topbar?'topbar':'sidebar');
-  moveSidebar(topbar);
-  updateStickyOffset();
-}
-function toggleMenu(e){
-  e.stopPropagation();
-  document.getElementById('hdr-menu').classList.toggle('open');
-}
-document.addEventListener('click', function(e){
-  const menu = document.getElementById('hdr-menu');
-  if(!menu || !menu.classList.contains('open')) return;
-  if(e.target.closest('#btn-menu')) return;
-  menu.classList.remove('open');
-});
-function toggleFilterRow(){
-  const open=document.getElementById('ctrl-filters').classList.toggle('open');
-  document.getElementById('btn-filters').textContent=open?'Filters ▴':'Filters ▾';
-  const tab=typeof activeTab!=='undefined'?activeTab:'default';
-  localStorage.setItem('filtersOpen-'+tab,open?'1':'0');
-  updateStickyOffset();
-}
-// Block slider track-taps on touch devices; allow thumb drags
-(function(){
-  if(!('ontouchstart' in window)) return;
-  let blocked=false, savedVal=null;
-  document.addEventListener('touchstart', function(e){
-    blocked=false;
-    const s=e.target.closest('.rank-slider');
-    if(!s) return;
-    const rect=s.getBoundingClientRect();
-    const tx=e.touches[0].clientX - rect.left;
-    const pct=(parseFloat(s.value)-parseFloat(s.min))/(parseFloat(s.max)-parseFloat(s.min));
-    if(Math.abs(tx - pct*rect.width) > 24){ blocked=true; savedVal=s.value; }
-  },{passive:true});
-  document.addEventListener('input', function(e){
-    const s=e.target.closest('.rank-slider');
-    if(!s||!blocked) return;
-    s.value=savedVal;
-    e.stopImmediatePropagation();
-  }, true);
-  document.addEventListener('touchend', function(){ blocked=false; },{passive:true});
-})();
-</script>
 <script src="data/data-meta.js"></script>
 <script src="data/data-items.js"></script>
 <script src="data/data-blueprints.js"></script>
@@ -1584,28 +1485,15 @@ function toggleFilterRow(){
 <script src="data/data-overframe.js"></script>
 <script src="data/data-overframe-mods.js"></script>
 <script src="data/data-abilities.js"></script>
-<script src="relics.js"></script>
+<script src="data/data-relics.js"></script>
 
 
 <script src="weapon-mr.js"></script>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="app.js"></script>
+<script src="layout.js"></script>
 
-<!-- Builds Panel -->
 <ul id="mod-drops-overlay"></ul>
-
-<div id="bp-overlay" onclick="bpOverlayClick(event)">
-  <div id="bp-panel">
-    <div id="bp-head">
-      <div id="bp-head-left">
-        <div id="bp-item-name"></div>
-        <a id="bp-of-link" href="#" target="_blank" rel="noopener">View on Overframe ↗</a>
-      </div>
-      <button id="bp-close" onclick="closeBuildsPanel()">✕</button>
-    </div>
-    <div id="bp-body"></div>
-  </div>
-</div>
 </body>
 </html>

@@ -22,8 +22,8 @@ const https        = require('https');
 const luaparse     = require('luaparse');
 const { execSync } = require('child_process');
 
-const DATA_ITEMS      = path.join(__dirname, '..', 'data-items.js');
-const DATA_BLUEPRINTS = path.join(__dirname, '..', 'data-blueprints.js');
+const DATA_ITEMS      = path.join(__dirname, '..', 'data', 'data-items.js');
+const DATA_BLUEPRINTS = path.join(__dirname, '..', 'data', 'data-blueprints.js');
 const WFCD_DIR        = path.join(__dirname, 'node_modules/@wfcd/items/data/json');
 const WIKI_BP_URL     = 'https://wiki.warframe.com/w/Module:Blueprints/data?action=raw';
 const BACKUP_DIR      = path.join(__dirname, 'backups', 'blueprints');
