@@ -196,6 +196,8 @@ const HELMINTH_OF_IDS = {
   "Wrathful Advance":     { id: 7739, source: "Kullervo"  },
   "Wyrd Scythes":         { id: 7916, source: "Dagath"    },
   "Xata's Whisper":       { id: 7884, source: "Xaku"      },
+  "Jade Stars":           { id: 1023, source: "Sirius & Orion"    },
+  "Astral Shell":         { id: 1024, source: "Sirius & Orion"    },
   // ── Helminth-native abilities (IDs 1010–1022) ───────────────────────────
   "Empower":              { id: 1010, source: "Helminth"  },
   "Energized Munitions":  { id: 1011, source: "Helminth"  },
