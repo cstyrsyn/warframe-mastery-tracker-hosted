@@ -1,81 +1,53 @@
 # Warframe Mastery Tracker
 
-A personal web app for tracking Mastery Rank progress in Warframe. Logs ranks for every warframe, weapon, companion, amp, mod, arcane, and more — with cloud sync via Supabase.
+A web app for tracking Mastery Rank progress in Warframe. Log ranks for every warframe, weapon, companion, amp, mod, arcane, and more — with optional cloud sync across devices.
 
-## Features
+## Tracking
 
-- **MR progress tracking** across all item categories: warframes, primary/secondary/melee weapons, companions, vehicles, arch-weapons, amps, mods, arcanes, intrinsics, and conclave
-- **Potential MR display** — shows what MR you'd reach if you maxed everything you already own
-- **Star Chart & Steel Path** completion tracking with per-planet XP
-- **The Circuit** — current week indicator for both the incarnon genesis rotation (9-week cycle) and warframe rotation (11-week cycle), updating every Monday UTC
-- **Incarnon Genesis** tracking per weapon, with current week highlighted
-- **Crafting checklist** — add items to a list, log resources you own, and mark items done when crafted
-- **Ducat calculator** — shows ducat value for your unowned prime parts
-- **Kitgun & Zaw builder** — stat comparison for modular weapon components
-- **Build planner** — save and manage mod loadouts per item, with optional import from [Overframe](https://overframe.gg) community builds
-- **Cloud sync** via Supabase (optional) — progress syncs across devices when signed in
-- **Auto-backup** — optionally writes a JSON backup to a local file on every save
-- **Import / export** — JSON round-trip; also accepts `.xlsx`/`.xlsm` files and Google Sheets
+- **MR progress** across all item categories: warframes, primary/secondary/melee weapons, companions, vehicles, arch-weapons, amps, mods, arcanes, and intrinsics.
+- **Potential MR** — see what rank you'd reach if you maxed everything you already own
+- **Star Chart & Steel Path** — completion tracking with per-planet XP
+- **Incarnon Genesis** — track which adapters you've acquired, with the current Circuit week highlighted
+- **The Circuit** — live week indicator for both the incarnon rotation (9-week cycle) and warframe rotation (11-week cycle), resetting every Monday UTC
 
-## Getting Started
+## Tools
 
-### Without cloud sync (local only)
+- **Crafting checklist** — queue items to build, log resources on hand, and mark them done when crafted
+- **Build planner** — save mod loadouts per item; import top community builds from [Overframe](https://overframe.gg) as a starting point
+- **Kitgun & Zaw builder** — track the components you want and the resources required to build them.
+- **Ducat calculator** — see the ducat value of untraded prime parts
 
-Open `index.html` directly in a browser. Progress is saved to `localStorage`.
+## Data & sync
 
-### With cloud sync (Supabase)
+- Progress saves locally to `localStorage` — no account needed
+- **Cloud sync** via Supabase — sign in via Discord to sync progress across devices
+- **Auto-backup** — optionally mirror saves to a local JSON file automatically
+- **Import / export** — JSON round-trip; also accepts `.xlsx`/`.xlsm` and Google Sheets
 
-1. Create a [Supabase](https://supabase.com) project.
-2. Copy `config.example.js` to `config.js` and fill in your project URL and publishable key.
-3. Serve the files from any static host (or `localhost`).
+### Privacy
+- Note when using Cloud sync, the only personal information stored about you is the email address linked to your Discord account.
 
-`config.js` is gitignored — never commit your keys.
+## Local vs. online
 
-### Local development (Overframe builds proxy)
+The app works in two modes depending on whether it's opened as a plain file or hosted with a Supabase backend configured.
 
-The Builds panel fetches data from the Overframe API. In production this goes through a Cloudflare Pages Function (`functions/of-proxy/`). For local dev, run the proxy server first:
+### Local (file opened directly in a browser)
 
-```bash
-node dev/Archive/overframe_proxy.js   # starts on port 3001
-```
+Progress is stored in your browser's `localStorage`. Everything works offline with no account needed. Data stays on that machine and in that browser — it won't follow you to another device, and clearing site data will erase it. The auto-backup feature lets you write a JSON file to disk on every save as an extra safety net.
 
-Then open `index.html` via `localhost` and the app will route API calls through the proxy automatically.
+Note: for a better local expierence, open the app in a local web server. The easiest is to just use Python:
+`python -m http.server`
 
-## Project Structure
+### Online (hosted site with Supabase + Discord)
 
-```
-index.html              Main page — all CSS inline, loads scripts
-app.js                  All UI and application logic
-data/
-  data-meta.js          Mastery rank XP table
-  data-items.js         Item arrays, circuit schedules, star chart data
-  data-blueprints.js    Incarnon requirements, currencies, crafting blueprints
-  data-mods.js          Mod data and descriptions
-  data-arcanes.js       Arcane data and descriptions
-  data-kitguns.js       Kitgun and Zaw component stats
-  data-overframe.js     Overframe item ID map, default polarities
-  data-overframe-mods.js  Overframe mod ID map
-relics.js               Relic drop tables
-weapon-mr.js            Supplemental weapon MR data
-config.example.js       Supabase credentials template
-config.js               Your credentials (gitignored)
-functions/of-proxy/     Cloudflare Pages Function for Overframe API proxy
-dev/                    Data maintenance scripts (scrapers, importers, updaters)
-```
+When the site is deployed with a `config.js` pointing at a Supabase project, a **Sign in** button appears in the menu. Clicking it redirects to Discord for OAuth — no separate password. Once signed in:
 
-## Data Updates
+- Progress, checklist, build loadouts, and UI preferences are pushed to Supabase after every change and pulled down on sign-in.
+- Signing into the same account on any device loads your progress automatically.
+- Signing out clears local storage so your data doesn't linger on a shared machine.
 
-Item data is maintained by scripts in `dev/`. These scrape the [Warframe Wiki](https://wiki.warframewiki.com) and other sources to keep weapon stats, blueprints, mod drains, and arcane details current:
+If the app is opened without a valid `config.js`, or if Supabase fails to initialise, it silently falls back to local-only mode — the Sign in button is hidden and nothing breaks.
 
-| Script | Updates |
-|--------|---------|
-| `dev/update-weapons.js` | Primary, secondary, melee, arch-weapon data |
-| `dev/update-warframes.js` | Warframe data |
-| `dev/update-mods.js` | Mod list and descriptions |
-| `dev/update-arcanes.js` | Arcane list and descriptions |
-| `dev/update-blueprints.js` | Crafting blueprint costs |
-| `dev/update-relics.js` | Relic drop tables |
+---
 
-## Deployment
-
-The app is a static site with no build step. Deploy `index.html`, `app.js`, the `data/` folder, `relics.js`, `weapon-mr.js`, and `functions/` to any static host. Cloudflare Pages is recommended as the `functions/of-proxy/` directory is picked up automatically as a Pages Function.
+For setup, deployment, and data maintenance see [dev/README.md](dev/README.md).
