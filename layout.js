@@ -17,9 +17,9 @@ function moveSidebar(toTopbar){
     if(appBody && sidebar.parentNode!==appBody) appBody.insertBefore(sidebar,appBody.firstChild);
   }
 }
-(function(){                                             //helper function to apply layout
+(function(){                                            //helper function to apply layout
   function applyLayout(){
-    const mobile=window.innerWidth<=700;
+    const mobile=window.innerWidth<=700;                //called mobile but really just "small screen" since it also applies to narrow desktop windows
     const btn=document.getElementById('btn-layout');
     if(mobile){                                         //force topbar mode on mobile
       document.body.classList.add('topbar-mode');
@@ -35,10 +35,11 @@ function moveSidebar(toTopbar){
   }
   applyLayout();
   window.addEventListener('resize', applyLayout);
-  if('ResizeObserver' in window){
+  if('ResizeObserver' in window){                      // watch for changes and update the height of the sticky header (e.g. filters row expanding/collapsing) and update offset accordingly
     new ResizeObserver(updateStickyOffset).observe(document.getElementById('sticky-top'));
   }
 })();
+//Logic to toggle between topbar and sidebar nav layouts.
 function toggleLayout(){
   const topbar=document.body.classList.toggle('topbar-mode');
   document.getElementById('btn-layout').textContent=topbar?'Side Nav':'Top Nav';
@@ -46,16 +47,19 @@ function toggleLayout(){
   moveSidebar(topbar);
   updateStickyOffset();
 }
+//Hamburger menu toggle.
 function toggleMenu(e){
   e.stopPropagation();
   document.getElementById('hdr-menu').classList.toggle('open');
 }
+//Listens for clicks outside of the menu to close it when open. Does not close if the click is on the menu button itself.
 document.addEventListener('click', function(e){
   const menu = document.getElementById('hdr-menu');
   if(!menu || !menu.classList.contains('open')) return;
   if(e.target.closest('#btn-menu')) return;
   menu.classList.remove('open');
 });
+//Show filter options.
 function toggleFilterRow(){
   const open=document.getElementById('ctrl-filters').classList.toggle('open');
   document.getElementById('btn-filters').textContent=open?'Filters ▴':'Filters ▾';
@@ -74,7 +78,7 @@ function toggleFilterRow(){
     const rect=s.getBoundingClientRect();
     const tx=e.touches[0].clientX - rect.left;
     const pct=(parseFloat(s.value)-parseFloat(s.min))/(parseFloat(s.max)-parseFloat(s.min));
-    if(Math.abs(tx - pct*rect.width) > 24){ blocked=true; savedVal=s.value; }
+    if(Math.abs(tx - pct*rect.width) > 24){ blocked=true; savedVal=s.value; } // adds a 24px "thumb zone" on either side of the slider value, change this if the tolerance is wrong.
   },{passive:true});
   document.addEventListener('input', function(e){
     const s=e.target.closest('.rank-slider');
