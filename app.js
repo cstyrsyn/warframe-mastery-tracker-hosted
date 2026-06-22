@@ -30,15 +30,20 @@ const OF_API = (window.location.hostname === 'localhost' || window.location.host
   ? 'http://localhost:3001/api/v1'
   : '/of-proxy';
 
+// Companions that use a plain image filename (Name.png) instead of the category-suffixed form
+const COMPANION_IMG_PLAIN = new Set(['Venari', 'Venari Prime']);
+
 // ─────────────────────────────────────────────
-// STATE
+// GLOBAL STATE
 // ─────────────────────────────────────────────
-const LS_KEY = 'wf-mastery-v1';
+const LS_KEY = 'wf-mastery-v1'; //Local storage key
 let progress = {};
-let activeTab = 'summary';
-let filters = { status: '', incarnon: false, hasParts: false };
+let activeTab = 'summary'; // defaults summary tab on load.
+let filters = { status: '', incarnon: false, hasParts: false }; //empty filters by default but will track what is filtered.
 const searchIndex = {}; // tab → Map<name, lowercased searchable text>
 
+// Lazy search index cache. Concatenates item name, category, obtain method, and blueprint components (including sub-components) 
+// for full-text search. Built on demand when a tab is first searched. 
 function buildSearchIndex(tab) {
   const items = TAB_DATA[tab] || [];
   const idx = new Map();
@@ -98,43 +103,9 @@ function loadMyBuilds() {
   let raw = {};
   try { raw = JSON.parse(localStorage.getItem(MY_BUILDS_KEY) || '{}'); } catch {}
   myBuilds = {};
-  let dirty = false;
-
-  // Pass 1: new-format arrays and old top-level build objects
   for (const [key, val] of Object.entries(raw)) {
-    if (!val || key.includes('\x00')) continue;
-    if (Array.isArray(val)) { myBuilds[key] = val; continue; }
-    dirty = true;
-    myBuilds[key] = [{
-      id: blpGenId(), name: 'Build 1', subForms: {},
-      baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
-      baseBuildUrl: isSafeOfPath(val.baseBuildUrl) ? val.baseBuildUrl : null, baseAuthor: val.baseAuthor ?? null,
-      slots: val.slots ?? [], isModified: val.isModified ?? false,
-    }];
+    if (Array.isArray(val)) myBuilds[key] = val;
   }
-
-  // Pass 2: old sub-form keys (ItemName\x00SubFormName)
-  for (const [key, val] of Object.entries(raw)) {
-    if (!val || !key.includes('\x00')) continue;
-    dirty = true;
-    const nullIdx  = key.indexOf('\x00');
-    const itemName = key.slice(0, nullIdx);
-    const sfName   = key.slice(nullIdx + 1);
-    if (!myBuilds[itemName]) {
-      myBuilds[itemName] = [{
-        id: blpGenId(), name: 'Build 1', subForms: {},
-        baseBuildId: null, baseBuildTitle: null, baseBuildUrl: null,
-        baseAuthor: null, slots: [], isModified: false,
-      }];
-    }
-    myBuilds[itemName][0].subForms[sfName] = {
-      baseBuildId: val.baseBuildId ?? null, baseBuildTitle: val.baseBuildTitle ?? null,
-      baseBuildUrl: isSafeOfPath(val.baseBuildUrl) ? val.baseBuildUrl : null, baseAuthor: val.baseAuthor ?? null,
-      slots: val.slots ?? [], isModified: val.isModified ?? false,
-    };
-  }
-
-  if (dirty) saveMyBuilds();
 }
 function saveMyBuilds() { localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds)); deferCloudSync(); }
 
@@ -171,47 +142,7 @@ function blpEnsureCurrentData() {
   return build;
 }
 
-const ARCHON_SHARDS = {
-  Crimson: { hex: '#c84040', buffs: [
-    ['+25% Melee Critical Damage',     '+37.5% Melee Critical Damage'],
-    ['+25% Primary Status Chance',     '+37.5% Primary Status Chance'],
-    ['+25% Secondary Critical Chance', '+37.5% Secondary Critical Chance'],
-    ['+10% Ability Strength',          '+15% Ability Strength'],
-    ['+10% Ability Duration',          '+15% Ability Duration'],
-  ]},
-  Amber: { hex: '#c88020', buffs: [
-    ['+30% Energy filled on Spawn',          '+45% Energy filled on Spawn'],
-    ['+100% Effectiveness on Health Orbs',   '+150% Effectiveness on Health Orbs'],
-    ['+50% Effectiveness on Energy Orbs',    '+75% Effectiveness on Energy Orbs'],
-    ['+25% Casting Speed',                   '+37.5% Casting Speed'],
-    ['+15% Parkour Velocity',                '+22.5% Parkour Velocity'],
-  ]},
-  Azure: { hex: '#4a86d8', buffs: [
-    ['+150 Max Health',          '+225 Max Health'],
-    ['+150 Shield Capacity',     '+225 Shield Capacity'],
-    ['+50 Energy Max',           '+75 Energy Max'],
-    ['+150 Armor',               '+225 Armor'],
-    ['+5 Health/s Regenerated',  '+7.5 Health/s Regenerated'],
-  ]},
-  Emerald: { hex: '#30a850', buffs: [
-    ['Toxin Status deals +30% more damage',     'Toxin Status deals +45% more damage'],
-    ['+2 Health per Toxin Status hit',          '+3 Health per Toxin Status hit'],
-    ['+10% Ability Damage vs Corrosion Status', '+15% Ability Damage vs Corrosion Status'],
-    ['+2 max Corrosion Status stacks',          '+3 max Corrosion Status stacks'],
-  ]},
-  Topaz: { hex: '#c86020', buffs: [
-    ['+1 Max HP per Blast kill (max 300)',      '+2 Max HP per Blast kill (max 450)'],
-    ['+5 Shield per Blast kill',                '+7.5 Shield per Blast kill'],
-    ['+1% Sec Crit per Heat kill (max 50%)',   '+1.5% Sec Crit per Heat kill (max 75%)'],
-    ['+10% Ability Damage vs Radiation Status', '+15% Ability Damage vs Radiation Status'],
-  ]},
-  Violet: { hex: '#8040c8', buffs: [
-    ['+10% Ability Damage vs Electricity Status',       '+15% Ability Damage vs Electricity Status'],
-    ['+30% Primary Electricity Damage',                 '+45% Primary Electricity Damage'],
-    ['+25% Melee Crit Damage (2x when >500 Energy)',   '+37.5% Melee Crit Damage (2x when >500 Energy)'],
-    ['+20% Health/Energy cross-pickup',                 '+30% Health/Energy cross-pickup'],
-  ]},
-};
+//Load archon shards from data-meta.js
 const ARCHON_SHARD_NAMES = Object.keys(ARCHON_SHARDS);
 
 function blpEmptyShards() {
