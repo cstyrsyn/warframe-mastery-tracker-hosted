@@ -169,7 +169,7 @@ const POLARITY_INT   = new Map(POLARITY_NAMES.map((n, i) => n ? [n, i] : null).f
 function blpPolarityLabel(p) {
   const name = POLARITY_NAMES[p];
   if (!name) return '—';
-  return `<img src="https://wiki.warframe.com/images/${name}_Pol%28xBlack%29.${POLARITY_EXTS[p]}?5760d" class="pol-icon" alt="${name[0]}">`;
+  return `<img src="images/polarities/${name}_Pol(xBlack).${POLARITY_EXTS[p]}" class="pol-icon" alt="${name[0]}">`;
 }
 
 function blpApplyDefaultPolarities(slots) {
@@ -180,7 +180,7 @@ function blpApplyDefaultPolarities(slots) {
     // Dual-aura warframe (Jade): [aura1, aura2, [mods], exilus]
     if (slots[0]) slots[0].polarity = def[0];
     if (slots[1]) slots[1].polarity = def[1];
-    if (slots[2]) slots[2].polarity = def[3];
+    if (slots[2]) slots[2].polarity = def[3]; // exilus is def[3]; def[2] is the mods sub-arra
     for (let i = 0; i < def[2].length; i++) if (slots[3 + i]) slots[3 + i].polarity = def[2][i];
   } else if (Array.isArray(def[1])) {
     if (_blpTab === 'primary' || _blpTab === 'secondary') {
@@ -217,6 +217,7 @@ function blpSetPolarity(i, p) {
   blpRenderEditor();
 }
 
+//polarity picker menu
 function blpPolPickerHtml(slotIdx, currentPol) {
   const isCompCtx = _blpTab === 'companions' || _blpTab === 'compWeapons'
     || blpCurrentExaltedType() === 'companion' || blpCurrentExaltedType() === 'claws';
