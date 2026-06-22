@@ -925,33 +925,11 @@ const INTRINSICS = [
   ["Endurance","Drifter","Duviri",10],
 ];
 
-// ── STAR CHART ────────────────────────────────────────────────────
-// Add new planets/junctions here as they're added to the game.
-// Planets tracked separately for regular and Steel Path completions.
-const SC_PLANETS = [
-  "Mercury","Venus","Earth","Lua","Mars","Deimos","Phobos","Ceres",
-  "Jupiter","Europa","Saturn","Uranus","Neptune","Pluto","Sedna",
-  "Eris","Kuva Fortress","Void","Zariman","Duviri",
-];
-const SC_SP_PLANETS = [...SC_PLANETS]; // Steel Path versions (same list, tracked separately)
-const SC_JUNCTIONS = [
-  "Mercury","Venus","Mars","Phobos","Ceres","Jupiter","Europa",
-  "Saturn","Uranus","Neptune","Pluto","Sedna","Eris",
-];
-const SC_SP_JUNCTIONS = [...SC_JUNCTIONS]; // Steel Path junction versions
-
-const SC_PLANET_XP = {
-  "Mercury": 49, "Venus": 319, "Earth": 308, "Lua": 0, "Mars": 777,
-  "Deimos": 0, "Phobos": 1356, "Ceres": 1956, "Jupiter": 718,
-  "Europa": 1656, "Saturn": 709, "Uranus": 803, "Neptune": 572,
-  "Pluto": 561, "Sedna": 2274, "Eris": 2511,
-  "Kuva Fortress": 0, "Void": 0, "Zariman": 0, "Duviri": 0,
-};
-const SC_JUNCTION_XP = 1000; // XP per junction
 
 // ── APP WIRING ────────────────────────────────────────────────────
 // Maps tab IDs to their data arrays. Add a new entry here whenever
 // you add a new tab category.
+// This is in here as it references the arrays above, despite being an app-level construct.
 const TAB_DATA = {
   warframes:   WARFRAMES,
   primary:     PRIMARY,
@@ -972,6 +950,4 @@ const PFX = {
   mods:'md:',
 };
 
-// Companions that use a plain image filename (Name.png) instead of the category-suffixed form
-const COMPANION_IMG_PLAIN = new Set(['Venari', 'Venari Prime']);
 
