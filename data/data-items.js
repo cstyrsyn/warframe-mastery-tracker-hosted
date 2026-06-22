@@ -51,7 +51,7 @@ const WARFRAMES = [
   ['Rhino','Base','Boss: The Jackal (Venus)',30],
   ['Saryn','Base','Boss: Kela De Thaym (Sedna)',30],
   ['Sevagoth','Base','Quest: Call of the Tempestarii & Void Storms',30],
-  ['Sirius & Orion','Base','TODO: obtain method',30],
+  ['Sirius & Orion','Base','Quest: Jade Shadows Constellations',30],
   ['Styanax','Base','Kahls Garrison: Chipper inventory',30],
   ['Temple','Base','Mission: Stage Defense (Höllvania)',30],
   ['Titania','Base','Quest: The Silver Grove',30],
@@ -374,7 +374,7 @@ const PRIMARY = [
   // ── Tenet (maxRank 40) ──
   ["Tenet Arca Plasmor","Tenet","Sister of Parvos",40],
   ["Tenet Envoy","Tenet","Sister of Parvos",40],
-  ["Tenet Ferrox","Tenet","Sister of Parvos",40],
+  ["Tenet Ferrox","Tenet","Ergo Glast",40],
   ["Tenet Flux Rifle","Tenet","Sister of Parvos",40],
   ["Tenet Glaxion","Tenet","Sister of Parvos",40],
   ["Tenet Quanta","Tenet","Sister of Parvos",40],
@@ -810,13 +810,13 @@ const MELEE = [
   ["Kuva Ghoulsaw","Kuva","Kuva Lich",40],
   ["Kuva Shildeg","Kuva","Kuva Lich",40],
   // ── Tenet (maxRank 40) ──
-  ["Tenet Agendus","Tenet","Sister of Parvos",40],
-  ["Tenet Exec","Tenet","Sister of Parvos",40],
-  ["Tenet Grigori","Tenet","Sister of Parvos",40],
-  ["Tenet Livia","Tenet","Sister of Parvos",40],
-  ["Pride","Heavy Scythes","TODO: obtain method",30],
-  ["War Prime","Prime","TODO: obtain method",30],
-  ["Wrath","Heavy Scythes","TODO: obtain method",30],
+  ["Tenet Agendus","Tenet","Ergo Glast",40],
+  ["Tenet Exec","Tenet","Ergo Glast",40],
+  ["Tenet Grigori","Tenet","Ergo Glast",40],
+  ["Tenet Livia","Tenet","Ergo Glast",40],
+  ["Pride","Heavy Scythes","Pontis Tower",30],
+  ["War Prime","Prime","Pontis Tower",30],
+  ["Wrath","Heavy Scythes","Pontis Tower",30],
 ];
 
 // ── VEHICLES ──────────────────────────────────────────────────────
