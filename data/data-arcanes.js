@@ -512,10 +512,10 @@ const ARCANE_LEVEL_STATS = {
   'Virtuos Surge': [["On Hit:\\nConverts 24% <DT_RADIANT_COLOR>Void Damage to <DT_ELECTRICITY_COLOR>Electricity Damage."],["On Hit:\\nConverts 48% <DT_RADIANT_COLOR>Void Damage to <DT_ELECTRICITY_COLOR>Electricity Damage."],["On Hit:\\nConverts 72% <DT_RADIANT_COLOR>Void Damage to <DT_ELECTRICITY_COLOR>Electricity Damage."],["On Hit:\\nConverts 98% <DT_RADIANT_COLOR>Void Damage to <DT_ELECTRICITY_COLOR>Electricity Damage."]],
   'Virtuos Tempo': [["On Kill:\\n60% chance for +15% Fire Rate for 8s"],["On Kill:\\n60% chance for +30% Fire Rate for 8s"],["On Kill:\\n60% chance for +45% Fire Rate for 8s"],["On Kill:\\n60% chance for +60% Fire Rate for 8s"]],
   'Virtuos Trojan': [["On Hit:\\nConverts 24% <DT_RADIANT_COLOR>Void Damage to <DT_VIRAL_COLOR>Viral Damage."],["On Hit:\\nConverts 48% <DT_RADIANT_COLOR>Void Damage to <DT_VIRAL_COLOR>Viral Damage."],["On Hit:\\nConverts 72% <DT_RADIANT_COLOR>Void Damage to <DT_VIRAL_COLOR>Viral Damage."],["On Hit:\\nConverts 98% <DT_RADIANT_COLOR>Void Damage to <DT_VIRAL_COLOR>Viral Damage."]],
-  'Arcane Sculptor': [/* TODO: add per-rank stats */],
-  'Melee Assimilation': [/* TODO: add per-rank stats */],
-  'Primary Compression': [/* TODO: add per-rank stats */],
-  'Secondary Cryogenic': [/* TODO: add per-rank stats */],
+  'Arcane Sculptor': [["On creating an object with abilities: casts have 125% Ability Efficiency for 12s. "],["On creating an object with abilities: casts have 135% Ability Efficiency for 12s. "],["On creating an object with abilities: casts have 145% Ability Efficiency for 12s. "],["On creating an object with abilities: casts have 155% Ability Efficiency for 12s. \\n+1 Arcane Revive","+1 Arcane Revive"],["On creating an object with abilities: casts have 165% Ability Efficiency for 12s. \\n+1 Arcane Revive","+1 Arcane Revive"],["On creating an object with abilities: casts have 175% Ability Efficiency for 12s. \\n+1 Arcane Revive","+1 Arcane Revive"]],
+  'Melee Assimilation': [["On Shield Break:\\n+25% Melee Damage on Heavy Attack and Heavy Attack kills restore +5% of max Shields for 20s."],["On Shield Break:\\n+50% Melee Damage on Heavy Attack and Heavy Attack kills restore +10% of max Shields for 20s."],["On Shield Break:\\n+75% Melee Damage on Heavy Attack and Heavy Attack kills restore +15% of max Shields for 20s."],["On Shield Break:\\n+100% Melee Damage on Heavy Attack and Heavy Attack kills restore +20% of max Shields for 20s."],["On Shield Break:\\n+125% Melee Damage on Heavy Attack and Heavy Attack kills restore +25% of max Shields for 20s."],["On Shield Break:\\n+150% Melee Damage on Heavy Attack and Heavy Attack kills restore +30% of max Shields for 20s."]],
+  'Primary Compression': [["On aim: x0.2 explosion radius, +50% damage and +3.0% ammo efficiency for every 1m radius lost."],["On aim: x0.2 explosion radius, +60% damage and +3.5% ammo efficiency for every 1m radius lost."],["On aim: x0.2 explosion radius, +70% damage and +4.0% ammo efficiency for every 1m radius lost."],["On aim: x0.2 explosion radius, +80% damage and +4.5% ammo efficiency for every 1m radius lost."],["On aim: x0.2 explosion radius, +90% damage and +5.0% ammo efficiency for every 1m radius lost."],["On aim: x0.2 explosion radius, +100% damage and +5.5% ammo efficiency for every 1m radius lost."]],
+  'Secondary Cryogenic': [["On <DT_PUNCTURE_COLOR> Puncture: Apply 1 <DT_FREEZE_COLOR> Cold stacks on targets within 10m."],["On <DT_PUNCTURE_COLOR> Puncture: Apply 1 <DT_FREEZE_COLOR> Cold stacks on targets within 11m."],["On <DT_PUNCTURE_COLOR> Puncture: Apply 2 <DT_FREEZE_COLOR> Cold stacks on targets within 12m."],["On <DT_PUNCTURE_COLOR> Puncture: Apply 2 <DT_FREEZE_COLOR> Cold stacks on targets within 13m."],["On <DT_PUNCTURE_COLOR> Puncture: Apply 3 <DT_FREEZE_COLOR> Cold stacks on targets within 14m."],["On <DT_PUNCTURE_COLOR> Puncture: Apply 3 <DT_FREEZE_COLOR> Cold stacks on targets within 15m."]],
 };
 
 // ── ARCANE_DROPS ─────────────────────────────────────────────────
@@ -675,8 +675,8 @@ const ARCANE_DROPS = {
   'Virtuos Surge': [{"location":"Vox Solaris, Agent","chance":100,"rarity":"Common"}],
   'Virtuos Tempo': [{"location":"The Quills, Observer","chance":100,"rarity":"Common"}],
   'Virtuos Trojan': [{"location":"Vox Solaris, Hand","chance":100,"rarity":"Common"}],
-  'Arcane Sculptor': [],
-  'Melee Assimilation': [],
-  'Primary Compression': [],
-  'Secondary Cryogenic': [],
+  'Arcane Sculptor': [{"location":"Uranus/Scoria's Angel (Skirmish)","chance":25,"rarity":"Uncommon"},{"location":"Uranus/The Kuva Wytch (Skirmish)","chance":25,"rarity":"Uncommon"}],
+  'Melee Assimilation': [{"location":"Uranus/Scoria's Angel (Skirmish)","chance":25,"rarity":"Uncommon"},{"location":"Uranus/The Kuva Wytch (Skirmish)","chance":25,"rarity":"Uncommon"}],
+  'Primary Compression': [{"location":"Uranus/Scoria's Angel (Skirmish)","chance":25,"rarity":"Uncommon"},{"location":"Uranus/The Kuva Wytch (Skirmish)","chance":25,"rarity":"Uncommon"}],
+  'Secondary Cryogenic': [{"location":"Uranus/Scoria's Angel (Skirmish)","chance":25,"rarity":"Uncommon"},{"location":"Uranus/The Kuva Wytch (Skirmish)","chance":25,"rarity":"Uncommon"}],
 };
