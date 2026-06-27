@@ -332,8 +332,8 @@ function getChecklistItemResources(tab, name) {
   }
   const itemRes = flattenResources(name, 1, new Set());
   const itemCur = flattenCurrencies(name);
-  for (const {key, costs} of getMissionDropComponents(name)) {
-    if (clBpOwned.has(key)) {
+  for (const {ownedKey, costs} of getMissionDropComponents(name)) {
+    if (clBpOwned.has(ownedKey)) {
       for (const [cur, amt] of Object.entries(costs))
         itemCur[cur] = Math.max(0, (itemCur[cur] || 0) - amt);
     }
@@ -2920,9 +2920,9 @@ function getMissionDropComponents(name) {
   function isMDC(costs) { return Object.keys(costs).some(c => MISSION_DROP_CURRENCIES.has(c)); }
 
   if (CURRENCIES.has(name) && isMDC(CURRENCIES.get(name))) {
-    result.push({key: name, label: name, costs: CURRENCIES.get(name)});
+    result.push({key: name, ownedKey: name + '\t' + name, label: name, costs: CURRENCIES.get(name)});
   } else if (CURRENCIES.has(name + ' Blueprint') && isMDC(CURRENCIES.get(name + ' Blueprint'))) {
-    result.push({key: name + ' Blueprint', label: 'Blueprint', costs: CURRENCIES.get(name + ' Blueprint')});
+    result.push({key: name + ' Blueprint', ownedKey: name + '\tBlueprint', label: 'Blueprint', costs: CURRENCIES.get(name + ' Blueprint')});
   }
 
   const bp = BLUEPRINTS.get(name);
@@ -2931,7 +2931,7 @@ function getMissionDropComponents(name) {
       const bare = pName.replace(/^Prime\s+/, '');
       for (const c of [pName, name + ' ' + pName, name + ' ' + bare, name + ' ' + bare + ' Blueprint']) {
         if (CURRENCIES.has(c) && isMDC(CURRENCIES.get(c))) {
-          result.push({key: c, label: pName, costs: CURRENCIES.get(c)});
+          result.push({key: c, ownedKey: name + '\t' + c, label: pName, costs: CURRENCIES.get(c)});
           break;
         }
       }
@@ -4128,8 +4128,8 @@ function renderChecklist() {
     }
     const itemRes = flattenResources(name, 1, new Set());
     const itemCur = flattenCurrencies(name);
-    for (const {key, costs} of getMissionDropComponents(name)) {
-      if (clBpOwned.has(key)) {
+    for (const {ownedKey, costs} of getMissionDropComponents(name)) {
+      if (clBpOwned.has(ownedKey)) {
         for (const [cur, amt] of Object.entries(costs))
           itemCur[cur] = Math.max(0, (itemCur[cur] || 0) - amt);
       }
@@ -4211,11 +4211,11 @@ ${sortedRes.map(([rName, total]) => {
       const mdComps = getMissionDropComponents(name);
       let bpOwnedHtml = '';
       if (mdComps.length) {
-        bpOwnedHtml = '<div class="cl-bp-list">' + mdComps.map(({key, label, costs}) => {
-          const owned = clBpOwned.has(key);
+        bpOwnedHtml = '<div class="cl-bp-list">' + mdComps.map(({ownedKey, label, costs}) => {
+          const owned = clBpOwned.has(ownedKey);
           const costStr = Object.entries(costs).map(([c, a]) => `${fmt(a)} ${c}`).join(', ');
           return `<label class="cl-bp-row${owned ? ' cl-bp-owned' : ''}">
-  <input type="checkbox" ${owned ? 'checked' : ''} onchange="toggleClBpOwned('${key}')">
+  <input type="checkbox" ${owned ? 'checked' : ''} onchange="toggleClBpOwned('${ownedKey}')">
   <span class="cl-bp-label">${esc(label)}</span>
   <span class="cl-bp-cost">${esc(costStr)}</span>
 </label>`;
