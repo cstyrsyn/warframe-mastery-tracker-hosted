@@ -309,28 +309,21 @@ const CURRENCIES = new Map([
   ["Voruna Chassis",{"Lua Thrax Plasm":25}],
   ["Voruna Neuroptics",{"Lua Thrax Plasm":25}],
   ["Voruna Systems",{"Lua Thrax Plasm":25}],
-  // Sirius & Orion - Emerald Talents
-  ["Sirius & Orion Blueprint",{"Emerald Talents":275}],
-  ["Sirius & Orion Chassis",{"Emerald Talents":90}],
-  ["Sirius & Orion Neuroptics",{"Emerald Talents":90}],
-  ["Sirius & Orion Systems",{"Emerald Talents":90}],
-  // Pride - Emerald Talents
+  // Sirius & Orion — Emerald or Crimson Talents (either per component)
+  ["Sirius & Orion Blueprint",{"Emerald Talents":275,"Crimson Talents":275}],
+  ["Sirius & Orion Chassis",{"Emerald Talents":90,"Crimson Talents":90}],
+  ["Sirius & Orion Neuroptics",{"Emerald Talents":90,"Crimson Talents":90}],
+  ["Sirius & Orion Systems",{"Emerald Talents":90,"Crimson Talents":90}],
+  // Pride — Emerald Talents
   ["Pride Blueprint",{"Emerald Talents":90}],
   ["Pride Handle",{"Emerald Talents":45}],
   ["Pride Blade",{"Emerald Talents":45}],
-  // War Prime - Emerald Talents
-  ["War Prime",{"Emerald Talents":12}],
-  // Sirius & Orion - Crimson Talents
-  ["Sirius & Orion Blueprint",{"Crimson Talents":275}],
-  ["Sirius & Orion Chassis",{"Crimson Talents":90}],
-  ["Sirius & Orion Neuroptics",{"Crimson Talents":90}],
-  ["Sirius & Orion Systems",{"Crimson Talents":90}],
-  // Wrath - Crimson Talents
+  // Wrath — Crimson Talents
   ["Wrath Blueprint",{"Crimson Talents":90}],
   ["Wrath Handle",{"Crimson Talents":45}],
   ["Wrath Blade",{"Crimson Talents":45}],
-  // War Prime - Crimson Talents
-  ["War Prime",{"Crimson Talents":12}],
+  // War Prime — Emerald or Crimson Talents (either)
+  ["War Prime",{"Emerald Talents":12,"Crimson Talents":12}],
 ]);
 
 const BLUEPRINTS = new Map([

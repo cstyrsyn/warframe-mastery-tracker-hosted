@@ -244,6 +244,7 @@ function blpTogglePolPicker(i) {
   }
 }
 
+//re-render the slots polarity UI after change
 function blpRefreshPolWrap(i) {
   const wrap = document.getElementById(`blp-pol-wrap-${i}`);
   if (!wrap) return;
@@ -2905,8 +2906,8 @@ function flattenCurrencies(name) {
 // so users may already own some blueprints and can deduct them from the total.
 const MISSION_DROP_CURRENCIES = new Set([
   'Atramentum', 'Beating Heartstrings',
-  'Belric Crystal Fragment', 'Rania Crystal Fragment',
-  'Fate Pearl', 'Fergolyte', 'Lua Thrax Plasm',
+  'Belric Crystal Fragment', 'Crimson Talents', 'Emerald Talents',
+  'Rania Crystal Fragment', 'Fate Pearl', 'Fergolyte', 'Lua Thrax Plasm',
   'Maphica', 'Scuttler Husk', 'Vessel Capillary', 'Vestigial Mote',
 ]);
 
