@@ -169,7 +169,7 @@ const POLARITY_INT   = new Map(POLARITY_NAMES.map((n, i) => n ? [n, i] : null).f
 function blpPolarityLabel(p) {
   const name = POLARITY_NAMES[p];
   if (!name) return '—';
-  return `<img src="images/polarities/${name}_Pol(xBlack).${POLARITY_EXTS[p]}" class="pol-icon" alt="${name[0]}">`;
+  return `<img src="Images/polarities/${name}_Pol(xBlack).${POLARITY_EXTS[p]}" class="pol-icon" alt="${name[0]}">`;
 }
 
 function blpApplyDefaultPolarities(slots) {
@@ -1361,6 +1361,7 @@ function blpTileHtml(i, slot, regIndex) {
       </div>
       <input class="blp-rank-input${rankLow ? ' blp-rank-input--low' : ''}" type="number" min="0" max="${modMaxRank}" value="${rank}" title="Rank"
         onchange="blpSetRank(${i}, this.value)">
+      ${modName ? `<button class="blp-mod-navlink" onclick="blpNavToMod('${jsStr(modName)}',${isArcaneSlot})" title="Go to ${isArcaneSlot ? 'Arcanes' : 'Mods'} tab">↗</button>` : ''}
       <button class="blp-slot-clear" onclick="blpClearSlot(${i})" title="Clear">✕</button>
     </div>
   </div>`;
@@ -2023,6 +2024,14 @@ function blpClearSlot(slotIdx) {
   blpRefreshPolWrap(slotIdx);
   blpRefreshCapacity();
   blpRefreshStatDesc(slotIdx);
+}
+
+function blpNavToMod(modName, isArcane) {
+  const tabKey = isArcane ? 'arcanes' : 'mods';
+  const tabEl = document.querySelector(`.tab[data-tab="${tabKey}"]`);
+  if (tabEl) switchTab(tabEl);
+  const searchEl = document.getElementById('search');
+  if (searchEl) { searchEl.value = modName; render(); }
 }
 
 function blpUpdateSlot(slotIdx, changes) {
