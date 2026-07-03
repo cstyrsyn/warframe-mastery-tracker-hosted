@@ -808,14 +808,16 @@ function blpRenderEditor() {
         <div id="blp-of-list" style="display:none" onclick="event.stopPropagation()"></div>
        </div>`
     : '';
+  const ofPageLinkHtml = showOFBrowser
+    ? `<a href="https://overframe.gg/items/arsenal/${parseInt(blpCurrentOFItemId())}/" target="_blank" rel="noopener" class="blp-action-btn">Open on Overframe ↗</a>`
+    : '';
 
   if (!build) {
     inner.innerHTML = `
-      <div id="blp-item-title">${esc(_blpItem)}</div>
+      <div id="blp-item-title">${esc(_blpItem)}&ensp;&ensp;${ofPageLinkHtml}</div> 
       <div id="blp-editor-empty" style="padding:20px 0 12px">
         No builds yet.&ensp;<button class="blp-action-btn" onclick="blpCreateBuild()">+ New Build</button>
-      </div>
-      ${ofBrowserHtml}`;
+      </div>`;
     return;
   }
 
