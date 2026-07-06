@@ -414,6 +414,7 @@ const PRIMARY = [
   ["Vectis Prime","Prime","Relics",30,1],
   ["Zhuge Prime","Prime","Relics",30,1],
   ["Afentis Prime","Prime","Relics",30,1],
+  ["Haalvu","Rifles","TODO: obtain method",30],
 ];
 
 // ── SECONDARY WEAPONS ─────────────────────────────────────────────

@@ -21353,16 +21353,16 @@ const MODS = [
   {
     name:       "Noctua Swarm",
     category:   "Warframe Mod", // TODO: verify
-    drops:      null, // TODO: fill when WFCD has this mod
+    drops:      ["Arbiters of Hexis, Maxim","Cephalon Suda, Genius"],
     maxRank:    3,
     polarity:   "Zenurik",
     rarity:     "Rare",
     isExilus:   false,
     tradable:   true,
-    compatName: null, // TODO: fill when WFCD has this mod
+    compatName: "Dante",
     isAugment:  true,
     baseDrain:  6,
-    levelStats: null, // TODO: fill when WFCD has this mod
+    levelStats: [["Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 6s, silencing enemies and stealing their Energy for allies."],["Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 9s, silencing enemies and stealing their Energy for allies."],["Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 12s, silencing enemies and stealing their Energy for allies."],["Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 15s, silencing enemies and stealing their Energy for allies."]],
   },
   {
     name:       "Primed Combustion Rounds",
@@ -21381,30 +21381,30 @@ const MODS = [
   {
     name:       "Reroot Rampage",
     category:   "Warframe Mod", // TODO: verify
-    drops:      null, // TODO: fill when WFCD has this mod
+    drops:      ["Red Veil, Exalted","The Perrin Sequence, Partner"],
     maxRank:    3,
     polarity:   "Zenurik",
     rarity:     "Rare",
     isExilus:   false,
     tradable:   true,
-    compatName: null, // TODO: fill when WFCD has this mod
+    compatName: "Nokko",
     isAugment:  true,
     baseDrain:  6,
-    levelStats: null, // TODO: fill when WFCD has this mod
+    levelStats: [["Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 175 <DT_POISON_COLOR> Toxin Damage with increased Critical Chance each hit."],["Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 200 <DT_POISON_COLOR> Toxin Damage with increased Critical Chance each hit."],["Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 225 <DT_POISON_COLOR> Toxin Damage with increased Critical Chance each hit."],["Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 250 <DT_POISON_COLOR> Toxin Damage with increased Critical Chance each hit."]],
   },
   {
     name:       "Rhythm Guard",
     category:   "Warframe Mod", // TODO: verify
-    drops:      null, // TODO: fill when WFCD has this mod
+    drops:      ["New Loka, Flawless","Steel Meridian, General"],
     maxRank:    3,
     polarity:   "Zenurik",
     rarity:     "Rare",
     isExilus:   false,
     tradable:   true,
-    compatName: null, // TODO: fill when WFCD has this mod
+    compatName: "Temple",
     isAugment:  true,
     baseDrain:  6,
-    levelStats: null, // TODO: fill when WFCD has this mod
+    levelStats: [["Passive Augment: Gain 25 Overguard when using an Ability on the Backbeat. Amount doubles up to 400 per Beat, but resets if the Beat is missed."],["Passive Augment: Gain 50 Overguard when using an Ability on the Backbeat. Amount doubles up to 800 per Beat, but resets if the Beat is missed."],["Passive Augment: Gain 75 Overguard when using an Ability on the Backbeat. Amount doubles up to 1200 per Beat, but resets if the Beat is missed."],["Passive Augment: Gain 100 Overguard when using an Ability on the Backbeat. Amount doubles up to 1600 per Beat, but resets if the Beat is missed."]],
   },
   {
     name:       "Scan Aquatic Lifeforms",
@@ -21423,15 +21423,15 @@ const MODS = [
   {
     name:       "Kumihimo Loading",
     category:   "Warframe Mod", // TODO: verify
-    drops:      null, // TODO: fill when WFCD has this mod
+    drops:      ["Arbiters of Hexis, Maxim","New Loka, Flawless"],
     maxRank:    3,
     polarity:   "Zenurik",
     rarity:     "Rare",
     isExilus:   false,
     tradable:   true,
-    compatName: null, // TODO: fill when WFCD has this mod
+    compatName: "Koumei",
     isAugment:  true,
     baseDrain:  6,
-    levelStats: null, // TODO: fill when WFCD has this mod
+    levelStats: [["Kumihimo Augment: <LOWER_IS_BETTER>12 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice."],["Kumihimo Augment: <LOWER_IS_BETTER>10 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice."],["Kumihimo Augment: <LOWER_IS_BETTER>8 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice."],["Kumihimo Augment: <LOWER_IS_BETTER>6 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice."]],
   },
 ];
