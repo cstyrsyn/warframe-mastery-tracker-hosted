@@ -395,6 +395,7 @@ const OVERFRAME_MAP = new Map([
   ["Vectis Prime","1089"],
   ["Zhuge Prime","2681"],
   ["Afentis Prime","7984"],
+  ["Haalvu", "8015"],
   // Secondary
   ["Acrid","0906"],
   ["Angstrum","0944"],
