@@ -81,6 +81,22 @@ const CL_OWN_KEY = 'wf-checklist-owned';
 const CL_BP_KEY  = 'wf-checklist-bp-owned';
 
 // ─────────────────────────────────────────────
+// INCARNON WISHLIST STATE (Incarnons page)
+// ─────────────────────────────────────────────
+let incWishlist = new Set(); // Set<genesisName> — synced via 'inc_wishlist' column on the saves table
+const INC_WISHLIST_KEY = 'wf-inc-wishlist';
+function loadIncWishlist() {
+  try { incWishlist = new Set(JSON.parse(localStorage.getItem(INC_WISHLIST_KEY) || '[]')); } catch { incWishlist = new Set(); }
+}
+function saveIncWishlist() { localStorage.setItem(INC_WISHLIST_KEY, JSON.stringify([...incWishlist])); deferCloudSync(); }
+function toggleIncWishlist(genesisName) {
+  if (incWishlist.has(genesisName)) incWishlist.delete(genesisName);
+  else incWishlist.add(genesisName);
+  saveIncWishlist();
+  renderIncarnonsPage();
+}
+
+// ─────────────────────────────────────────────
 // MY BUILDS STATE (Builds page)
 // ─────────────────────────────────────────────
 const MY_BUILDS_KEY = 'wf-my-builds';
@@ -357,8 +373,8 @@ function markChecklistDone(tab, name) {
 
   if (tab === 'incarnon') {
     const wTab = INCARNON_WEAPON_TAB.get(name) ?? null;
-    if (wTab && !progress[incarnonKey(wTab, name)]) {
-      progress[incarnonKey(wTab, name)] = true;
+    if (wTab && !progress[incAcqKey(wTab, name)]) {
+      progress[incAcqKey(wTab, name)] = true;
       saveProgress();
       updateHeader();
     }
@@ -417,15 +433,16 @@ function openChecklistMenu(evt, tab, name) {
 function openAcqMenu(evt, tab, name) {
   evt.stopPropagation();
   closeChecklistMenu();
-  const isAcq    = !!progress[aqKey(tab, name)];
-  const isIncAcq = !!progress[incarnonKey(tab, name)];
+  const isAcq       = !!progress[aqKey(tab, name)];
+  const isIncAcq    = !!progress[incAcqKey(tab, name)];
+  const isIncInst   = !!progress[incarnonKey(tab, name)];
   const menu = document.createElement('div');
   menu.id = 'cl-menu';
   menu.className = 'cl-menu';
   const opts = [
-    { label: (isAcq ? '✓ ' : '') + 'Weapon acquired',  action: () => { toggleAcquired(tab, name); closeChecklistMenu(); } },
-    { label: (isIncAcq ? '✓ ' : '') + 'Incarnon acquired', action: () => { toggleIncarnon(tab, name); closeChecklistMenu(); } },
-    { label: 'Both acquired', action: () => { if (!progress[aqKey(tab, name)]) toggleAcquired(tab, name); if (!progress[incarnonKey(tab, name)]) toggleIncarnon(tab, name); closeChecklistMenu(); } },
+    { label: (isAcq ? '✓ ' : '') + 'Weapon acquired',        action: () => { toggleAcquired(tab, name); closeChecklistMenu(); } },
+    { label: (isIncAcq ? '✓ ' : '') + 'Incarnon acquired',   action: () => { toggleIncarnonAcquired(tab, name); closeChecklistMenu(); } },
+    { label: (isIncInst ? '✓ ' : '') + 'Incarnon installed', action: () => { toggleIncarnon(tab, name); closeChecklistMenu(); } },
   ];
   opts.forEach(opt => {
     const btn = document.createElement('button');
@@ -1354,7 +1371,7 @@ function blpTileHtml(i, slot, regIndex) {
         onblur="setTimeout(()=>blpCloseModPicker(${i}),150)">
       <div class="blp-mod-dropdown" id="blp-dd-${i}" style="display:none"></div>
     </div>
-    <div class="blp-stat-desc" id="blp-stat-${i}">${esc(statDesc).replace(/\\n/g, '<br>')}</div>
+    <div class="blp-stat-desc" id="blp-stat-${i}">${formatStatText(statDesc)}</div>
     <div class="blp-tile-footer">
       <div class="blp-pol-wrap" id="blp-pol-wrap-${i}">
         <button class="blp-slot-polarity${polarity ? ' p' + polarity : ''}" onclick="blpTogglePolPicker(${i})" title="Polarity">${blpPolarityLabel(polarity)}</button>
@@ -2005,11 +2022,11 @@ function blpRefreshStatDesc(slotIdx) {
   if (!modName) { el.textContent = ''; return; }
   if (isArcane) {
     const ls = ARCANE_LEVEL_STATS?.[modName];
-    el.innerHTML = esc(ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '').replace(/\\n/g, '<br>');
+    el.innerHTML = formatStatText(ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '');
     return;
   }
   const ls = MOD_MAP.get(modName)?.levelStats;
-  el.textContent = ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '';
+  el.innerHTML = formatStatText(ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '');
 }
 
 function blpClearSlot(slotIdx) {
@@ -2848,13 +2865,117 @@ function toggleAcquired(tab, name) {
   if (!wasAcquired) _checkDucatAcquiredPrompt(name);
 }
 
-function incarnonKey(tab, name) { return 'inc:' + itemKey(tab, name); }
+// Two distinct states per weapon: "Acquired" (have the Incarnon Genesis Adapter) and
+// "Installed" (applied it to unlock the weapon's Incarnon form). Installing implies acquired;
+// un-acquiring implies un-installed — both cascade to keep the pair consistent.
+function incarnonKey(tab, name) { return 'inc:' + itemKey(tab, name); }       // Installed
+function incAcqKey(tab, name)   { return 'incAcq:' + itemKey(tab, name); }   // Acquired
 function toggleIncarnon(tab, name) {
   const k = incarnonKey(tab, name);
+  progress[k] = !progress[k];
+  if (progress[k]) progress[incAcqKey(tab, name)] = true;
+  else delete progress[k];
+  saveProgress();
+  render();
+}
+function toggleIncarnonAcquired(tab, name) {
+  const k = incAcqKey(tab, name);
+  progress[k] = !progress[k];
+  if (!progress[k]) {
+    delete progress[k];
+    const instK = incarnonKey(tab, name);
+    if (progress[instK]) delete progress[instK]; // can't stay installed without being acquired
+  }
+  saveProgress();
+  render();
+}
+
+// ── Kuva / Tenet / Coda bonus element tracking ──
+const DAMAGE_ELEMENTS = ['Impact', 'Heat', 'Cold', 'Electricity', 'Toxin', 'Magnetic', 'Radiation'];
+const ELEM_PCT_MIN = 25;
+const ELEM_PCT_MAX = 60;
+function isElemWeaponCat(cat) { return /^(Kuva|Tenet|Coda)\b/.test(cat); }
+function elemKey(tab, name)     { return 'elem:' + itemKey(tab, name); }
+function elemPctKey(tab, name)  { return 'elemPct:' + itemKey(tab, name); }
+function elemViceKey(tab, name) { return 'elemVice:' + itemKey(tab, name); }
+function setWeaponElement(tab, name, val) {
+  const k = elemKey(tab, name);
+  if (val) progress[k] = val; else delete progress[k];
+  saveProgress();
+  render();
+}
+function setWeaponElemPct(el, tab, name) {
+  let n = parseInt(el.value, 10);
+  if (isNaN(n)) n = ELEM_PCT_MIN;
+  n = Math.max(ELEM_PCT_MIN, Math.min(ELEM_PCT_MAX, n));
+  el.value = n;
+  progress[elemPctKey(tab, name)] = n;
+  deferSave();
+}
+function stepWeaponElemPct(evt, tab, name, delta) {
+  evt.stopPropagation();
+  const input = evt.currentTarget.closest('.card-elem-combo').querySelector('.card-elem-pct');
+  const n = Math.max(ELEM_PCT_MIN, Math.min(ELEM_PCT_MAX, (parseInt(input.value, 10) || ELEM_PCT_MIN) + delta));
+  input.value = n;
+  progress[elemPctKey(tab, name)] = n;
+  deferSave();
+}
+function toggleWeaponVice(tab, name) {
+  const k = elemViceKey(tab, name);
   progress[k] = !progress[k];
   if (!progress[k]) delete progress[k];
   saveProgress();
   render();
+}
+function buildElemBadge(tab, name, cat, isMax) {
+  if (!isElemWeaponCat(cat)) return '';
+  if (!progress[aqKey(tab, name)]) return '';
+  const ename = jsStr(name);
+  const selElem = progress[elemKey(tab, name)] || '';
+  const elemPct = progress[elemPctKey(tab, name)] || ELEM_PCT_MIN;
+  const vice = !!progress[elemViceKey(tab, name)];
+  const elemIcon = selElem ? `<img src="${esc('Images/damage/Dmg' + selElem + 'Small64.png')}" alt="" onerror="this.style.display='none'">` : '';
+  const viceBtn = isMax ? `<button class="card-elem-vice${vice ? ' on' : ''}" onclick="toggleWeaponVice('${tab}','${ename}')" title="Elemental Vice — freely swap element">Vice</button>` : '';
+  return `<div class="card-elem-combo">
+    <button type="button" class="card-elem-trigger" onclick="openElemMenu(event,'${tab}','${ename}')" title="Bonus element">${elemIcon}<span class="card-elem-trigger-lbl">${esc(selElem || 'Element')}</span><span class="elem-arrow">▾</span></button>
+    <input class="card-elem-pct" type="number" min="${ELEM_PCT_MIN}" max="${ELEM_PCT_MAX}" value="${elemPct}" title="Bonus element %" onchange="setWeaponElemPct(this,'${tab}','${ename}')">
+    <span class="card-elem-pct-sign">%</span>
+    <span class="card-elem-pct-spin">
+      <button type="button" class="card-elem-pct-btn up" tabindex="-1" onmousedown="event.preventDefault()" onclick="stepWeaponElemPct(event,'${tab}','${ename}',1)" title="Increase">▲</button>
+      <button type="button" class="card-elem-pct-btn dn" tabindex="-1" onmousedown="event.preventDefault()" onclick="stepWeaponElemPct(event,'${tab}','${ename}',-1)" title="Decrease">▼</button>
+    </span>
+  </div>${viceBtn}`;
+}
+function closeElemMenu() {
+  const m = document.getElementById('elem-menu');
+  if (m) m.remove();
+}
+function openElemMenu(evt, tab, name) {
+  evt.stopPropagation();
+  closeElemMenu();
+  const selElem = progress[elemKey(tab, name)] || '';
+  const menu = document.createElement('div');
+  menu.id = 'elem-menu';
+  menu.className = 'elem-dd-menu';
+  const noneItem = document.createElement('button');
+  noneItem.type = 'button';
+  noneItem.className = 'elem-dd-item' + (selElem === '' ? ' on' : '');
+  noneItem.textContent = 'None';
+  noneItem.onclick = (e) => { e.stopPropagation(); setWeaponElement(tab, name, ''); closeElemMenu(); };
+  menu.appendChild(noneItem);
+  for (const el of DAMAGE_ELEMENTS) {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'elem-dd-item' + (el === selElem ? ' on' : '');
+    item.innerHTML = `<img src="${esc('Images/damage/Dmg' + el + 'Small64.png')}" alt="" onerror="this.style.display='none'">${esc(el)}`;
+    item.onclick = (e) => { e.stopPropagation(); setWeaponElement(tab, name, el); closeElemMenu(); };
+    menu.appendChild(item);
+  }
+  document.body.appendChild(menu);
+  const rect = evt.currentTarget.getBoundingClientRect();
+  menu.style.top  = (rect.bottom + 4) + 'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth - 160) + 'px';
+  setTimeout(() => document.addEventListener('click', closeElemMenu, { once: true }), 0);
 }
 
 function flipCard(btn) {
@@ -3104,6 +3225,84 @@ function buildRecipeBack(name) {
 </div>`;
 }
 
+// WFCD embeds Warframe's internal damage-type color tags in stat text — tag name doesn't
+// always match the word it precedes (e.g. DT_FIRE_COLOR -> "Heat", DT_RADIANT_COLOR -> "Void").
+const DT_ICON_MAP = {
+  DT_IMPACT_COLOR:       'Impact',
+  DT_PUNCTURE_COLOR:     'Puncture',
+  DT_SLASH_COLOR:        'Slash',
+  DT_FIRE_COLOR:         'Heat',
+  DT_FREEZE_COLOR:       'Cold',
+  DT_ELECTRICITY_COLOR:  'Electricity',
+  DT_POISON_COLOR:       'Toxin',
+  DT_MAGNETIC_COLOR:     'Magnetic',
+  DT_RADIATION_COLOR:    'Radiation',
+  DT_VIRAL_COLOR:        'Viral',
+  DT_CORROSIVE_COLOR:    'Corrosive',
+  DT_GAS_COLOR:          'Gas',
+  DT_RADIANT_COLOR:      'Void',
+};
+// Damage-type words WFCD sometimes mentions in plain text with no <DT_..._COLOR> tag at all
+// (e.g. Hellfire: `"+15% Heat"` — no tag). Superset of DT_ICON_MAP's values, plus Blast (no DT_ tag exists for it in this data, but the icon does).
+const ELEMENT_WORDS = ['Impact', 'Puncture', 'Slash', 'Heat', 'Cold', 'Electricity', 'Toxin', 'Magnetic', 'Radiation', 'Viral', 'Corrosive', 'Gas', 'Blast', 'Void'];
+function dtIconHtml(elem) {
+  const src = 'Images/damage/Dmg' + elem + 'Small64.png';
+  return `<img class="levelstats-icon" src="${esc(src)}" alt="${esc(elem)}" title="${esc(elem)}" onerror="this.style.display='none'">`;
+}
+function escStatSegment(text) {
+  return esc(text).replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+}
+// Renders <DT_..._COLOR> tags as inline damage-type icons. Also catches bare element-word
+// mentions that have no tag at all and prepends the matching icon — without touching the word
+// itself, so "Heat" stays "Heat" with an icon in front of it, never replaced.
+// "Blast Radius" (AOE size) isn't a Blast-damage mention — excluded via lookahead.
+const STAT_WORD_ALT = ELEMENT_WORDS.map(w => w === 'Blast' ? 'Blast(?!\\s+Radius)' : w).join('|');
+const STAT_TOKEN_RE = new RegExp('<(DT_[A-Za-z_]+)>|\\b(' + STAT_WORD_ALT + ')\\b', 'g');
+function formatStatText(raw) {
+  const s = String(raw);
+  let out = '';
+  let lastIndex = 0;
+  let skipWordAt = -1; // index right after a tag, where its word is already iconified — don't double-icon it
+  let m;
+  STAT_TOKEN_RE.lastIndex = 0;
+  while ((m = STAT_TOKEN_RE.exec(s))) {
+    out += escStatSegment(s.slice(lastIndex, m.index));
+    if (m[1]) {
+      const elem = DT_ICON_MAP[m[1]];
+      if (elem) {
+        out += dtIconHtml(elem);
+        skipWordAt = m.index + m[0].length;
+      }
+    } else if (m.index === skipWordAt) {
+      out += esc(m[2]);
+    } else {
+      out += dtIconHtml(m[2]) + esc(m[2]);
+    }
+    lastIndex = m.index + m[0].length;
+  }
+  out += escStatSegment(s.slice(lastIndex));
+  return out;
+}
+// Plain-text variant for native title="" tooltips, which can't render <img> — drops the tag, keeps the word,
+// and normalizes literal "\n" (double-escaped in source data) to a real newline.
+function stripDtTags(raw) {
+  return String(raw).replace(/<DT_[A-Za-z_]+>/g, '').replace(/\\n/g, '\n');
+}
+
+// levelStats: array indexed by rank, each element an array of per-rank stat strings (mods' `levelStats` / ARCANE_LEVEL_STATS[name]).
+function buildLevelStatsBack(levelStats, rank) {
+  if (!levelStats || !levelStats.length) return '';
+  const rows = levelStats.map((stats, i) => `<div class="levelstats-item${i === rank ? ' current' : ''}">
+    <span class="levelstats-rank">${i}</span>
+    <span class="levelstats-val">${(stats || []).map(s => formatStatText(s)).join('<br>')}</span>
+  </div>`).join('');
+  return `<div class="card-back">
+  <div class="recipe-header"><span class="recipe-title">Rank Stats</span></div>
+  <div class="levelstats-list">${rows}</div>
+  <div class="card-foot"><div class="qbtns"><button class="qbtn" onclick="flipCard(this)">&#8592; Back</button></div></div>
+</div>`;
+}
+
 function toggleVaultedState(name) {
   const k = 'wf-resurgence:' + name;
   if (progress[k]) delete progress[k];
@@ -3246,12 +3445,14 @@ function switchTab(tabEl) {
   const isDucats  = activeTab === 'ducats';
   const isKitgun  = activeTab === 'kitgunBuilder';
   const isBuilds  = activeTab === 'builds';
-  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds;
+  const isIncarnons = activeTab === 'incarnons';
+  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds || isIncarnons;
   document.getElementById('summary').classList.toggle('open', isSummary);
   document.getElementById('checklist-view').style.display = isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = isBuilds  ? 'flex'  : 'none';
+  document.getElementById('incarnons-view').style.display = isIncarnons ? 'block' : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
@@ -3615,7 +3816,8 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const cardCls = isMax ? 'maxed' : isPartial ? 'partial' : isAcq ? 'acquired' : '';
   const ename = jsStr(name);
   const incarnonGenesis = INCARNON_WEAPONS.get(name);
-  const isIncAcq = incarnonGenesis && !!progress[incarnonKey(tab, name)];
+  const isIncAcq  = incarnonGenesis && !!progress[incarnonKey(tab, name)]; // Installed
+  const isIncGAcq = incarnonGenesis && !!progress[incAcqKey(tab, name)];  // Acquired
   let compTag = '';
   if (compFor) {
     const parts = compFor.split(/\s*;\s*/).filter(Boolean);
@@ -3630,7 +3832,7 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
         ? `<button class="card-resurgence" onclick="toggleVaultedState('${ename}')">Resurgence</button>`
         : `<button class="card-vaulted" onclick="toggleVaultedState('${ename}')">Vaulted</button>`)
     : '';
-  const incarnonTag = incarnonGenesis ? `<a class="card-incarnon${isIncAcq?' on':''}" href="${esc(wikiUrl(incarnonGenesis))}" target="_blank" rel="noopener">Incarnon</a>` : '';
+  const incarnonTag = incarnonGenesis ? `<a class="card-incarnon${isIncAcq?' on':isIncGAcq?' acq':''}" href="${esc(wikiUrl(incarnonGenesis))}" target="_blank" rel="noopener" title="${isIncAcq?'Installed':isIncGAcq?'Acquired':'Not acquired'}">Incarnon</a>` : '';
   const _incInCircuit = !!incarnonGenesis && CIRCUIT_INCARNON_WEEK_LOOKUP[incarnonGenesis] != null;
   const _incCircuitNow = _incInCircuit && CIRCUIT_INCARNON_NOW.has(incarnonGenesis);
   const _incCircuitWk = _incInCircuit ? CIRCUIT_INCARNON_WEEK_LOOKUP[incarnonGenesis] : null;
@@ -3653,7 +3855,7 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
       onchange="sliderInput(this,'${tab}','${ename}',${maxRank})">
     <span class="rank-max">${maxRank}</span>
   </div>`;
-  const _aqOn    = incarnonGenesis ? (isAcq || isIncAcq) : isAcq;
+  const _aqOn    = incarnonGenesis ? (isAcq || isIncAcq || isIncGAcq) : isAcq;
   const _aqClick = incarnonGenesis ? `openAcqMenu(event,'${tab}','${ename}')` : `toggleAcquired('${tab}','${ename}')`;
   const qbtns = `<div class="qbtns">
       ${hasRecipe ? `<button class="qbtn rec" onclick="flipCard(this)">Recipe</button>` : ''}
@@ -3661,11 +3863,13 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
       <button class="qbtn mx" onclick="setRank('${tab}','${ename}',${maxRank})">Max</button>
       <button class="qbtn zr" onclick="setRank('${tab}','${ename}',0)">0</button>
     </div>`;
-  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}</div>`;
+  const elemBadge = buildElemBadge(tab, name, cat, isMax);
+  const obtain_row = `<div class="card-obtain-row"><div class="card-obtain" title="${esc(obtain)}">${esc(obtain)}</div>${compTag}${tradableTag}${elemBadge}</div>`;
   const recipe = hasRecipe ? buildRecipeBack(name) : '';
+  const elemCatAttr = isElemWeaponCat(cat) ? ` data-elemcat="${esc(cat)}"` : '';
 
   if (listMode) {
-    return `<div class="card list-row${cardCls ? ' '+cardCls : ''}">
+    return `<div class="card list-row${cardCls ? ' '+cardCls : ''}"${elemCatAttr}>
 <div class="card-front">
   <div class="list-name-col">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener">${esc(name)}</a></div>
@@ -3685,11 +3889,11 @@ ${recipe}
   const wfImg = _imgSrc
     ? `<img class="${_imgCls}" src="${esc(_imgSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">`
     : '';
-  return `<div class="card${cardCls ? ' '+cardCls : ''}">
+  return `<div class="card${cardCls ? ' '+cardCls : ''}"${elemCatAttr}>
 <div class="card-front">${wfImg}
   <div class="card-top">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener">${esc(name)}</a></div>
-    <div style="display:flex;gap:3px;flex-shrink:0;align-items:center">${badges}</div>
+    <div class="card-badges" style="display:flex;gap:3px;flex-shrink:0;align-items:center">${badges}</div>
   </div>
   ${obtain_row}
   ${slider}
@@ -3709,6 +3913,7 @@ function render() {
   if (activeTab === 'arcanes')   { renderArcanes();   return; }
   if (activeTab === 'checklist')     { renderChecklist();     updateTabStat(); return; }
   if (activeTab === 'builds')        { renderBuildsPage();    return; }
+  if (activeTab === 'incarnons')     { renderIncarnonsPage(); updateTabStat(); return; }
   if (activeTab === 'ducats')        { renderDucats();        updateTabStat(); return; }
   if (activeTab === 'kitgunBuilder') { renderKitgunBuilder(); updateTabStat(); return; }
   const items = TAB_DATA[activeTab] || [];
@@ -3930,6 +4135,34 @@ function sliderInput(el, tab, name, maxRank) {
     btn.onclick = () => toggleAcquired(tab, name);
     qbtns.insertBefore(btn, qbtns.firstChild);
   }
+  const elemCat = card.dataset.elemcat;
+  if (elemCat) {
+    const nowAcq = rank > 0 || !!progress[aqKey(tab, name)];
+    const isMaxNow = rank === maxRank;
+    let comboEl = card.querySelector('.card-elem-combo');
+    if (nowAcq && !comboEl) {
+      const html = buildElemBadge(tab, name, elemCat, isMaxNow);
+      const obtainRowEl = card.querySelector('.card-obtain-row');
+      if (html && obtainRowEl) obtainRowEl.insertAdjacentHTML('beforeend', html);
+    } else if (!nowAcq && comboEl) {
+      comboEl.remove();
+      const viceBtnEl = card.querySelector('.card-elem-vice');
+      if (viceBtnEl) viceBtnEl.remove();
+    } else if (comboEl) {
+      const viceBtnEl = card.querySelector('.card-elem-vice');
+      if (isMaxNow && !viceBtnEl) {
+        const vice = !!progress[elemViceKey(tab, name)];
+        const btn = document.createElement('button');
+        btn.className = 'card-elem-vice' + (vice ? ' on' : '');
+        btn.title = 'Elemental Vice — freely swap element';
+        btn.textContent = 'Vice';
+        btn.onclick = () => toggleWeaponVice(tab, name);
+        comboEl.insertAdjacentElement('afterend', btn);
+      } else if (!isMaxNow && viceBtnEl) {
+        viceBtnEl.remove();
+      }
+    }
+  }
   setItemRank(tab, name, rank);
 }
 
@@ -3944,7 +4177,7 @@ function setRank(tab, name, rank) {
 }
 
 function updateTabStat() {
-  if (['starChart','summary','checklist','ducats','kitgunBuilder'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
+  if (['starChart','summary','checklist','ducats','kitgunBuilder','builds','incarnons'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
     for (const { name, maxRank } of MODS) {
@@ -4103,6 +4336,200 @@ function sumHdr(key, label, rightHtml) {
   <span class="sc-group-title"><span class="grp-arrow">${collapsed ? '▶' : '▼'}</span>${label}</span>
   ${rightHtml ? `<span style="color:var(--text-muted);font-weight:400;font-size:10px">${rightHtml}</span>` : ''}
 </div>`;
+}
+
+// ─────────────────────────────────────────────
+// INCARNONS PAGE
+// ─────────────────────────────────────────────
+let incFilter = 'all'; // 'all' | 'acquired' | 'installed' | 'notAcquired'
+function setIncFilter(val) {
+  incFilter = val;
+  renderIncarnonsPage();
+}
+const INC_TAB_LABEL = { primary: 'Primary', secondary: 'Secondary', melee: 'Melee' };
+const INC_EVO_ROMAN = ['I', 'II', 'III', 'IV'];
+function incEvoKey(tab, name, tierIdx) { return 'incEvo:' + itemKey(tab, name) + ':' + tierIdx; }
+function setIncEvoChoice(tab, name, tierIdx, perkIdx) {
+  const k = incEvoKey(tab, name, tierIdx);
+  const v = parseInt(perkIdx, 10);
+  if (isNaN(v)) delete progress[k]; else progress[k] = v;
+  saveProgress();
+  render();
+}
+// Substitutes a perk's "+X"/"X" placeholders with this weapon variant's actual values,
+// e.g. desc "Increase Base Damage by +X." + values "X = 24" -> "Increase Base Damage by +24."
+function substituteEvoValues(desc, valuesStr) {
+  if (!valuesStr || valuesStr === '-') return desc;
+  const map = {};
+  for (const line of valuesStr.split('\n')) {
+    const m = line.match(/^([A-Za-z])\s*=\s*(.+)$/);
+    if (m) map[m[1]] = m[2].trim();
+  }
+  if (!Object.keys(map).length) return desc;
+  let out = desc;
+  for (const [k, v] of Object.entries(map)) out = out.replace(new RegExp('\\b' + k + '\\b', 'g'), v);
+  return out;
+}
+// Renders the 4 Evolution tiers for one weapon variant — a <select> per tier when it has
+// multiple perk choices, substituting that weapon's own stat values into the description.
+function buildIncEvoTiers(tab, name, genesisName) {
+  const evo = INCARNON_EVOLUTIONS.get(genesisName);
+  if (!evo) return '';
+  const colIdx = evo.weapons.indexOf(name);
+  if (colIdx === -1) return '';
+  const ename = jsStr(name);
+  const tierRows = evo.tiers.map((tier, tIdx) => {
+    if (!tier.perks.length) return '';
+    const roman = INC_EVO_ROMAN[tIdx] || String(tIdx + 1);
+    const challengeHtml = tier.challenge ? `<div class="inc-evo-challenge">Unlock: ${esc(tier.challenge)}</div>` : '';
+    let selectorHtml, selectedPerk;
+    if (tier.perks.length > 1) {
+      const stored = progress[incEvoKey(tab, name, tIdx)];
+      const selIdx = (stored != null && tier.perks[stored]) ? stored : 0;
+      selectedPerk = tier.perks[selIdx];
+      const options = tier.perks.map((p, pIdx) =>
+        `<option value="${pIdx}"${pIdx === selIdx ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+      selectorHtml = `<select class="inc-evo-select" onchange="setIncEvoChoice('${tab}','${ename}',${tIdx},this.value)">${options}</select>`;
+    } else {
+      selectedPerk = tier.perks[0];
+      selectorHtml = `<span class="inc-evo-perkname">${esc(selectedPerk.name)}</span>`;
+    }
+    const substituted = substituteEvoValues(selectedPerk.desc, selectedPerk.values?.[colIdx] || '');
+    const descHtml = substituted ? `<div class="inc-evo-desc">${formatStatText(substituted)}</div>` : '';
+    return `<div class="inc-evo-tier">
+      <div class="inc-evo-tier-hdr"><span class="inc-evo-roman">${roman}</span>${selectorHtml}</div>
+      ${challengeHtml}
+      ${descHtml}
+    </div>`;
+  }).join('');
+  return `<div class="inc-evo-tiers">${tierRows}</div>`;
+}
+function incGroups() {
+  const groups = new Map(); // genesisName -> [{name, tab}]
+  for (const [wName, genesisName] of INCARNON_WEAPONS) {
+    const wTab = INCARNON_WEAPON_TAB.get(wName);
+    if (!wTab) continue;
+    if (!groups.has(genesisName)) groups.set(genesisName, []);
+    groups.get(genesisName).push({ name: wName, tab: wTab });
+  }
+  return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+function renderIncarnonsPage() {
+  const el = document.getElementById('incarnons-view');
+  const q = (document.getElementById('search')?.value || '').trim().toLowerCase();
+  const groups = incGroups();
+
+  let totalW = 0, acqW = 0, instW = 0;
+  const rowsHtml = [];
+  for (const [genesisName, weapons] of groups) {
+    const matchGroup = !q || genesisName.toLowerCase().includes(q) || weapons.some(w => w.name.toLowerCase().includes(q));
+    const visibleWeapons = weapons.filter(w => {
+      const isAcq  = !!progress[incAcqKey(w.tab, w.name)];
+      const isInst = !!progress[incarnonKey(w.tab, w.name)];
+      totalW++;
+      if (isAcq)  acqW++;
+      if (isInst) instW++;
+      if (!(matchGroup || w.name.toLowerCase().includes(q))) return false;
+      if (incFilter === 'acquired')    return isAcq;
+      if (incFilter === 'installed')   return isInst;
+      if (incFilter === 'notAcquired') return !isAcq;
+      return true;
+    });
+    if (visibleWeapons.length === 0) continue;
+
+    const inCircuit = CIRCUIT_INCARNON_WEEK_LOOKUP[genesisName] != null;
+    const circuitNow = inCircuit && CIRCUIT_INCARNON_NOW.has(genesisName);
+    const circuitWk  = inCircuit ? CIRCUIT_INCARNON_WEEK_LOOKUP[genesisName] : null;
+    const circuitTag = inCircuit ? `<div class="card-circuit${circuitNow ? ' circuit-now' : ''}" title="Circuit Week ${circuitWk}${circuitNow ? ' (current)' : ''}">Circuit Week ${circuitWk}</div>` : '';
+
+    const rows = visibleWeapons.map(w => {
+      const ename = jsStr(w.name);
+      const isAcq  = !!progress[incAcqKey(w.tab, w.name)];
+      const isInst = !!progress[incarnonKey(w.tab, w.name)];
+      const hasEvo = INCARNON_EVOLUTIONS.has(genesisName) && INCARNON_EVOLUTIONS.get(genesisName).weapons.includes(w.name);
+      const showEvo = hasEvo && isInst; // Evolutions only shown once the weapon is Installed
+      const evoTiers = showEvo ? buildIncEvoTiers(w.tab, w.name, genesisName) : '';
+      const rowInWishlist = incWishlist.has(genesisName);
+      const wishBtnRow = `<button class="inc-wish-btn" onclick="toggleIncWishlist('${jsStr(genesisName)}')" title="${rowInWishlist ? 'Remove from' : 'Add to'} wishlist">${rowInWishlist ? '★' : '☆'}</button>`;
+      return `<div class="inc-row${showEvo ? ' inc-row--expanded' : ''}">
+        <div class="inc-row-top">
+          <div class="inc-row-name"><a href="${esc(wikiUrl(w.name))}" target="_blank" rel="noopener">${esc(w.name)}</a><span class="card-cat">${INC_TAB_LABEL[w.tab] || w.tab}</span></div>
+          <div class="inc-row-toggles">
+            ${wishBtnRow}
+            <button class="inc-toggle${isAcq ? ' on' : ''}" onclick="toggleIncarnonAcquired('${w.tab}','${ename}')">Acquired</button>
+            <button class="inc-toggle inc-toggle--inst${isInst ? ' on' : ''}" onclick="toggleIncarnon('${w.tab}','${ename}')">Installed</button>
+          </div>
+        </div>
+        ${evoTiers}
+      </div>`;
+    }).join('');
+
+    const inWishlist = incWishlist.has(genesisName);
+    const wishBtn = `<button class="inc-wish-btn${inWishlist ? ' on' : ''}" onclick="toggleIncWishlist('${jsStr(genesisName)}')" title="${inWishlist ? 'Remove from' : 'Add to'} wishlist">${inWishlist ? '★' : '☆'}</button>`;
+
+    rowsHtml.push(`<div class="inc-group">
+      <div class="inc-group-hdr">
+        ${wishBtn}
+        <a class="inc-group-title" href="${esc(wikiUrl(genesisName))}" target="_blank" rel="noopener">${esc(genesisName)}</a>
+        ${circuitTag}
+      </div>
+      <div class="inc-group-rows">${rows}</div>
+    </div>`);
+  }
+
+  const summary = `<div class="inc-summary">
+    <span><b>${acqW}</b>/${totalW} Acquired</span>
+    <span><b>${instW}</b>/${totalW} Installed</span>
+    <div class="inc-filters">
+      <button class="filt-btn${incFilter === 'all' ? ' on' : ''}" onclick="setIncFilter('all')">All</button>
+      <button class="filt-btn${incFilter === 'notAcquired' ? ' on' : ''}" onclick="setIncFilter('notAcquired')">Not Acquired</button>
+      <button class="filt-btn${incFilter === 'acquired' ? ' on' : ''}" onclick="setIncFilter('acquired')">Acquired</button>
+      <button class="filt-btn${incFilter === 'installed' ? ' on' : ''}" onclick="setIncFilter('installed')">Installed</button>
+    </div>
+  </div>`;
+
+  const mainHtml = rowsHtml.length
+    ? `<div class="inc-groups">${rowsHtml.join('')}</div>`
+    : `<div class="empty">No Incarnon weapons match your filters.</div>`;
+
+  el.innerHTML = summary + `<div class="inc-layout">
+    <div class="inc-col-main">${mainHtml}</div>
+    <div class="inc-col-wishlist">${buildIncWishlistPanel()}</div>
+  </div>`;
+}
+
+// Current-week items first, then the rest ordered by circuit week descending.
+// Since CIRCUIT_WEEK_NOW changes weekly, a different subset floats to the top each week.
+function incWishlistSorted() {
+  return [...incWishlist].sort((a, b) => {
+    const wa = CIRCUIT_INCARNON_WEEK_LOOKUP[a] ?? -1;
+    const wb = CIRCUIT_INCARNON_WEEK_LOOKUP[b] ?? -1;
+    const aCur = wa === CIRCUIT_WEEK_NOW;
+    const bCur = wb === CIRCUIT_WEEK_NOW;
+    if (aCur !== bCur) return aCur ? -1 : 1;
+    return wb - wa;
+  });
+}
+function buildIncWishlistPanel() {
+  const items = incWishlistSorted();
+  const rows = items.map(genesisName => {
+    const wk = CIRCUIT_INCARNON_WEEK_LOOKUP[genesisName];
+    const inCircuit = wk != null;
+    const circuitNow = inCircuit && CIRCUIT_INCARNON_NOW.has(genesisName);
+    const circuitTag = inCircuit
+      ? `<div class="card-circuit${circuitNow ? ' circuit-now' : ''}" title="Circuit Week ${wk}${circuitNow ? ' (current)' : ''}">Week ${wk}</div>`
+      : `<div class="card-circuit">—</div>`;
+    return `<div class="inc-wish-item">
+      <a class="inc-wish-name" href="${esc(wikiUrl(genesisName))}" target="_blank" rel="noopener">${esc(genesisName)}</a>
+      ${circuitTag}
+      <button class="inc-wish-remove" onclick="toggleIncWishlist('${jsStr(genesisName)}')" title="Remove from wishlist">✕</button>
+    </div>`;
+  }).join('');
+
+  return `<div class="inc-wishlist-panel">
+    <div class="inc-wishlist-hdr">Wishlist <span class="inc-wishlist-count">${items.length}</span></div>
+    <div class="inc-wishlist-list">${rows || `<div class="inc-wishlist-empty">Click ☆ on any Incarnon to add it here.</div>`}</div>
+  </div>`;
 }
 
 // ─────────────────────────────────────────────
@@ -4572,7 +4999,7 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
   const cardCls = isMax ? 'maxed' : rank > 0 ? 'partial' : copies > 0 ? 'acquired' : '';
   const ename     = jsStr(name);
   const _ls = ARCANE_LEVEL_STATS?.[name];
-  const desc = _ls?.length ? _ls[_ls.length - 1].join('\n') : '';
+  const desc = _ls?.length ? stripDtTags(_ls[_ls.length - 1].join('\n')) : '';
   const pct       = (copies / maxCopies * 100).toFixed(1);
 
   const tradableTag = tradable ? `<a class="card-tradable" href="${esc(modMarketUrl(name))}" target="_blank" rel="noopener">Tradable</a>` : '';
@@ -4590,17 +5017,21 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
     <span class="rank-max">${maxCopies}</span>
   </div>`;
 
-  let qbtns = '';
+  const statsBack = buildLevelStatsBack(_ls, rank);
+  const statsBtn = statsBack ? `<button class="qbtn rec" onclick="flipCard(this)">Stats</button>` : '';
+
+  let qbtns = statsBtn;
   if (copies === 0) {
-    qbtns = `<button class="qbtn aq" onclick="setArcaneCopies('${ename}',1)">Owned</button>`;
+    qbtns += `<button class="qbtn aq" onclick="setArcaneCopies('${ename}',1)">Owned</button>`;
     qbtns += `<button class="qbtn mx" onclick="setArcaneCopies('${ename}',${maxCopies})">Max</button>`;
   } else {
-    qbtns = `<button class="qbtn mx" onclick="setArcaneCopies('${ename}',${maxCopies})">Max</button>`;
+    qbtns += `<button class="qbtn mx" onclick="setArcaneCopies('${ename}',${maxCopies})">Max</button>`;
     qbtns += `<button class="qbtn zr" onclick="setArcaneCopies('${ename}',0)">0</button>`;
   }
 
   if (listMode) {
     return `<div class="card list-row${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}">
+<div class="card-front">
   <div class="list-name-col">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
     <div class="list-badges">${typeTag}</div>
@@ -4608,9 +5039,12 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
   <div class="card-obtain-row">${buildAcqTags(acq)}${tradableTag}</div>
   ${rankSection}
   <div class="qbtns" style="flex-shrink:0;gap:5px;min-width:112px">${qbtns}</div>
+</div>
+${statsBack}
 </div>`;
   }
   return `<div class="card${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}">
+<div class="card-front">
   <div class="card-top">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
     <div style="display:flex;gap:3px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:flex-end">${typeTag}</div>
@@ -4618,6 +5052,8 @@ function buildArcaneItem(name, type, acq, maxRank, rarity, tradable, listMode) {
   <div class="card-obtain-row">${buildAcqTags(acq)}${tradableTag}</div>
   ${rankSection}
   <div class="card-foot" style="margin-top:8px"><div class="qbtns">${qbtns}</div></div>
+</div>
+${statsBack}
 </div>`;
 }
 
@@ -4716,7 +5152,7 @@ function buildModItem(mod, listMode) {
   const cardCls = isMax ? 'maxed' : isPartial ? 'partial' : isOwn ? 'acquired' : '';
   const ename = jsStr(name);
   const ls   = mod.levelStats;
-  const desc = ls?.length ? (ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '';
+  const desc = ls?.length ? stripDtTags(ls[Math.min(rank, ls.length - 1)]?.[0] || '') : '';
   const pct = maxRank > 0 ? (rank / maxRank * 100).toFixed(1) : 0;
   const rarityLow = rarity.toLowerCase().replace(/ /g, '-');
 
@@ -4734,12 +5170,15 @@ function buildModItem(mod, listMode) {
     <span class="rank-max">${maxRank}</span>
   </div>` : (listMode ? `<div style="flex-shrink:0;width:200px;font-size:10px;color:var(--text-muted);font-style:italic;padding:0 4px">No rank</div>` : '');
 
-  let qbtns = '';
+  const statsBack = buildLevelStatsBack(ls, rank);
+  const statsBtn = statsBack ? `<button class="qbtn rec" onclick="flipCard(this)">Stats</button>` : '';
+
+  let qbtns = statsBtn;
   if (maxRank > 0) {
     const ownedBtn = rank === 0 ? `<button class="qbtn aq${isOwn?' on':''}" onclick="toggleModOwned('${ename}')">Owned</button>` : '';
-    qbtns = `${ownedBtn}<button class="qbtn mx" onclick="setModRank('${ename}',${maxRank})">Max</button><button class="qbtn zr" onclick="setModRank('${ename}',0)">0</button>`;
+    qbtns += `${ownedBtn}<button class="qbtn mx" onclick="setModRank('${ename}',${maxRank})">Max</button><button class="qbtn zr" onclick="setModRank('${ename}',0)">0</button>`;
   } else {
-    qbtns = `<button class="qbtn aq${isOwn?' on':''}" onclick="toggleModOwned('${ename}')">${isOwn ? 'Owned ✓' : 'Owned'}</button>`;
+    qbtns += `<button class="qbtn aq${isOwn?' on':''}" onclick="toggleModOwned('${ename}')">${isOwn ? 'Owned ✓' : 'Owned'}</button>`;
   }
 
   if (listMode) {
@@ -4747,6 +5186,7 @@ function buildModItem(mod, listMode) {
       ? `<div class="card-xp" style="white-space:nowrap;flex-shrink:0;font-size:10px;min-width:60px"><span>${rank}</span> / ${maxRank}</div>`
       : `<div style="min-width:60px"></div>`;
     return `<div class="card list-row${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}" data-cat="${esc(cat)}">
+<div class="card-front">
   <div class="list-name-col">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
     <div class="list-badges">${compatTag}${exilusTag}${polarityTag}</div>
@@ -4755,12 +5195,15 @@ function buildModItem(mod, listMode) {
   ${rankSection}
   ${xpCell}
   <div class="qbtns" style="flex-shrink:0;gap:5px;min-width:112px">${qbtns}</div>
+</div>
+${statsBack}
 </div>`;
   }
   const footLeft = maxRank > 0
     ? `<div class="mod-cost-row" style="margin:0">${modCostContent(rarity, cat, rank, maxRank)}</div>`
     : `<div class="mod-no-rank">No rank</div>`;
   return `<div class="card${cardCls ? ' '+cardCls : ''}" data-rarity="${esc(rarity)}" data-cat="${esc(cat)}">
+<div class="card-front">
   <div class="card-top">
     <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener"${desc ? ` title="${esc(desc)}"` : ''}>${esc(name)}</a></div>
     <div style="display:flex;gap:3px;flex-shrink:0;align-items:center;flex-wrap:wrap;justify-content:flex-end">${compatTag}${exilusTag}${polarityTag}</div>
@@ -4768,6 +5211,8 @@ function buildModItem(mod, listMode) {
   <div class="card-obtain-row">${buildModDropsBtn(acq)}${tradableTag}</div>
   ${rankSection}
   <div class="card-foot">${footLeft}<div class="qbtns">${qbtns}</div></div>
+</div>
+${statsBack}
 </div>`;
 }
 
@@ -4829,6 +5274,7 @@ function buildSave() {
     customItems: customItems,
     modularBuilds: modularBuilds,
     modularOwned: modularOwned,
+    incWishlist: [...incWishlist],
   };
 }
 
@@ -4881,10 +5327,12 @@ function applySave(bundle) {
       modularOwned = bundle.modularOwned;
       saveModularOwned();
     }
+    incWishlist = new Set((Array.isArray(bundle.incWishlist) ? bundle.incWishlist : []).filter(x => typeof x === 'string'));
     saveProgress();
     saveChecklist();
     saveChecklistOwned();
     saveCustomItems();
+    saveIncWishlist();
   } else {
     // Legacy format: flat progress object (number|boolean values only)
     const sanitizedProgress = {};
@@ -5737,11 +6185,13 @@ async function logout() {
   localStorage.removeItem(CL_BP_KEY);
   localStorage.removeItem(CUSTOM_LS_KEY);
   localStorage.removeItem(CONFLICT_LS_KEY);
+  localStorage.removeItem(INC_WISHLIST_KEY);
   localStorage.removeItem('wf-cloud-ts');
   progress = {};
   customItems = [];
   conflictingCustomItems = [];
   loadChecklist();
+  loadIncWishlist();
   updateAuthUI();
   updateHeader();
   render();
@@ -5752,7 +6202,7 @@ async function loadFromCloud() {
   try {
     const { data, error } = await _sb
       .from('saves')
-      .select('progress, checklist, ui_prefs, custom_items, modular_builds, my_builds, updated_at')
+      .select('progress, checklist, ui_prefs, custom_items, modular_builds, my_builds, inc_wishlist, updated_at')
       .eq('user_id', currentUser.id)
       .single();
 
@@ -5799,6 +6249,11 @@ async function loadFromCloud() {
       localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds));
     }
 
+    if (Array.isArray(data.inc_wishlist)) {
+      incWishlist = new Set(data.inc_wishlist.filter(x => typeof x === 'string'));
+      localStorage.setItem(INC_WISHLIST_KEY, JSON.stringify([...incWishlist]));
+    }
+
     if (data.ui_prefs) {
       for (const [k, v] of Object.entries(data.ui_prefs)) {
         if (k.startsWith('wf-ui-') || k.startsWith('wf-filt-')) localStorage.setItem(k, v);
@@ -5841,6 +6296,7 @@ async function syncToCloud() {
       custom_items: customItems,
       modular_builds: { builds: modularBuilds, owned: modularOwned },
       my_builds:    myBuilds,
+      inc_wishlist: [...incWishlist],
       updated_at:   new Date().toISOString(),
     });
 
@@ -6145,6 +6601,7 @@ loadProgress();
 loadCustomItems();
 renderConflictNotice();
 loadChecklist();
+loadIncWishlist();
 loadModularBuilds();
 loadMyBuilds();
 initAuth();
@@ -6162,12 +6619,14 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isDucats  = activeTab === 'ducats';
   const _isKitgun  = activeTab === 'kitgunBuilder';
   const _isBuilds  = activeTab === 'builds';
-  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds;
+  const _isIncarnons = activeTab === 'incarnons';
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds || _isIncarnons;
   document.getElementById('summary').classList.toggle('open', _isSummary);
   document.getElementById('checklist-view').style.display = _isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = _isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = _isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = _isBuilds  ? 'flex'  : 'none';
+  document.getElementById('incarnons-view').style.display = _isIncarnons ? 'block' : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
