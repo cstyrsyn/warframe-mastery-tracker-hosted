@@ -1,0 +1,4788 @@
+{
+  "Ack & Brunt Incarnon Genesis": {
+    "weapons": [
+      "Ack & Brunt"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nSend forth a spectral axe during aerial and slide attacks.\n+100% Melee Damage\n+20% Sprint Speed\n+20% to Parkour Velocity",
+            "values": [
+              "-"
+            ],
+            "notes": "Spectral axes deal 149 damage on contact, then explode dealing 303 Heat damage with a forced Impact status effect in a 5m radius. Axes launched by aerial attacks have 2x damage.\nHeat damage on explosions will combine with modded elements. For example, when modded for Electricity, axes will deal Electricity on direct hit and Radiation on explosion.\nSpectral axe hits do not add to the melee combo counter.\nDirect hits of spectral axes and explosions are affected by faction damage mods, elemental mods, status chance and status damage mods, critical hit mods and Universal damage bonuses.\nDirect hits of spectral axes are affected by Condition Overload, while the explosions are not.\nDirect hits of spectral axes and explosions are not affected by the stance mod, combo multiplier, damage increase on Evolution II perks or melee damage bonuses like Incarnon form's innate +100% melee damage, Pressure Point, and Arcane Fury.\nLateral slam attack is replaced by the axe throw, reducing mobility. Slam attacks can only be performed directly downwards while Incarnon is active."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Templar's Wrath",
+            "desc": "Increase Base Damage by +150.\nWith Armor Over 450: +70% Heavy Attack Efficiency.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Shieldmaiden's Rush",
+            "desc": "Increase Base Damage by +150.\nOn Shield Break: +300% Combo Count Chance while Blocking for 11 seconds.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+0.7 Range",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Abiding Hold",
+            "desc": "Combo Timer pauses when weapon is holstered.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+70% Heavy Attack Windup Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Reach 10x combo 10 times",
+        "perks": [
+          {
+            "name": "Rogue Readiness",
+            "desc": "On Kill: 50% chance for Primary and Secondary weapons instantly reload.",
+            "values": [
+              "-"
+            ],
+            "notes": "The kill has to be by the Ack & Brunt.\nThis evolution does not generate ammo, i.e., reloaded ammo is taken from the weapons' ammo reserves."
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +17%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Versatile Creed",
+            "desc": "Increase Base Critical Chance by +9%.\nIncrease Base Status Chance by +9%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Angstrum Incarnon Genesis": {
+    "weapons": [
+      "Angstrum",
+      "Prisma Angstrum"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Direct hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nLaunches target-seeking fireballs that ricochet towards enemies.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form becomes fully automatic and shoots small fireballs that deal pure Heat damage. Upon hitting an enemy, the projectile will ricochet toward 1 enemy within 20 meters of the initial target. This ricochet has no homing capability and can miss. Projectiles that hit a surface can bounce up to 2 times before dissipating on the third impact, but these ricochets do not automatically aim towards enemies."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Haven Foray",
+            "desc": "Increase Base Damage by +50.\nWith Overshields: Increase Base Damage by +50.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Paladin Virtue",
+            "desc": "Increase Base Damage by +75.\nWith Energy Max Over 700: Increase Base Critical Damage Multiplier by +0.5x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+30% Projectile Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus stacks additively with Terminal Velocity."
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus stacks additively with reload speed mods such as Fast Hands."
+          },
+          {
+            "name": "Hitman's Hoard",
+            "desc": "Increase Base Ammo Capacity by +9.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "This bonus does not apply to the Incarnon form."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies afflicted with 4 or more status effects",
+        "perks": [
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Critical Damage Multiplier by +0.2x.",
+            "values": [
+              "X = 14%",
+              "X = 10%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 9%\nY = 9%",
+              "X = 6%\nY = 6%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Fatal Affliction",
+            "desc": "+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Anku Incarnon Genesis": {
+    "weapons": [
+      "Anku"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nIncarnon form temporarily increases Range and inflicts guaranteed Slash Status for all attacks after a successful slide attack.\n+100% Melee Damage\n+20% Sprint Speed\n+20% Bullet Jump",
+            "values": [
+              "-"
+            ],
+            "notes": "Successful slide attacks grant +3 Range and forced Slash Status for all attacks for 6s."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Edge of Justice",
+            "desc": "Increase Base Damage by +50.\nWith Melee Weapon Equipped: +40% Attack Speed.",
+            "values": [
+              "-"
+            ],
+            "notes": "Attack Speed bonus requires manually equipping the melee, either by holding the weapon swap key (default F) or going into a mission with only the melee weapon equipped.\nAttack Speed bonus does not affect quickswap melee attacks."
+          },
+          {
+            "name": "Guardian's Promise",
+            "desc": "Increase Base Damage by +50.\nWith Overshields: +80% Heavy Attack Efficiency.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 10 times in a mission",
+        "perks": [
+          {
+            "name": "Standoff",
+            "desc": "Combo Timer paused when weapon is holstered.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swordsman's Celerity",
+            "desc": "+20% Movement Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "Movement Speed bonus applies at all times."
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+60% Heavy Attack Wind Up Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with slide attacks with this weapon",
+        "perks": [
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +20%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Subtle Force",
+            "desc": "Increase Base Critical Chance by +6%.\nIncrease Base Status Chance by +14%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +12%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Atomos Incarnon Genesis": {
+    "weapons": [
+      "Atomos"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire high-powered grenades.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form becomes a semi-automatic grenade launcher whose projectiles explode in a 7.9 meter radius dealing Impact damage on direct hits and Blast damage on the explosion, with significantly higher base damage, Critical Chance, Critical Multiplier, and Status Chance. However it has significantly slower Fire Rate, the explosion possesses linear Damage Falloff from 100% to 20% from central impact, and the projectile has travel time with arcing affected by Projectile Speed."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Paladin Virtue",
+            "desc": "Increase Base Damage by +24.\nWith Energy Max over 700: Increase Base Critical Damage Multiplier by +1x.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Hoplite Virtue",
+            "desc": "Increase Base Damage by +24.\nOn Shield Break: Increase Base Damage by +30 for 8s.",
+            "values": [
+              "-"
+            ],
+            "notes": "This is on personal shield break, not breaking enemy shields."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Moonrise Velocity",
+            "desc": "+7 Range.",
+            "values": [
+              "-"
+            ],
+            "notes": "Bonus stacks additively to Ruinous Extension\nThis bonus has no effect on Incarnon Form"
+          },
+          {
+            "name": "Mercenary Chamber",
+            "desc": "Increase Base Ammo Capacity to 560.",
+            "values": [
+              "-"
+            ],
+            "notes": "This bonus not affect Incarnon form"
+          },
+          {
+            "name": "Resonant Restore",
+            "desc": "On Reload From Empty: Increase Base Magazine Capacity by +5. Stacks up to 7x.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies afflicted with 4 or more status effects",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +20%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +19%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +10%.\nIncrease Base Status Chance by +10%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Ballistica Incarnon Genesis": {
+    "weapons": [
+      "Ballistica",
+      "Rakta Ballistica",
+      "Ballistica Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge. Fire cross-shaped projectiles that punch through enemies",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Fires a single X-shaped projectile. Deals much higher pure Slash damage, with increased Critical Chance, Critical Multiplier, Status Chance, Projectile Speed, and Charge Time, with charging being automatic."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Headcracker",
+            "desc": "Increase Base Damage by +X.\nOn Headshot: +7.5% Fire Rate for 4s. Stacks up to 10x.",
+            "values": [
+              "X = 30",
+              "X = 10",
+              "X = 3"
+            ],
+            "notes": "On headshot effect has a 50% chance of activating.\nFire Rate bonus is additive to other sources of Fire Rate such as Gunslinger."
+          },
+          {
+            "name": "Prolific Perforation",
+            "desc": "Increase Base Damage by +X.\nOn Punch Through Hit: +10% Critical Chance for 3s. Stacks up to 8x.",
+            "values": [
+              "X = 30",
+              "X = 10",
+              "X = 3"
+            ],
+            "notes": "Critical Chance bonus is additive to other sources of Critical Chance such as Pistol Gambit."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 Enemies with this weapons Incarnon Form",
+        "perks": [
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Void's Guidance",
+            "desc": "+40% Accuracy\n-40% Weapon Recoil",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 Enemies without reloading",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status by +X per projectile.\nIncrease Base Status by +Y for Incarnon Form.",
+            "values": [
+              "X = 20%\nY = 20%",
+              "X = 20%\nY = 20%",
+              "X = 18%\nY = 72%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X.\nIncrease Base Status by +Y per projectile.\nIncrease Base Status by +Z for Incarnon Form",
+            "values": [
+              "X = 10%\nY = 10%\nZ = 10%",
+              "X = 8%\nY = 8%\nZ = 8%",
+              "X = 7%\nY = 7%\nZ = 28%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X.\nIncrease Base Critical Damage Multiplier by +Y.",
+            "values": [
+              "X = 15%\nY = 1.0x",
+              "X = 14%\nY = 1.0x",
+              "X = 12%\nY = 1.0x"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Bo Incarnon Genesis": {
+    "weapons": [
+      "Bo",
+      "Mk1-Bo",
+      "Bo Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nIncarnon form increases Range and Heavy Attack Efficiency.\n+100% Melee Damage\n+4 Range\n+50% Heavy Attack Efficiency\n+20% Sprint Speed\n+20% to Bullet Jump",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Stalwart Oak",
+            "desc": "Increase Base Damage by +X.\nWith Armor over 450:\n+30 Parry Angle\n+300% Combo Count Chance while Blocking.",
+            "values": [
+              "X = 110",
+              "X = 90",
+              "X = 34"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swordsman's Flourish",
+            "desc": "Increase Base Damage by +X.\nWith Melee Weapon Equipped: +100% Combo Count Chance.",
+            "values": [
+              "X = 100",
+              "X = 85",
+              "X = 30"
+            ],
+            "notes": "Combo Count Chance bonus requires manually equipping the melee, either by holding the weapon swap key (default F) or going into a mission with only the melee weapon equipped.\nCombo Count Chance bonus does not affect quickswap melee attacks."
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+0.5 Range",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Overhand",
+            "desc": "Base Heavy Attack Efficiency set at 20%",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swordsman's Celerity",
+            "desc": "+20% Movement Speed",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Movement Speed bonus applies at all times."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 40 enemies with slide attacks.",
+        "perks": [
+          {
+            "name": "Flashing Bleed",
+            "desc": "+40% chance of Slash Status on Impact Status Effect.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "On enemies that are knocked down, Impact effects will not apply but the bleed still will."
+          },
+          {
+            "name": "Subtle Force",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 12%\nY = 12%",
+              "X = 15%\nY = 15%",
+              "X = 6%\nY = 6%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +X%.",
+            "values": [
+              "X = 34%",
+              "X = 38%",
+              "X = 30%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Boar Incarnon Genesis": {
+    "weapons": [
+      "Boar",
+      "Boar Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFires three short-range beams that chain link enemies.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form becomes a continuous beam weapon that can fire up to 3 beams that automatically target enemies within 10° of the reticle, with each beam chaining up to 2 nearby enemies within 10 meters of the initial target and subsequent targets struck by punch through, with each chain doing 80% of the previous one's damage. Beams remain locked on enemies while they are within 50° of the reticle. While in Incarnon Form, it inflicts pure Heat damage with increased Critical Chance, Critical Multiplier, and Fire Rate. However, it has reduced damage and Zoom, and the main beam has a maximum range of 20 meters.\nWhile Sinister Reach cannot be equipped on Boar or its variants, Galvanized Acceleration can be used to increase the maximum range of the main beams."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Reified Bane",
+            "desc": "Increase Base Damage by +10.\nOn Reload From Empty: Increase Base Damage by +14.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "The damage bonus is applied after finishing a reload while the magazine is empty, and lasts indefinitely until a manual reload is initiated while the magazine is not empty. Refilling the magazine through other means (such as with Blood For Ammo) will not remove the bonus.\nReload From empty bonus is incorrectly listed as +10 in game."
+          },
+          {
+            "name": "Fortress Salvo",
+            "desc": "Increase Base Damage by +16.\nWith Armor Over 450: +4 Punch Through",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Ready Retaliation",
+            "desc": "On Reload From Empty: +100% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "As the reload speed bonus is only applied at the end of the first reload from empty, the bonus will not apply to the first reload, only subsequent ones.\nBonus stacks additively with reload speed mods such as Tactical Pump."
+          },
+          {
+            "name": "Mercenary Chamber",
+            "desc": "Increase Base Ammo Capacity to 195.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Practiced Grip",
+            "desc": "Increase Accuracy by +50%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies without reloading",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +12% per projectile.\nIncrease Base Status Chance by +96% for Incarnon Form.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +20%.\nIncrease Base Critical Damage Multiplier by +0.5x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +10%.\nIncrease Base Status Chance by +6% per projectile.\nIncrease Base Status Chance by +48% for Incarnon Form.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Boltor Incarnon Genesis": {
+    "weapons": [
+      "Boltor",
+      "Telos Boltor",
+      "Boltor Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nPrioritize Slash Damage and gain Multishot.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form turns the weapon in a rapid-fire pseudo-shotgun with 3 base multishot, increased overall damage stats, added Slash damage, and slightly faster fire rate, but with lower accuracy resulting in a shotgun-like spread pattern."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Hunter's Mantra",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability active: Punch Through +4 and +40% Accuracy.",
+            "values": [
+              "X = 18",
+              "X = 4",
+              "X = 4"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Crimson Overture",
+            "desc": "Increase Base Damage by +X.\nOn Kill: Increase Base Damage by +2 and +20% Ammo Efficiency for 5 seconds. Stacks up to Yx",
+            "values": [
+              "X = 12\nY = 4",
+              "X = 0\nY = 3",
+              "X = 0\nY = 3"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+60% Projectile Speed.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +20.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+60% Reload Speed.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 40 enemies while sliding.",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X%",
+            "values": [
+              "X = 20%",
+              "X = 20%",
+              "X = 18%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%\nIncrease Base Status Chance by +Y%",
+            "values": [
+              "X = 8%\nY = 8%",
+              "X = 4%\nY = 4%",
+              "X = 10%\nY = 10%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%",
+            "values": [
+              "X = 12%",
+              "X = 6%",
+              "X = 14%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Braton Incarnon Genesis": {
+    "weapons": [
+      "Braton",
+      "Mk1-Braton",
+      "Braton Vandal",
+      "Braton Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nGain Radial Heat damage.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form has a 3 meter area of effect that deals pure Heat damage, with much higher Critical Chance, Critical Multiplier, and Status Chance. However, the Fire Rate is reduced, and the explosion possesses Damage Falloff from 100% to 90% from central impact.\nWhen modded for Punch Through, the Incarnon Form's radial effect occurs at the first object struck, and only the main bullet punches through."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Daring Reverie",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability active: Increase Base Damage by +Y. +50% Ammo Efficiency",
+            "values": [
+              "X = 24\nY = 30",
+              "X = 28\nY = 22",
+              "X = 12\nY = 34",
+              "X = 4\nY = 38"
+            ],
+            "notes": "Channeled Abilities must be draining energy to be considered active. Abilities that do not drain energy over time such as Nekros's Desecrate, Hildryn's Haven, or Sevagoth's Gloom (with no enemies nearby) do not count."
+          },
+          {
+            "name": "Munitions Grit",
+            "desc": "Increase Base Damage by +X.\nMultishot consumes ammo directly from Capacity and does +Y Damage. +20% Multishot.",
+            "values": [
+              "X = 14\nY = 60%",
+              "X = 20\nY = 48%",
+              "X = 8\nY = 58%",
+              "X = 2\nY = 54%"
+            ],
+            "notes": "Affects both modes. In the case of Incarnon Form, it pulls directly from its magazine.\nDamage bonus is a unique modifier that is multiplicative to other damage buffs.\nDamage bonus only applies to shots generated by multishot.\nThe multishot bonus stacks additively with multishot mods such as Split Chamber."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Mercenary Chamber",
+            "desc": "Increase Base Ammo Capacity to X.",
+            "values": [
+              "X = 675",
+              "X = 600",
+              "X = 750",
+              "X = 1125"
+            ],
+            "notes": "The bonus does not apply to the Incarnon form."
+          },
+          {
+            "name": "Void's Guidance",
+            "desc": "+60% Accuracy\n-60% Recoil",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Gunsmoke Pick Up",
+            "desc": "On Punch Through Hit: 20% chance for 10% Ammo restored.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The bonus does not apply to the Incarnon form.\nA second target does not need to be hit, the bullet just has to have some amount of punch-through."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies without reloading. (For the purposes of this challenge, the Incarnon transformation itself is counted as a reload.)",
+        "perks": [
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X.\nIncrease Base Critical Damage Multiplier by +Y.",
+            "values": [
+              "X = 16%\nY = 0.4x",
+              "X = 18%\nY = 0.5x",
+              "X = 16%\nY = 0.4x",
+              "X = 18%\nY = 0.2x"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Prelude of Might",
+            "desc": "With Critical Chance Below 50%: Increase Base Critical Damage Multiplier by +X.",
+            "values": [
+              "X = 3.4x",
+              "X = 3.3x",
+              "X = 3.0x",
+              "X = 3.0x"
+            ],
+            "notes": "The critical damage increase is added as base critical damage and will be affected by mods.\nCondition is affected by the critical chance increase effect of Puncture status."
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X.\nIncrease Base Status Chance by +Y.",
+            "values": [
+              "X = 10%\nY = 12%",
+              "X = 12%\nY = 12%",
+              "X = 10%\nY = 12%",
+              "X = 10%\nY = 14%"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Bronco Incarnon Genesis": {
+    "weapons": [
+      "Bronco",
+      "Bronco Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nIncrease Range and Ricochet.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form has much higher Critical Chance, Critical Multiplier, and Status Chance, and longer Damage Falloff ranges, at the expense of reduced base damage and Fire Rate.\nIndividual pellets now ricochet once to nearby enemies within 6 meters (8 meters for the prime) of the main target.\nBronco only has a 50% chance to Ricochet.\nModding for Punch Through and hitting multiple targets will create successive ricochets.\nVoid Status Effect prevents ricochets from occurring."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Speeding Bullet",
+            "desc": "Increase Base Damage by +X.\nWith Sprint Speed 1.2 or Higher: +60% Projectile Speed.",
+            "values": [
+              "X = 36",
+              "X = 30"
+            ],
+            "notes": "The projectile speed bonus stacks additively with projectile speed mods such as Lethal Momentum."
+          },
+          {
+            "name": "Infused Shots",
+            "desc": "Increase Base Damage by +X.\nOn 50 Energy Spent: Increase Base Damage by +Y for 10s. Stacks up to 4x.",
+            "values": [
+              "X = 20\nY = 10",
+              "X = 16\nY = 9"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Kinetic Battle",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Practised Grip",
+            "desc": "Increase Accuracy by +30%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +2.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 10 enemies within 8 seconds 6 times",
+        "perks": [
+          {
+            "name": "Enough for Everyone",
+            "desc": "+80% Ammo efficiency when 6 enemies are within 6m.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +20%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rain of Lead",
+            "desc": "+2 Base Multishot.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Burston Incarnon Genesis": {
+    "weapons": [
+      "Burston",
+      "Burston Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nGain an Auto Fire mode and deal Radial Heat Damage.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form becomes fully automatic dealing pure Heat damage with shots exploding in a 2 meter area of effect, with much higher Critical Chance, Critical Multiplier, and Fire Rate. However, it deals much less base damage, the explosion possesses Damage Falloff from 100% to 0% from central impact, and reduced Zoom.\nThe Radial Attack does not benefit from Multishot bonuses and has a Headshot multiplier of 1x.\nOn Punch Through Radial Attack will hit only first enemy or be stopped if fired through an obstacle."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Forceful Finality",
+            "desc": "Increase Base Damage by +42.\n+5 Base Multishot on final magazine burst.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Multishot bonus is added before mods, and is thus multiplied by multishot bonuses.\nMultishot bonus does not affect the Incarnon form."
+          },
+          {
+            "name": "Fortress Salvo",
+            "desc": "Increase Base Damage by +42.\nWith Armor Over 450: +2 Punch Through.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +21.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Ready Retaliation",
+            "desc": "On Reload From Empty: +100% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Kinetic Battle",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Get 40 weakpoint hits with this weapon in Incarnon form in a single mission.",
+        "perks": [
+          {
+            "name": "Reaver's Rapture",
+            "desc": "On Full Burst Hit: +20% Damage, resets on Reload.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Caps at 5x for +100% damage, additive with base damage mods such as Serration.\nBurst condition is not affected by multishot or punch through, but counts object hits such as nullifier bubbles, and activates even if the first hit of a burst kills the target.\nResets when activating incarnon, and cannot be stacked in Incarnon form."
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +22%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Fatal Affliction",
+            "desc": "+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Ceramic Dagger Incarnon Genesis": {
+    "weapons": [
+      "Ceramic Dagger"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nHeavy Attacks sends forth spectral daggers.\n+100% Melee Damage\n+25% Sprint Speed\n+25% to Parkour Velocity",
+            "values": [
+              "-"
+            ],
+            "notes": "Heavy Attack in Incarnon Form will fire a flurry of 2 spectral daggers towards the crosshair that explode on impact, dealing Heat damage with a forced Impact status effect.\nDirect hits can headshot.\nProjectiles and explosions are silent.\nDirect hits of spectral daggers and explosions are affected by universal base damage sources like Vigorous Swap, Holster Amp, Arcane Arachne, Vex Armor and Amp.\nDirect hit damage is affected by Condition Overload, but not the explosions.\nDamage is not affected by the melee damage increase on Evolution 2, Incarnon form's innate +100% melee damage, or melee damage bonuses like Pressure Point."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Gun and Blade",
+            "desc": "Increase Base Damage by +100.\nOn Primary Kill: +1 Initial Combo. Stacks up to 100x.",
+            "values": [
+              "-"
+            ],
+            "notes": "Initial Combo Increase stacks shows as a buff, which lasts permanently throughout the mission but are lost on death.\nMaximum stacks allows Ceramic Dagger to activate Incarnon Form without building any additional combo."
+          },
+          {
+            "name": "Breacher's Opportunity",
+            "desc": "Increase Base Damage by +120.\nOn Shield Break: Increase Base Damage by +80 for 8s.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+1 Range",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Adept Reflexes",
+            "desc": "+20 Initial Combo",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rogue Readiness",
+            "desc": "On Kill: 40% chance for Instantly Reload Primary and Secondary weapons.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 20 unalerted enemies with a Finisher Attack",
+        "perks": [
+          {
+            "name": "Red Right Hand",
+            "desc": "On First Attack With Primary Equipped: Increase Base Critical Damage Multiplier by +2x.",
+            "values": [
+              "-"
+            ],
+            "notes": "Applies to the first attack from quickswap melee."
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +30%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +30%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Cestra Incarnon Genesis": {
+    "weapons": [
+      "Cestra"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Critical Chance increases with uninterrupted shots fired.",
+            "values": [
+              "-"
+            ],
+            "notes": "Shots gain an increasing Critical Chance bonus while the trigger is held, up to +200%. Damage, Critical Chance, Critical Multiplier, and Status Chance are increased, but Fire Rate is lowered.\nCritical chance bonus is additive to Pistol Gambit and similar bonuses."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Steadfast Grit",
+            "desc": "Increase Base Damage by +10.\nOn Shield/Overguard break: x3 Critical Damage for 6s.",
+            "values": [
+              "-"
+            ],
+            "notes": "This is on personal shield break, not breaking enemy shields."
+          },
+          {
+            "name": "Fortress Salvo",
+            "desc": "Increase Base Damage by +10.\nWith Armor Over 450: +80% Multishot.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              ""
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Slayer's Nerve",
+            "desc": "On Hit: +6% Accuracy and -6% Weapon Recoil for 6s. Stacks up to 10x.",
+            "values": [
+              ""
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed.",
+            "values": [
+              ""
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies without reloading",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +18%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "Increase Base Critical Damage Multiplier by +2x.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Wiseman's Regard",
+            "desc": "Increase Base Status Chance by 30% of current Critical Chance, up to 40%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Dera Incarnon Genesis": {
+    "weapons": [
+      "Dera",
+      "Dera Vandal"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire high power beams and gain Magnetic Damage.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Fires lasers that inflict Magnetic damage. Gains 3 Punch Through and Damage, Critical Chance, and Critical Multiplier are increased, but Status Chance and Fire Rate are lowered.\nDespite the Incarnon form description saying it fires beams, it is not a Beam Weapon."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Crimson Overture",
+            "desc": "Increase Base Damage by +X.\nOn Kill: +20% Ammo Efficiency for 5s. Stacks up to 4x.",
+            "values": [
+              "X = 8",
+              "X = 6"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Paragon Essence",
+            "desc": "Increase Base Damage by +X.\nOn Status Effect: +5% Fire Rate for 5s. Stacks up to 6x.",
+            "values": [
+              "X = 6",
+              "X = 4"
+            ],
+            "notes": "Fire Rate bonus stacks additively with other fire rate bonuses such as Speed Trigger."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +X",
+            "values": [
+              "X = 22",
+              "X = 30"
+            ],
+            "notes": "Increased Base Magazine Capacity does not affect Incarnon Form."
+          },
+          {
+            "name": "Evolved Autoloader",
+            "desc": "+50% Magazine Reloaded per second when Holstered.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies afflicted with 4 or more Status Effects",
+        "perks": [
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "Increase Base Critical Chance by +14%\nIncrease Base Critical Damage Multiplier by +X",
+            "values": [
+              "X = 0.6x",
+              "X = 0.4x"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "High Ground",
+            "desc": "Increase Base Critical Chance by 25% of current Status Chance, up to 35%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "For Non-Incarnon Dera Vandal, +366.7% Status Chance is needed to max out the Critical Chance bonus.\nFor Incarnon Dera Vandal and Non-Incarnon Dera, +536.4% Status Chance is needed to max out the Critical Chance bonus."
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X%",
+            "values": [
+              "X = 18%",
+              "X = 14%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Despair Incarnon Genesis": {
+    "weapons": [
+      "Despair"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Gain embedding projectiles that explode with Heat Damage.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form now explodes in a 4.9 meter radius after a 0.5 second embed delay, dealing 150 Heat damage. It also has increased base damage, Critical Chance, Critical Multiplier, and Status Chance, but slightly lower Fire Rate and significantly lower Accuracy.\nIncarnon explosions are affected by explosion radius mods (such as Fulmination)"
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Fatal Affliction",
+            "desc": "Increase Damage by +50.\n+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Stalker's Vendetta",
+            "desc": "Increase Damage by +60.\nWith Dread and Hate equipped:\nMultishot consumes ammo directly from Capacity and increases Damage by +100%.\n+30% Multishot.",
+            "values": [
+              "-"
+            ],
+            "notes": "Damage bonus is a unique modifier that is multiplicative to other damage buffs.\nDamage bonus only applies to shots generated by multishot.\nThe multishot bonus stacks additively with multishot mods such as Barrel Diffusion."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Marksman's Focus",
+            "desc": "-30% Zoom.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+100% Reload Speed.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 40 enemies within 10m",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Status Chance by +24%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Critical Chance by +12%\nIncrease Status Chance by +12%",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +18%\nIncrease Base Critical Damage Multiplier by +0.4x",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Destreza Incarnon Genesis": {
+    "weapons": [
+      "Destreza",
+      "Destreza Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nHeavy Attacks spawn ghostly rapiers\n+100% Melee Damage\n+20% Sprint Speed\n+20% Parkour Velocity\n+10% Puncture Damage per Heavy Attack kill, up to 300% while transformed",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Heavy Attacks summon 5 spectral rapiers that fly forward."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Weighted Impetus",
+            "desc": "Increase Base Damage by +X\nOn Heavy Attack Kill: +100% Heavy Attack Wind Up Speed for 8s",
+            "values": [
+              "X = 50",
+              "X = 40"
+            ],
+            "notes": "Heavy Attack Wind Up Speed bonus is additive to other sources of Heavy Attack Wind Up Speed such as Killing Blow."
+          },
+          {
+            "name": "Piercing Stature",
+            "desc": "Increase Base Damage by +X\nOn Puncture Status Effect: Gain +20% Status Chance for 6 seconds. Stacks 5x",
+            "values": [
+              "X = 50",
+              "X = 40"
+            ],
+            "notes": "Status Chance bonus is additive to other sources of Status Chance such as Melee Prowess and Weeping Wounds."
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+1 Range",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Overhand",
+            "desc": "Base Heavy Attack Efficiency set at 30%",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Adept Reflexes",
+            "desc": "+20 Initial Combo",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Reach 10x Combo Multiplier 10 times.",
+        "perks": [
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +X",
+            "values": [
+              "X = 20%",
+              "X = 16%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Forte",
+            "desc": "Increase Base Critical Multiplier by +X",
+            "values": [
+              "X = 1.2x",
+              "X = 0.6x"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Decisive Stature",
+            "desc": "Increase Base Critical Chance by 25% of current Status Chance, up to 35%",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Dread Incarnon Genesis": {
+    "weapons": [
+      "Dread"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nSacrifice silence for increased projectile size and Heat Damage.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form fires a wide projectile that deals Heat damage, with increased base damage, Critical Multiplier, and Status Chance, and infinite body Punch Through. However, it no longer deals Puncture damage, has a headshot multiplier of 1x, has slightly slower charge time, can no longer be fired from a partial charge, and is no longer silent."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Hitman's Opportunity",
+            "desc": "Increase Base Damage by +70.\n+100% Damage to enemies below half Health",
+            "values": [
+              "-"
+            ],
+            "notes": "The conditional damage bonus ignores the base damage increase from the same perk, the 2x damage from the charged shot (Primary Fire only) and Galvanized Aptitude's damage bonus."
+          },
+          {
+            "name": "Stalker's Resentment",
+            "desc": "Increase Base Damage by +50.\nWith Hate and Despair Equipped: Hits increase Base Damage by +10 and Fire Rate by +10%, stacks up to 5x. Resets on missed shot.",
+            "values": [
+              "-"
+            ],
+            "notes": "Affects both regular and Incarnon forms."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+30% Projectile Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Marksman's Focus",
+            "desc": "-30% Zoom",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Hitman's Hoard",
+            "desc": "Increase Base Ammo Capacity to 144",
+            "values": [
+              "-"
+            ],
+            "notes": "Does not affect the Incarnon form."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 40 enemies that are at least 40m away",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +10%\nIncrease Base Status Chance by +10%",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +24%",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Zeroed In",
+            "desc": "Increase Base Critical Damage Multiplier by +1x",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Dual Ichor Incarnon Genesis": {
+    "weapons": [
+      "Dual Ichor"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nKills create a Toxin Damage field\n+100% Melee Damage\n+20% Sprint Speed\n+20% to Bullet Jump",
+            "values": [
+              "-"
+            ],
+            "notes": "Fields do 350 Toxin damage (increased to 440 by EVO2) and last for 7 seconds.\nFields will be created by any kills made Dual Ichor's attacks or status damage, both from the weapon itself and from other fields that have been created. This allows for fields to create other fields in a loop so long as they continue getting kills before disappearing.\nFields have 0% Critical Chance, 1x Critical Damage, 4m range and 50% Status Chance.\nCritical Chance cannot be increased, even with flat buffs like Arcane Avenger, Cat's Eye, or Wrathful Advance, or enemy debuffs like Shadow Haze.\nRange is not affected by melee range mods like Reach.\nStatus Chance is not affected by mods (including Proton Snap) or the Absolute Valor evolution.\nStatus Duration can be increased, such as by Lasting Sting.\nDamage is affected by melee damage buffs such as Pressure Point and Incarnon form's innate +100% Melee Damage.\nClouds are not affected by Condition Overload.\nDamage is affected by all elemental damage buffs such as Fever Strike and Molten Impact, increasing its damage and changing its damage type as expected.\nDamage is affected by faction damage bonuses such as Smite Grineer, and will correctly double dip on status procs made by the fields.\nDamage is affected by status damage buffs such as Melee Elementalist.\nDamage is affected by Stealth Damage Bonus (+700%).\nStatuses inflicted by fields will not be spread by Melee Influence."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Alchemist's Wrath",
+            "desc": "Increase Base Damage by +90.\n5 additional Combos on targets affected by Toxin.",
+            "values": [
+              "-"
+            ],
+            "notes": "Toxin fields will award the 5 bonus combo when they damage enemies affected by Toxin.\nToxic Lash and Xata's Whisper also work, and can award bonus combo independently for a total of 15 bonus combo when both are active."
+          },
+          {
+            "name": "Ronin's Rush",
+            "desc": "Increase Base Damage by +90.\nOn striking target with final move of Neutral Combo: +30% Attack Speed for 33s.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+0.6 Range",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Resolute Force",
+            "desc": "+7s Combo Duration.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+100% Heavy Attack Windup Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 29 enemies with Heavy Attacks.",
+        "perks": [
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Status Chance by +34%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Poison Parasite",
+            "desc": "On killing an enemy with 3+ Toxin Stacks: +33 Heal Regen/s for 9s.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Universal Readiness",
+            "desc": "Collecting ammo grants 5 Melee Combo counter.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Dual Toxocyst Incarnon Genesis": {
+    "weapons": [
+      "Dual Toxocyst"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nGain an Auto Fire mode and Ricochet.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form becomes fully automatic with higher Critical Chance, Critical Multiplier, Status Chance, Fire Rate, significantly less Recoil, and shots now ricochet to 1 nearby enemy per shot within 5 meters of the main target.\nThe ricochet is capable of headshotting and triggering Dual Toxocyst's Frenzy buff.\nAdditional pellets generated via Multishot can ricochet into different targets.\nRicochet rounds are affected by Galvanized Shot and the base damage values of both Evolution II perks.\nBy using Punch Through every enemy hit with the main shot along the punch through line creates ricochet rounds.\nEnemies in a Ragdoll state cannot be hit by ricochet rounds so any grouping tool that isn't Magus Anomaly or Ensnare will prevent ricochet shots from hitting any of the other grouped targets."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Carnage Reign",
+            "desc": "Increase Base Damage by +60.\n+33% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-"
+            ],
+            "notes": "Damage per Status Type bonus has an unlisted requirement of \"With Energy Max ≥ 200.\""
+          },
+          {
+            "name": "Fevered Frenzy",
+            "desc": "Increase Base Damage by +50.\nOn Ability Cast: +5% Multishot. Stacks up to 20x.",
+            "values": [
+              "-"
+            ],
+            "notes": "The multishot bonus stacks additively with multishot mods such as Barrel Diffusion."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Ready Retaliation",
+            "desc": "On Reload from Empty: +100% Reload Speed.",
+            "values": [
+              "-"
+            ],
+            "notes": "Currently does not work."
+          },
+          {
+            "name": "Evolved Autoloader",
+            "desc": "+50% Magazine Reloaded/s when holstered.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Marksman's Hand",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Get 17 consecutive headshots",
+        "perks": [
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +20%.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Neurotoxin",
+            "desc": "On Headshot: +70% Toxin for 3s.",
+            "values": [
+              "-"
+            ],
+            "notes": "Currently does not work."
+          },
+          {
+            "name": "Ripper Rounds",
+            "desc": "On Kill: +3 Punch Through for 7s.",
+            "values": [
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Furax Incarnon Genesis": {
+    "weapons": [
+      "Furax",
+      "Mk1-Furax",
+      "Furax Wraith"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nIncarnon Form gains Heavy Slam Efficiency and leaves behind Heat Damage fields after Heavy Slams.\n+100% Melee Damage\n+25% Sprint Speed\n+25% to Bullet Jump",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Heavy Slams receive 90% Heavy Attack Efficiency.\nField does 50 Heat damage every second for 7 seconds.\nField has 0% Critical Chance, 1x Critical Damage, 5m range and 50% Status Chance.\nStatus Chance is not affected by the Absolute Dominion evolution or mods.\nField damage is affected by elemental mods, melee damage mods, and faction mods.\nField damage is not affected by combo multiplier.\nField's radius is not affected by range mods such as Reach or the Moonrise Velocity evolution.\nField's duration is not affected by status duration mods such as Lasting Sting.\nField can trigger and benefit from Melee Influence."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Swordsman's Flourish",
+            "desc": "Increase Base Damage by +X.\nWith Melee Weapon Equipped: +100% Combo Count Chance",
+            "values": [
+              "X = 110",
+              "X = 100",
+              "X = 65"
+            ],
+            "notes": "Combo Count Chance bonus requires manually equipping the melee, either by holding the weapon swap key (default F) or going into a mission with only the melee weapon equipped.\nCombo Count Chance bonus does not affect quickswap melee attacks."
+          },
+          {
+            "name": "Kill Joy",
+            "desc": "Increase Base Damage by +X.\n+10% Attack Speed per enemy within 6m, stacks up to 5x.",
+            "values": [
+              "X = 90",
+              "X = 80",
+              "X = 55"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Moonrise Velocity",
+            "desc": "+1 Range",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Overhand",
+            "desc": "Heavy Attack Efficiency set at 20%",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Standoff",
+            "desc": "Combo Timer pauses when weapon is holstered.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies affected by Lifted Status",
+        "perks": [
+          {
+            "name": "Flashing Bleed",
+            "desc": "+40% chance of Bleed on Impact Status Effect.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Kinetic Killer",
+            "desc": "Increase Base Critical Damage Multiplier to 4x on Slide Attacks.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +X%.",
+            "values": [
+              "X = 24%",
+              "X = 22%",
+              "X = 14%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Furis Incarnon Genesis": {
+    "weapons": [
+      "Furis",
+      "Mk1-Furis"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire a wide Heat Damage beam.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form fires a short-ranged, wide Klamora Prism-like beam that deals pure Heat damage and has significantly increased base damage, Critical Chance, Critical Multiplier, Status Chance, and Fire Rate, but has linear Damage Falloff from 100% to 80% from 10m to 16m target distance and has a maximum range of 16 meters.\nDue to not being able to be equipped with Ruinous Extension, its damage falloff is affected by Projectile Speed, but the beam length isn't. Thus, it is possible to completely negate falloff with sufficient Projectile Speed.\nThe beam has no innate punch-through effect."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Haven Foray",
+            "desc": "Increase Base Damage by +X.\nWith Overshields: Increase Base Damage by +30.",
+            "values": [
+              "X = 28",
+              "X = 34"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Stormburst",
+            "desc": "Increase Base Damage by +X.\nOn hitting enemies affected by Electricity Status: +0.4 Multishot for 2s. Stacks up to 3x.",
+            "values": [
+              "X = 28",
+              "X = 34"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Practiced Grip",
+            "desc": "Increase Accuracy by +50%",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +25.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "The bonus does not apply to the Incarnon form."
+          },
+          {
+            "name": "Executioner's Fortune",
+            "desc": "On Headshot: 10% chance for Instant Reload",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies afflicted with 4 or more status effects",
+        "perks": [
+          {
+            "name": "Headcracker",
+            "desc": "On Headshot: +5% Fire Rate for 2s. Stacks up to 10x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "This effect has a 50% chance of activating."
+          },
+          {
+            "name": "Prelude of Might",
+            "desc": "With Critical Chance below 40%: Increase Base Critical Damage Multiplier by +3x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Condition is affected by the critical chance increase effect of Puncture status."
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X%.",
+            "values": [
+              "X = 28%",
+              "X = 39%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Gammacor Incarnon Genesis": {
+    "weapons": [
+      "Gammacor",
+      "Synoid Gammacor"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFires projectiles that pull enemies into a Cold Damage explosion.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form shoots semi-automatic projectiles that deal guaranteed Impact proc on direct impacts, then pulls and staggers enemies within 5 meters for 1.2 seconds before exploding, inflicting pure 760 Cold damage with a guaranteed Cold proc on the explosion. However it has significantly slower Fire Rate and the explosion possesses Damage Falloff from 100% to 70% from central impact."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Sage's Resolve",
+            "desc": "Increase Base Damage by +10.\nWith Channeled Ability Active: +25% Multishot.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Infused Shots",
+            "desc": "Increase Base Damage by +6.\nOn 50 Energy Spent: Increase Base Damage by +5 for 10s. Stacks up to 4x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "All stacks are removed after the most recent one expires. Gaining a stack will refresh the duration of all stacks."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Evolved Autoloader",
+            "desc": "+50% Magazine Reloaded/s when Holstered",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Moonrise Velocity",
+            "desc": "+8 Range",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +40.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies while airborne",
+        "perks": [
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Critical Damage Multiplier by +0.2x.",
+            "values": [
+              "X = 20%",
+              "X = 10%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 12%\nY = 10%",
+              "X = 6%\nY = 6%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X%.",
+            "values": [
+              "X = 20%",
+              "X = 10%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Gorgon Incarnon Genesis": {
+    "weapons": [
+      "Gorgon",
+      "Gorgon Wraith",
+      "Prisma Gorgon"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire embedding projectiles that explode with Heat Damage.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form shoots a time-delayed explosive projectile, dealing a spread of Impact, Puncture, and Slash damage upon impact. After a short delay, it detonates with an explosion radius of 5 meters, dealing Heat damage with guaranteed Heat status, but has linear Damage Falloff from 100% to 90% from central impact."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Hunter's Mantra",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability Active: +3 Punch Through, +40% Accuracy.",
+            "values": [
+              "X = 10",
+              "X = 5",
+              "X = 5"
+            ],
+            "notes": "Channeled Abilities must be draining energy to be considered active. Abilities that do not drain energy over time such as Nekros's Desecrate, Hildryn's Haven, or Sevagoth's Gloom (with no enemies nearby) do not count."
+          },
+          {
+            "name": "Hoplite Virtue",
+            "desc": "Increase Base Damage by +X.\nOn Shield Break: Increase Base Damage by +Y for 8s.",
+            "values": [
+              "X = 10\nY = 13",
+              "X = 5\nY = 8",
+              "X = 5\nY = 8"
+            ],
+            "notes": "This is on personal shield break, not breaking enemy shields."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Resonant Restore",
+            "desc": "On Reload From Empty: Increase Base Magazine Capacity by +15. Stacks up to 3x.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Void's Guidance",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies without reloading. (For the purposes of this challenge, the Incarnon transformation itself is counted as a reload.)",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X\nIncrease Base Status Chance by +Y",
+            "values": [
+              "X = 8%\nY = 9%",
+              "X = 8%\nY = 6%",
+              "X = 2%\nY = 6%"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X",
+            "values": [
+              "X = 16%",
+              "X = 14%",
+              "X = 12%"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +X",
+            "values": [
+              "X = 14%",
+              "X = 14%",
+              "X = 6%"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Hate Incarnon Genesis": {
+    "weapons": [
+      "Hate"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nForward and Neutral Combos embed explosive blades.\n+100% Melee Damage\n+20% Sprint Speed\n+20% to Parkour Velocity",
+            "values": [
+              "-"
+            ],
+            "notes": "Forward and Neutral Combos in Incarnon Form will launch 1 spectral blade towards the crosshair that explode 0.4 seconds after impact, dealing Heat damage in a 3 meter radius.\nAll hits are affected by the stance multiplier of the attack that launched the blade.\nDirect hits can headshot.\nProjectiles and explosions are silent.\nExplosions do not self stagger.\nDirect hits of spectral blades and explosions are affected by universal base damage sources like Vigorous Swap, Holster Amp, Arcane Arachne, Vex Armor and Amp.\nDirect hit damage is affected by Condition Overload, but not the explosions.\nDamage is not affected by the damage increase on Evolution 2, Incarnon form's innate +100% melee damage, or melee damage bonuses like Pressure Point."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Swordsman's Flourish",
+            "desc": "Increase Base Damage by +30.\nWith Melee Weapon Equipped: +100% Combo Count Chance",
+            "values": [
+              "-"
+            ],
+            "notes": "Combo Count Chance bonus requires manually equipping the melee, either by holding the weapon swap key (default F) or going into a mission with only the melee weapon equipped.\nCombo Count Chance bonus does not affect quickswap melee attacks."
+          },
+          {
+            "name": "Stalker's Legacy",
+            "desc": "Increase Base Damage by +30.\nWith Dread and Despair equipped: +30 Initial Combo.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+0.8 Range",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+60% Heavy Attack Wind Up Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Resolute Force",
+            "desc": "+10s Combo Duration",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Perform 20 Finisher Attacks with only a Melee Weapon equipped",
+        "perks": [
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +10%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +20%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Subtle Force",
+            "desc": "Increase Base Critical Chance by +6%.\nIncrease Base Status Chance by +10%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Kunai Incarnon Genesis": {
+    "weapons": [
+      "Kunai",
+      "Mk1-Kunai"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nProjectiles seek Headshots and have increased Multishot.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form grants its projectiles head-homing properties, with increased base damage weighted towards Slash, Critical Chance, and Critical Multiplier, and 2 base Multishot.\nPunch Through is ignored in Incarnon Form and will not cause projectiles to home in on additional targets.\nConcealed Explosives is disabled in Incarnon Form."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Swift Conclusion",
+            "desc": "Increase Damage by +X.\nIncrease Damage by +200% if enemy has less than half health.",
+            "values": [
+              "X = 70",
+              "X = 80"
+            ],
+            "notes": "Damage bonus if enemy has less than half health is additive with Hornet Strike in basic Kunai form, and multiplicative in Incarnon form. It is also additive with Galvanized Shot in hover=GunCO is multiplicative in incarnon form. The game logic that checks the proc status of a target is likely the same logic that checks its HP, providing the same bonus.."
+          },
+          {
+            "name": "Sage's Resolve",
+            "desc": "Increase Base Damage by +X\nWith Channeled Ability active: +100% Multishot.",
+            "values": [
+              "X = 70",
+              "X = 80"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+60% Projectile Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +10.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus stacks additively with reload speed mods such as Quickdraw."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 60 enemies within 10m",
+        "perks": [
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "On equip from Primary:\nIncrease Base Critical Chance by +X% for 4s.\nIncrease Base Critical Damage Multiplier by +Y for 4s.",
+            "values": [
+              "X = 40%\nY = 1.4x",
+              "X = 42%\nY = 1x"
+            ],
+            "notes": "Bug: These are displayed as permanent bonuses in the Arsenal but only actually apply while the 4 second Deathtrap Trigger buff is active."
+          },
+          {
+            "name": "Accelerating Volley",
+            "desc": "On Fire: +20% Fire Rate for 0.5s. Stacks up to 5x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus stacks additively with fire rate mods such as Gunslinger."
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +12%.\nIncrease Base Status Chance by +12%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Base Status Chance increase is divided among the 2 projectiles in Incarnon mode, resulting in +6% Status Chance per projectile."
+          }
+        ]
+      }
+    ]
+  },
+  "Lato Incarnon Genesis": {
+    "weapons": [
+      "Lato",
+      "Lato Vandal",
+      "Lato Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nGain Punch Through and Ricochet.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form gains increased base damage, Critical Chance, Critical Multiplier, and overall Status Chance. It also gains an innate Multishot of 2 (similar to shotguns) and 0.8 meter Punch Through. Shots also ricochet to 1 nearby enemy within 10 meters (12 meters for the prime) of the main target, plus any subsequent targets struck via punch through. However, it has slower Fire Rate and significantly higher Recoil.\nModding for Punch Through and hitting multiple targets will create successive ricochets.\nVoid Status Effect prevents ricochets from occurring."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Haven Foray",
+            "desc": "Increase Base Damage by +X.\nWith Overshields: Increase Base Damage by +Y.",
+            "values": [
+              "X = 40\nY = 40",
+              "X = 22\nY = 40",
+              "X = 2\nY = 34"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Reified Bane",
+            "desc": "Increase Base Damage by +X.\nOn Reload from Empty Magazine: Increase Base Damage by +Y.",
+            "values": [
+              "X = 30\nY = 30",
+              "X = 12\nY = 30",
+              "X = 2\nY = 24"
+            ],
+            "notes": "Once the damage bonus has been earned, the ONLY way to lose it is to manually reload with a non-empty magazine.\nThe bonus will be retained through Incarnon transformations, regardless of magazine status when transformed."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Void's Guidance",
+            "desc": "+50% Accuracy\n-50% Recoil",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Marksman's Gain",
+            "desc": "On Headshot: 20% chance for +50% Ammo Efficiency for 6s.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The bonus can be refreshed on subsequent headshots.\nThe bonus does not affect the Incarnon form."
+          },
+          {
+            "name": "Exact Penance",
+            "desc": "On Kill: 50% chance for Instant Reload.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Kills from status effects can also trigger the effect.\nThe bonus does not affect the Incarnon form."
+          }
+        ]
+      },
+      {
+        "challenge": "Get 40 headshots in a single mission",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 20%\nY = 12%",
+              "X = 6%\nY = 12%",
+              "X = 4%\nY = 10%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "On Equip from Primary:\nIncrease Base Critical Chance by +X% for 4s.\nIncrease Base Critical Damage Multiplier by +Y for 4s.",
+            "values": [
+              "X = 50%\nY = 3.2x",
+              "X = 38%\nY = 2.6x",
+              "X = 30%\nY = 2.3x"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Carnage Reign",
+            "desc": "+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Latron Incarnon Genesis": {
+    "weapons": [
+      "Latron",
+      "Latron Wraith",
+      "Latron Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire Heat Damage energy waves that bounce off enemies and terrain.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form changes the weapon's fire mode from hitscan to a traveling projectile that can ricochet off enemies and terrain, exploding up to 6 times with a 4 meter radius, dealing damage once for any collision on enemies, and again for the explosion.\nCollision deals Impact damage and have a guaranteed Impact proc.\nExplosion deals Puncture and Heat damage, and can benefit from Firestorm (Primed).\nEach ricochet will cause the projectile to slow down.\nBullet attraction bubbles such as Magnetize or Void status will cause the projectile to orbit within until exploding at the end of its life, and seem to require multiple enemies to ricochet repeatedly.\nIncarnon Form has no Recoil, higher total damage, Critical Chance, Critical Multiplier, and Status Chance. However its Slash damage is removed, the Fire Rate is reduced, and the explosion possesses Damage Falloff from 100% to 80% from central impact.\nPunch Through does not affect the incarnon projectile.\nDouble Tap affects Incarnon Form."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Riddled Target",
+            "desc": "Increase Base Damage by +X.\nOn Puncture Status Effect: +25% Multishot for 8s. Stacks up to 4x.",
+            "values": [
+              "X = 48",
+              "X = 12",
+              "X = 6"
+            ],
+            "notes": "The multishot bonus stacks additively with mods such as Split Chamber."
+          },
+          {
+            "name": "Swift Punishment",
+            "desc": "Increase Base Damage by +X.\nWith Sprint Speed 1.2 or Higher: +30% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "X = 48",
+              "X = 12",
+              "X = 6"
+            ],
+            "notes": "Despite the description, the effect only requires 1.1 or higher sprint speed.\nEquipping Amalgam Serration will allow any Warframe to reach the threshold without needing to mod for sprint speed on the Warframe itself."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Marksman's Hand",
+            "desc": "-60% Weapon Recoil.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +15.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Marksman's Focus",
+            "desc": "-30% Zoom.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies that are least 40m away.",
+        "perks": [
+          {
+            "name": "Flensing Spikes",
+            "desc": "Remove 20% of enemy Armor per Puncture Status.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Has no effect on enemies immune to armor removal, such as Exploiter Orb or Archons.\nCan fully strip Acolytes' armor, though they cannot have more than four Puncture status stacks at once."
+          },
+          {
+            "name": "Deadhead",
+            "desc": "+100% Headshot Damage.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The bonus stacks additively with other headshot multiplier bonuses such as the passive from Primary Deadhead."
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Critical Damage Multiplier by +Yx.",
+            "values": [
+              "X = 30%\nY = 0.6x",
+              "X = 24%\nY = 0.2x",
+              "X = 24%\nY = 0.2x"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Magistar Incarnon Genesis": {
+    "weapons": [
+      "Magistar",
+      "Sancti Magistar"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nIncarnon Form increases Initial Combo and Wind Up Speed\n+100% Melee Damage\n+30 Initial Combo\n+50% Heavy Attack Wind Up Speed\n+10% Sprint Speed\n+10% to Bullet Jump.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Crushing Verdict",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability active: Increase Follow Through by +40%.",
+            "values": [
+              "X = 100",
+              "X = 20"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Edge Of Justice",
+            "desc": "Increase Base Damage by +X.\nWith Melee Weapon Equipped: +40% Attack Speed.",
+            "values": [
+              "X = 100",
+              "X = 20"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Seismic Slam",
+            "desc": "+100% Slam Radius.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Orokin Reach",
+            "desc": "+1.4 Range",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+30% Heavy Attack Wind Up Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Perform 20 downed Finisher attacks.",
+        "perks": [
+          {
+            "name": "Flashing Bleed",
+            "desc": "+50% Chance of Bleed on Impact Status Effect.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Subtle Force",
+            "desc": "Increase Base Critical Chance by +8%.\nIncrease Base Status Chance by +8%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Critical Damage Multiplier by +Y.",
+            "values": [
+              "X = 16%\nY = 1x",
+              "X = 12%\nY = 0.2x"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Miter Incarnon Genesis": {
+    "weapons": [
+      "Miter"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire homing and bouncing Heat Damage explosives.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form becomes fully automatic and its projectiles have gained slight homing properties and explode twice in a 3 meter area of effect dealing Heat damage, with significantly higher Critical Chance, Critical Multiplier, Status Chance, and Fire Rate. Projectiles that hit enemies will rebound and home into other nearby enemies, albeit with reduced flight speed.\nThe projectile speed after rebound is not affected by mods or Swift Deliverance."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Swift Sawblades",
+            "desc": "Increase Base Damage by +77.\nWith Channeled Ability active: +70% Fire Rate.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Plentiful Mayhem",
+            "desc": "Increase Base Damage by +57.\nMultishot consumes ammo directly from Capacity and increases Damage by +20.",
+            "values": [
+              "-"
+            ],
+            "notes": "Affects both modes. In the case of Incarnon Form, it pools directly from its magazine.\nDamage bonus from multishot consuming ammo only applies to projectiles generated by multishot.\nDamage bonus is a flat +20 to both charged and uncharged shots, not affected by base damage mods. The bonus is affected by physical mods, elemental mods, critical hits, etc."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Ready Retaliation",
+            "desc": "On Reload from Empty: +100% Reload Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Mercenary Chamber",
+            "desc": "Increase Base Ammo Capacity to 160",
+            "values": [
+              "-"
+            ],
+            "notes": "Does not affect the Incarnon form"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 31 enemies with Bleed status",
+        "perks": [
+          {
+            "name": "Sawblade Storm",
+            "desc": "Hold charged shot for 1s to increase area of effect.",
+            "values": [
+              "-"
+            ],
+            "notes": "Does not affect the Incarnon form.\nEach bounce will cause an explosion dealing 1400 Blast in a 5 meter AoE, with critical and status stats equal to the normal charged shot.\nAoE has no damage falloff and does not require line of sight, damaging enemies through obstacles.\nCan benefit from (Primed) Firestorm.\nInflicts self-stagger.\nThe 1s delay is not affected by mods.\nProjectiles continue to ricochet as normal after the explosion.\nIf the weapon is given punch-through, the explosion only occurs on the first impact."
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +22%",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +12%\nIncrease Base Status Chance by +12%",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Nami Solo Incarnon Genesis": {
+    "weapons": [
+      "Nami Solo"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nGreatly increase Range\n+3 Range\n+100% Melee Damage\n+20% Sprint Speed\n+20% to Parkour Velocity",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Brigand's Frenzy",
+            "desc": "Increase Base Damage by +80.\nOn Equip: +30% Attack Speed for 4s.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Master's Flourish",
+            "desc": "Increase Base Damage by +80.\nOn Finisher Kill: +40 Health per second for 10s.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Lone Blade",
+            "desc": "With Melee Weapon Equipped: Increase Base Follow Through by +60%",
+            "values": [
+              "-"
+            ],
+            "notes": "Follow Through bonus requires manually equipping the melee, either by holding the weapon swap key (default F) or going into a mission with only the melee weapon equipped.\nFollow Through bonus does not affect quickswap melee attacks."
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+50% Heavy Attack Windup Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Resolute Force",
+            "desc": "+6s Combo Duration",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Perform 40 Finisher Attacks with Melee Weapon equipped",
+        "perks": [
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +21%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Versatile Creed",
+            "desc": "Increase Base Critical Chance by +14%.\nIncrease Base Status Chance by +14%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +30%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Obex Incarnon Genesis": {
+    "weapons": [
+      "Obex",
+      "Prisma Obex"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nPerform a large radial attack for each Finisher strike.\n+100% Melee Damage\n+20% Sprint Speed\n+20% Parkour Velocity",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Finishers in Incarnon form will deal their damage in a 12 meter radius, with no falloff."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Balanced Stagger",
+            "desc": "Increase Base Damage by +X\n20% chance to stun enemies hit by a Neutral Combo, opening them to finishers.",
+            "values": [
+              "X = 50",
+              "X = 10"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Armored Finisher",
+            "desc": "Increase Base Damage by +X\nWith Armor over 450: +80% Finisher Damage.",
+            "values": [
+              "x = 50",
+              "X = 10"
+            ],
+            "notes": "Finisher Damage bonus is additive to other sources of Finisher Damage such as Finishing Touch."
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon Form 6 times in a mission.",
+        "perks": [
+          {
+            "name": "Rapid Conclusion",
+            "desc": "On Finisher Kill: +2.5% Parkour Velocity. Stacks up to 16x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus lasts until death."
+          },
+          {
+            "name": "Orokin Reach",
+            "desc": "+1.2 Range",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Standoff",
+            "desc": "Combo Timer pauses when weapon is holstered.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Reach 10x Combo Multiplier 10 times.",
+        "perks": [
+          {
+            "name": "Subtle Force",
+            "desc": "Increase Base Critical Chance by +10%\nIncrease Base Status Chance by +X",
+            "values": [
+              "X = 18%",
+              "X = 12%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Dominion",
+            "desc": "Increase Base Status Chance by +X",
+            "values": [
+              "X = 28%",
+              "X = 20%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Critical Coefficient",
+            "desc": "Increase Base Critical Damage Multiplier by +0.6x. Effect doubles in Incarnon Form.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Okina Incarnon Genesis": {
+    "weapons": [
+      "Okina",
+      "Okina Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nKills generate spectral daggers that target enemies, applying max Cold Status stacks.\n+100% Melee Damage\n+20% Sprint Speed\n+20% to Parkour Velocity",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Kills create a dagger that orbits the player, then seek an enemy within 15 meters, applying 10 Cold stacks to the target, then exploding in a 4m radius and applying 1 Cold stack to nearby enemies.\nUp to 6 daggers can be active at once.\nSpectral dagger hits do not add to the melee combo counter.\nDirect hits of spectral daggers and explosions are affected by universal base damage sources.\nDirect hits of spectral daggers are affected by Condition Overload, while the explosions are not.\nCondition Overload effects are multiplicative to sources of universal base damage.\nDirect hits of spectral daggers and explosions are not affected by melee damage bonuses like Incarnon form's innate +100% melee damage, Pressure Point, and Arcane Fury.\nSpectral Daggers can activate Melee Influence's buff, but do not benefit from it.\nKills from the spectral daggers do not generate new daggers, but kills from Melee Influence do."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Seeing Red",
+            "desc": "Increase Base Damage by +X.\n5 additional Combos on targets affected by Slash Status",
+            "values": [
+              "X = 60",
+              "X = 20"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Synergist Surety",
+            "desc": "Increase Base Damage by +X.\nOn Critical Hit: +Y% Status Damage for 10s. Stacks up to 5x.",
+            "values": [
+              "X = 60\nY = 8%",
+              "X = 20\nY = 6%"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+1 Range",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Standoff",
+            "desc": "Combo Timer pauses when weapon is holstered",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swordsman's Celerity",
+            "desc": "+30% Movement Speed",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Movement Speed bonus applies at all times."
+          }
+        ]
+      },
+      {
+        "challenge": "Reach 10x Combo Multiplier 10 times.",
+        "perks": [
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 12%",
+              "X = 6%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Alchemy of War",
+            "desc": "Increase Base Status Chance by +X%.\n+25% Status Duration",
+            "values": [
+              "X = 16%",
+              "X = 12%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X\nIncrease Base Status Chance by +Y%",
+            "values": [
+              "X = 6%\nY = 10%",
+              "X = 2%\nY = 8%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Paris Incarnon Genesis": {
+    "weapons": [
+      "Paris",
+      "Mk1-Paris",
+      "Paris Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nSacrifice silence for increased projectile size and Heat Damage.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form fires a wide projectile that deals Heat damage, with significantly increased base damage, Critical Chance, and Critical Multiplier, and infinite body Punch Through. However, it no longer deals Puncture or Slash damage, has a headshot multiplier of 1x, and has slightly slower charge time."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Deadly Pace",
+            "desc": "Increase Base Damage by +X.\nWith Sprint Speed 1.2 or Higher: +80% Fire Rate.",
+            "values": [
+              "X = 40",
+              "X = 50",
+              "X = 20"
+            ],
+            "notes": "The fire rate bonus stacks additively with fire rate mods such as Speed Trigger but does not apply twice.\nDespite the description, the effect only requires 1.1 or higher sprint speed.\nEquipping Amalgam Serration will allow any Warframe to reach the threshold without needing to mod for sprint speed on the Warframe itself."
+          },
+          {
+            "name": "Guardian's Might",
+            "desc": "Increase Base Damage by +X.\nWith Overshields: Increase Base Damage by +Y.",
+            "values": [
+              "X = 40\nY = 52",
+              "X = 50\nY = 40",
+              "X = 20\nY = 74"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Ardent Trigger",
+            "desc": "On Punch Through Hit: +40% Fire Rate for 6s.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The fire rate bonus stacks additively with fire rate mods such as Speed Trigger but does not apply twice.\nThe bonus applies when hitting multiple enemies with either the normal or the Incarnon form as well as when hitting enemies through obstacles by adding punch through with mods such as Metal Auger."
+          },
+          {
+            "name": "Markman's Focus",
+            "desc": "-30% Zoom.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+60% Projectile Speed.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 60 enemies while being at least 4m above them",
+        "perks": [
+          {
+            "name": "Vicious Promise",
+            "desc": "Increase Base Critical Chance by +40% on undamaged enemies.\nIncrease Base Critical Damage Multiplier by +2x on undamaged enemies.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Enemies are undamaged as long as their health and shield have not been damaged.\nDamaging Overguard is not taken into account."
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +60%.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Striking Succession",
+            "desc": "On Hit: Increase Base Damage by +15 for 3s. Stacks up to 4x.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "When the buff times out, one stack is lost and the buff duration resets."
+          }
+        ]
+      }
+    ]
+  },
+  "Sibear Incarnon Genesis": {
+    "weapons": [
+      "Sibear"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nCreate a Cold Blast Radius with Heavy Slams.\n+100% Melee Damage\n+50% Heavy Attack Wind Up Speed\n+10% Sprint Speed\n+10% to Parkour Velocity",
+            "values": [
+              "-"
+            ],
+            "notes": "Heavy slams create a slowing field over the radius of the slam for 4 seconds."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Master's Shatter",
+            "desc": "Increase Base Damage by +20.\n10 additional Combo on targets affected by Cold Status.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Thane's Wrath",
+            "desc": "Increase Base Damage by +20.\nWith Armor Over 450: Increase Base Damage by +40.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+1 Range",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Kinetic Harmony",
+            "desc": "+60% Heavy Attack Wind Up Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Resolute Force",
+            "desc": "+6s Combo Duration",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 Lifted enemies",
+        "perks": [
+          {
+            "name": "Mounting Avalanche",
+            "desc": "On Killing Enemy With 3+ Cold Stacks: +15 Initial Combo for 10s. Stacks up to 4x.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +25%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Red Right Hand",
+            "desc": "On First Attack With Primary Equipped: Increase Base Critical Damage Multiplier by +2x.",
+            "values": [
+              "-"
+            ],
+            "notes": "First attack from quickswap melee deals bonus critical damage."
+          }
+        ]
+      }
+    ]
+  },
+  "Sicarus Incarnon Genesis": {
+    "weapons": [
+      "Sicarus",
+      "Sicarus Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Bullets ricochet.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Base damage, base Critical Chance, and base Critical Multiplier are increased. Sicarus also gains increased base Status Chance.\nShots ricochet to 1 nearby enemy within 6 meters of the main target and any subsequent targets struck by punch through.\nRicochets can hit weakpoints, but not reliably."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Feigned Retreat",
+            "desc": "Increase Base Damage by +X.\n+40% Damage to enemies below half Health.",
+            "values": [
+              "X = 50",
+              "X = 40"
+            ],
+            "notes": "Bonus damage is additive with mods such as  Hornet Strike but does not take into account the Base Damage increase from this perk."
+          },
+          {
+            "name": "King's Gambit",
+            "desc": "Increase Base Damage by +X (Sicarus) / +X (Prime)\nx0 Critical Chance on Bodyshots, +150% Critical Chance on Weakpoint Hits.",
+            "values": [
+              "X = 50",
+              "X = 40"
+            ],
+            "notes": "Bodyshot modifier is multiplicative with all sources of Critical Chance, effectively making non-headshot critical hits impossible.\nCitrine's Crystallize is an exception to this.\nWeakpoint modifier is additive with mods such as Pistol Gambit"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Void's Guidance",
+            "desc": "+40% Accuracy.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +X.",
+            "values": [
+              "X = 9",
+              "X = 12"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Get 40 weakpoint hits with this weapon in Incarnon form in a single mission",
+        "perks": [
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 18",
+              "X = 14"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by X%.\nIncrease Base Status Chance to Y%.",
+            "values": [
+              "X = 12\nY = 12",
+              "X = 9\nY = 9"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Wiseman's Regard",
+            "desc": "Increase Base Status Chance by 30% of current Critical Chance, up to 40%",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Maximum Base Status Chance increase is gained at 134% Critical Chance, achievable with +734% (Sicarus) / +434% (Prime) modded Critical Chance, or +567% (Sicarus) / +345% (Prime) in Incarnon Form.\nIncarnon Form Status Chance is displayed in the Arsenal screen as if using the normal form's Critical Chance, but will properly use its' own Critical chance while in-mission.\nIn addition to regular Critical Chance mods, it is also affected by both parts of Galvanized Crosshairs while aiming, Secondary Outburst, Cascadia Overcharge, Arcane Avenger, Secondary Enervate, Yareli's Passive, Zephyr's Passive, Covenant's baseline Critical Chance bonus but not the 4x multiplier on headshots, and Cat's Eye.\nNot affected by the King's Gambit Evolution II perk, Cascadia Accuracy, Crystallize, or Shadow Haze."
+          }
+        ]
+      }
+    ]
+  },
+  "Skana Incarnon Genesis": {
+    "weapons": [
+      "Skana",
+      "Prisma Skana",
+      "Skana Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Reach 6x Combo and then Heavy Attack to activate Incarnon Form.\nIncarnon Form stuns nearby enemies when it enters Incarnon Form and after Finisher attacks.\n+100% Melee Damage\n+20% Sprint Speed\n+20% Parkour Velocity",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon form stuns enemies within 10 meters when activated and after performing a Finisher.\n+100% damage is additive with other bonus damage sources like Pressure Point."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Guardian's Promise",
+            "desc": "Increase Base Damage by +X.\nWith Overshields: +80% Heavy Attack Efficiency.",
+            "values": [
+              "X = 100",
+              "X = 100",
+              "X = 10"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Wartime Nerve",
+            "desc": "Increase Base Damage by +X.\n+9 Combo Count on undamaged enemies.",
+            "values": [
+              "X = 90",
+              "X = 90",
+              "X = 10"
+            ],
+            "notes": "Enemies are undamaged as long as their health and shield have not been damaged.\nDamaging Overguard is not taken into account."
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapon's Incarnon form 6 times in a mission",
+        "perks": [
+          {
+            "name": "Orokin Reach",
+            "desc": "+0.4 Range",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Resolute Force",
+            "desc": "+6s Combo Duration",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Break",
+            "desc": "+50% Heavy Attack Wind Up Speed.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Reach 10x Combo Multiplier 10 times",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 12%\nY = 10%",
+              "X = 12%\nY = 10%",
+              "X = 2%\nY = 4%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Elemental Excess",
+            "desc": "Increase Base Status Chance by +X%.",
+            "values": [
+              "X = 20%",
+              "X = 20%",
+              "X = 10%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Absolute Valor",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 25%",
+              "X = 25%",
+              "X = 4%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Soma Incarnon Genesis": {
+    "weapons": [
+      "Soma",
+      "Soma Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nGain increased Status Chance and Multishot while slowing fire rate.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form transforms into a full-auto shotgun with tight spread weighted slightly more towards Slash damage, 8 base Multishot, and increased base damage, Critical Multiplier, and overall Status Chance. However, it has reduced Critical Chance and Fire Rate and a very low Status Chance per pellet (2.5% for base, 3% for prime).\nIncarnon Form can trigger Hata-Satya.\nSwitching to and from Incarnon Form resets Hata-Satya's bonus."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Fortress Salvo",
+            "desc": "Increase Base Damage by +12.\nWith Armor Over 450: +4 Punch Through.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Damage increase is applied per pellet, giving Incarnon Form a total base damage increase of +96."
+          },
+          {
+            "name": "Fortifying Bloodshed",
+            "desc": "Increase Base Damage by +10.\nOn Slash Status Kill: +100 Overshield.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Damage increase is applied per pellet, giving Incarnon Form a total base damage increase of +80.\nSlash status kill grants shields, which can be overshields."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Kinetic Battle",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Practiced Grip",
+            "desc": "Increase Accuracy by +50%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 10 enemies within 8 seconds 10 times",
+        "perks": [
+          {
+            "name": "Fresh Havoc",
+            "desc": "On Reload From Empty: Increase Base Damage by +6. Stacks up to 2x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Buff lasts permanently throughout the mission but is lost on death.\nSwitching to Incarnon Form from empty will also trigger the buff.\nDamage increase is applied per pellet, giving Incarnon Form a total maximum base damage increase of +96."
+          },
+          {
+            "name": "Fatal Affliction",
+            "desc": "+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Zeroed In",
+            "desc": "Increase Base Critical Damage Multiplier by +0.6x.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Strun Incarnon Genesis": {
+    "weapons": [
+      "Strun",
+      "Mk1-Strun",
+      "Strun Wraith",
+      "Strun Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire staggering explosive projectiles.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form fires explosive shots with a 4 meter area of effect that deals primarily Blast damage, with much higher Critical Chance, Critical Multiplier, and Status Chance. However, it loses shotgun multishot mechanics and has a base multishot of 1, the Fire Rate is reduced, has much lower base damage, and the explosion possesses Damage Falloff from 100% to 80% from central impact."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Tenno Targeting",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability Active: +4 Punch Through",
+            "values": [
+              "X = 54",
+              "X = 68",
+              "X = 24",
+              "X = 2"
+            ],
+            "notes": "Damage increase is per pellet."
+          },
+          {
+            "name": "Blazing Barrel",
+            "desc": "Increase Base Damage by +X.\nOn Firing: +0.05 Base Multishot. Stacks up to 5x.",
+            "values": [
+              "X = 54",
+              "X = 68",
+              "X = 24",
+              "X = 2"
+            ],
+            "notes": "Damage increase is per pellet.\nThe in-game description of +5 Multishot is incorrect.\nThe Multishot bonus adds 0.25 pellets to the base Multishot of both forms when fully stacked.\nThe Multishot bonus is lost upon reloading.\nThis can be bypassed by using Blood Forge, but not effects that reload the weapon while holstered such as Lock and Load.\nEntering Incarnon Form counts as reloading but exiting does not."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+60% Reload Speed.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The bonus stacks additively with mods such as Tactical Pump."
+          },
+          {
+            "name": "Galvanic Reload",
+            "desc": "On hitting a target affected by an Electricity status, 40% chance to restore 1 round in the magazine from ammo pool.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "The status effect may originate from any source.\nThe bonus can only apply once per enemy hit.\nThe bonus does not affect the Incarnon form."
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+30% Projectile Speed.",
+            "values": [
+              "-",
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies within 10m",
+        "perks": [
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +X%.\nIncrease Base Status Chance by +Y% for Incarnon Form.",
+            "values": [
+              "X = 11%\nY = 132%",
+              "X = 11%\nY = 110%",
+              "X = 10%\nY = 100%",
+              "X = 11.3%\nY = 136%"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 16%",
+              "X = 10%",
+              "X = 12%",
+              "X = 12%"
+            ],
+            "notes": ""
+          },
+          {
+            "name": "Brutal Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.\nIncrease Base Status Chance by +Z% for Incarnon Form.",
+            "values": [
+              "X = 4%\nY = 4%\nZ = 48%",
+              "X = 2%\nY = 2%\nZ = 20%",
+              "X = 4%\nY = 4.8%\nZ = 48%",
+              "X = 4%\nY = 4%\nZ = 48%"
+            ],
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "Stug Incarnon Genesis": {
+    "weapons": [
+      "Stug"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Direct hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge. Unleash a chaotic maelstrom of bouncing corrosive blobs.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon form fires embedding Corrosive shots that explode after 1.5 seconds or reaching max stacks. The explosion releases secondary projectiles that bounce up to 3 times, and explode in a 1.5 meter radius on each bounce.\nIncarnon form shots can stack up to 5 times before exploding, increasing their damage and explosion range.\nNumber of secondary projectiles scales with how stacked the initial shot was. A 1 / 2 / 3 / 4 / 5 stack shot will release 2 / 2 / 3 / 4 / 5 secondary projectiles."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Blazing Barrel",
+            "desc": "Increase Base Damage by +175.\nOn Firing: +5% Multishot. Stacks up to 10x",
+            "values": [
+              "-"
+            ],
+            "notes": "Base Damage bonus of +175 is only applied once to the embed DoT and explosion, regardless of the number of stacks.\nBase form embed DoT is increased from 4 - 36 to 179 - 211, and explosion damage is increased from 75 - 750 to 250 - 925.\nIncarnon form embed DoT is increased from 50 - 200 to 225 - 375, and explosion damage is increased from 200 to 375.\nDoes not require the shots to hit enemies to stack.\nBonus is additive to other sources of multishot such as Split Chamber.\nResets after reloading, which can be bypassed by using Blood Forge, but not effects that reload the weapon while holstered such as Lock and Load."
+          },
+          {
+            "name": "Overcharge Blast",
+            "desc": "Increase Base Damage by +300.\nWith Energy Max above 700: +50% Blast Radius",
+            "values": [
+              "-"
+            ],
+            "notes": "Base Damage bonus of +300 is only applied once to the embed DoT and explosion, regardless of the number of stacks.\nBase form embed DoT is increased from 4 - 36 to 304 - 336, and explosion damage is increased from 75 - 750 to 375 - 1075.\nIncarnon form embed DoT is increased from 50 - 200 to 350 - 500, and explosion damage is increased from 200 to 500.\nBlast Radius increase is additive with other sources, such as (Primed) Fulmination."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 Enemies with this weapons Incarnon Form",
+        "perks": [
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed.",
+            "values": [
+              "-"
+            ],
+            "notes": "Projectile speed increase does not apply to bouncing blobs, only the initial shot."
+          },
+          {
+            "name": "Resonant Restore",
+            "desc": "On Reload From Empty: Increase Base Magazine Capacity by +10. Stacks up to 3x.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Activate this weapons Incarnon Form 15 times in-mission",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +15%.\nIncrease Base Status Chance by +15%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "Increase Base Critical Chance by +25%.\nIncrease Base Critical Damage Multiplier by +1.5x.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Elemental Dominance",
+            "desc": "Increase Base Status Chance by +20%. Effect doubles in Incarnon Form.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Sybaris Incarnon Genesis": {
+    "weapons": [
+      "Sybaris",
+      "Dex Sybaris",
+      "Sybaris Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire 4-round bursts and gain Blast Status",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Burst count is increased to 4 and shots have guaranteed Blast proc. Damage, Critical Multiplier, and Status Chance are increased, but Critical Chance is reduced."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Well Rehearsed",
+            "desc": "Increase Base Damage by +X.\nOn Consecutive Weakpoint Hits: Increase Base Damage by +5. Stacks up to 3x.",
+            "values": [
+              "X = 20",
+              "X = 15",
+              "X = 15"
+            ],
+            "notes": "Resets after reloading, which can be bypassed by using Blood Forge, but not effects that reload the weapon while holstered such as Lock and Load.\nAlso resets after hitting a bodyshot and after Blast status proc detonation, even if the shot that inflicted this proc was a weakpoint hit."
+          },
+          {
+            "name": "Blazing Barrel",
+            "desc": "Increase Base Damage by +X.\nOn Firing: +5% Multishot. Stacks up to 10x.",
+            "values": [
+              "X = 20",
+              "X = 15",
+              "X = 15"
+            ],
+            "notes": "Does not require the shots to hit enemies to stack.\nBonus is additive to other sources of multishot such as Split Chamber.\nResets after reloading, which can be bypassed by using Blood Forge, but not effects that reload the weapon while holstered such as Lock and Load."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +X.",
+            "values": [
+              "X = 8",
+              "X = 10",
+              "X = 12"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Ready Retaliation",
+            "desc": "On Reload From Empty: +60% Reload Speed.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Marksman's Hand",
+            "desc": "-60% Weapon Recoil.",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Get 40 weakpoint hits with this weapon in Incarnon form in a single mission.",
+        "perks": [
+          {
+            "name": "Elemental Dominance",
+            "desc": "Increase Base Status Chance by +X Effect doubles in Incarnon Form.",
+            "values": [
+              "X = 15%",
+              "X = 15%",
+              "X = 8%"
+            ],
+            "notes": "Sybaris Prime gains +23% Status Chance in Incarnon form, rather than the expected +16%."
+          },
+          {
+            "name": "Reaver's Rapture",
+            "desc": "On Full Burst Hit: +20% Damage, resets on Reload",
+            "values": [
+              "-",
+              "-",
+              "-"
+            ],
+            "notes": "Stacks up to 4x.\nBonus is additive with other sources of base damage such as Serration.\nReset can be bypassed by using Blood Forge, but not effects that reload the weapon while holstered such as Lock and Load."
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Critical Chance by +X.\nIncrease Status Chance by +Y.",
+            "values": [
+              "X = 5%\nY = 10%",
+              "X = 5%\nY = 10%",
+              "X = 5%\nY = 10%"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Torid Incarnon Genesis": {
+    "weapons": [
+      "Torid"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Direct shots charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nFire a long-range Toxin beam.",
+            "values": [
+              "-"
+            ],
+            "notes": "Incarnon Form becomes a continuous beam weapon with a 37 meter range, and a 2.3 meter damage radius from the point of impact against a surface. The beam is then capable of chaining to up to 5 nearby enemies within 7 meters of each other, with each chain doing 75% of the previous chain's damage. The base damage, Critical Chance, Critical Multiplier, and Status Chance are also increased. However, the Zoom is reduced.\nPunch Through mods have no effect on the behavior of the beam.\nThe 2.3 meter damage radius from the point of impact CAN be benefit from Firestorm (Primed).\nMods such as Sinister Reach or Combustion Beam are not available for use, as the base Torid is not a beam weapon.\nAs a continuous weapon, the spherical damage radius does not benefit from Multishot; only targets directly hit by the beam benefit.\nThe beam will chain independently to 5 additional enemies starting from each target hit by the initial damage radius. Each chain chooses targets independently, and an enemy can be struck by multiple chains. However, due to the damage radius not benefiting from multishot, beams chaining from targets that were in the damage radius but not directly struck by the initial beam itself will also not benefit from multishot.\nThe damage radius is not a separate damage instance from the beam, so a target that is directly struck by the beam is still only hit once."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Final Fusillade",
+            "desc": "Increase Base Damage by +51.\n+3 Multishot on last shot in magazine.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Plentiful Mayhem",
+            "desc": "Increase Base Damage by +31.\nMultishot consumes ammo directly from Capacity and increases Damage by +60%.",
+            "values": [
+              "-"
+            ],
+            "notes": "Damage bonus from multishot consuming ammo is multiplicative to base damage bonuses like Serration.\nAffects both modes. In the case of Incarnon Form, it pools directly from its magazine.\nDamage bonus from multishot consuming ammo on applies to projectiles generated by multishot.\nIn the Incarnon form, instead of increasing the damage of additional projectiles created by multishot, all multishot bonuses are increased by 60%."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Swift Deliverance",
+            "desc": "+50% Projectile Speed",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Renewed Horror",
+            "desc": "On Reload from Empty: Lingering damage field duration doubles on first shot.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +9.",
+            "values": [
+              "-"
+            ],
+            "notes": "Does not apply to Incarnon Form's Magazine."
+          }
+        ]
+      },
+      {
+        "challenge": "Activate Incarnon Form 15 times",
+        "perks": [
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +20%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +15%.\nIncrease Base Status Chance by +15%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Elemental Balance",
+            "desc": "Increase Base Status Chance by +34%.",
+            "values": [
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  },
+  "Vasto Incarnon Genesis": {
+    "weapons": [
+      "Vasto",
+      "Vasto Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nRapidly empty a full magazine.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form transforms into a 6-round burst with 6 base multishot along with increased Critical Chance and Critical Multiplier. However, it has reduced base damage and Status Chance per bullet, has significantly higher Recoil, and cannot Zoom."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Lone Gun",
+            "desc": "Increase Base Damage by +X.\nWith No Primary Equipped:\nIncrease Base Damage by +40\nIncrease Base Magazine Capacity by +14.",
+            "values": [
+              "X = 66",
+              "X = 24"
+            ],
+            "notes": "Increased Base Magazine Capacity does not affect Incarnon Form.\nBase Damage increase is applied per pellet in Incarnon Form."
+          },
+          {
+            "name": "Deathtrap Trigger",
+            "desc": "Increase Base Damage by +X.\nOn Equip From Primary:\nIncrease Base Critical Chance by +30% for 3s.\nIncrease Base Critical Damage Multiplier by +Y for 3s.",
+            "values": [
+              "X = 66\nY = 2.2x",
+              "X = 24\nY = 0.8x"
+            ],
+            "notes": "Base Damage increase is applied per pellet in Incarnon Form."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +6.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Increased Base Magazine Capacity does not affect Incarnon Form."
+          },
+          {
+            "name": "Marksman's Hand",
+            "desc": "-50% Weapon Recoil.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Awakened Readiness",
+            "desc": "+20% Magazine Reloaded per second when Holstered.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Does not apply to Incarnon Form's Magazine."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies while airborne",
+        "perks": [
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 16%",
+              "X = 18%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +10%.\nIncrease Base Status Chance by +10%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Status Chance increase for Incarnon Form is divided by the innate multishot."
+          },
+          {
+            "name": "Reaper's Plenty",
+            "desc": "On Headshot: +100% Ammo Efficiency for 2s.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Does not apply to Incarnon Form."
+          }
+        ]
+      }
+    ]
+  },
+  "Vectis Incarnon Genesis": {
+    "weapons": [
+      "Vectis",
+      "Vectis Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; alt fire transmutes. Switching back will expend any remaining charge.\nFire slowing projectiles that explode on headshot",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Fires projectiles that embed for 2.5 seconds, dealing Cold damage three times with a forced Cold Status Effect on each hit. On headshots, explodes in a 6.7 meter radius after a 0.4 second delay, dealing pure Cold damage. Incarnon Form has higher Critical Chance, but with reduced Fire Rate and can no longer Punch Through."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped.",
+        "perks": [
+          {
+            "name": "Inciting Incident",
+            "desc": "Increase Base Damage by +X.\nWith Channeled Ability Active: +2 Punch Through",
+            "values": [
+              "X = 100",
+              "X = 200"
+            ],
+            "notes": "Punch Through is locked to 0 in Incarnon Form, meaning the Channeled Ability bonus from this evolution applies only in the base form."
+          },
+          {
+            "name": "Lone Enforcer",
+            "desc": "Increase Base Damage by +X.\n+25% Multishot if no enemies are within 5m.",
+            "values": [
+              "X = 75",
+              "X = 150"
+            ],
+            "notes": "Multishot bonus is additive with Split Chamber and similar bonuses."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form.",
+        "perks": [
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+60% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Marksman's Hand",
+            "desc": "-60% Recoil.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Silent Running",
+            "desc": "Reduce the chance an enemy will hear gunfire by 100%.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 30 enemies that are at least 40m away.",
+        "perks": [
+          {
+            "name": "Deadhead",
+            "desc": "+25% Headshot Damage.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Bonus is additive with Target Acquired, Vectis's Scope bonus, and similar bonuses."
+          },
+          {
+            "name": "Critical Parallel",
+            "desc": "Increase Base Critical Chance by +X.\nIncrease Base Critical Damage Multiplier by +0.5x.",
+            "values": [
+              "X = 10%",
+              "X = 8%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Status Chance by 30% of current Critical Chance, up to 40%",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Maximum Base Status Chance increase is gained at 134% Critical Chance."
+          }
+        ]
+      }
+    ]
+  },
+  "Zylok Incarnon Genesis": {
+    "weapons": [
+      "Zylok",
+      "Zylok Prime"
+    ],
+    "tiers": [
+      {
+        "challenge": null,
+        "perks": [
+          {
+            "name": "Incarnon Form",
+            "desc": "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.\nCharge a large single shot that deals Radial Heat Damage.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "Incarnon Form shoots charged explosive lasers with a 0.6 second charge time, inflicts pure Heat damage on the explosion, and explodes in a 6 meter radius, with increased base damage, Critical Chance, and Status Chance. However direct hits no longer deals Slash damage, it has significantly slower Fire Rate, and the explosion possesses linear Damage Falloff from 100% to 60% from central impact.\nIncarnon Form trigger must be fully charged to fire."
+          }
+        ]
+      },
+      {
+        "challenge": "Complete a solo mission with this weapon equipped",
+        "perks": [
+          {
+            "name": "Precision's Payoff",
+            "desc": "Increase Base Damage by +X.\nOn Burst Headshots: Increase Base Damage by +20. Stacks up to 3x.",
+            "values": [
+              "X = 76",
+              "X = 30"
+            ],
+            "notes": "Stacks are generated if both shots from holding and releasing Zylok's trigger are headshots.\nStacks are shown as a buff, which are lost on reload or switching to Incarnon Form.\nIncarnon Form cannot trigger burst headshots, as it has a Charge trigger instead of Duplex."
+          },
+          {
+            "name": "Mauler's Magazine",
+            "desc": "Increase Base Damage by +X.\nOn Reload From Empty: Increase Base Critical Damage Multiplier by +1x. Stacks up to 2x.",
+            "values": [
+              "X = 76",
+              "X = 30"
+            ],
+            "notes": "Stacks are shown as a buff, which are lost when reloading from a partial magazine or on death."
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 100 enemies with this weapon's Incarnon Form",
+        "perks": [
+          {
+            "name": "Extended Volley",
+            "desc": "Increase Base Magazine Capacity by +X.",
+            "values": [
+              "X = 12",
+              "X = 18"
+            ],
+            "notes": "Increased Base Magazine Capacity does not affect Incarnon Form."
+          },
+          {
+            "name": "Rapid Reinforcement",
+            "desc": "+50% Reload Speed.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Void's Guidance",
+            "desc": "+60% Accuracy\n-60% Recoil",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      },
+      {
+        "challenge": "Kill 20 enemies with 4 or more active Status Effects",
+        "perks": [
+          {
+            "name": "Survivor's Edge",
+            "desc": "Increase Base Critical Chance by +X%.\nIncrease Base Status Chance by +Y%.",
+            "values": [
+              "X = 20%\nY = 20%",
+              "X = 22%\nY = 16%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Commodore's Fortune",
+            "desc": "Increase Base Critical Chance by +X%.",
+            "values": [
+              "X = 32%",
+              "X = 30%"
+            ],
+            "notes": "-"
+          },
+          {
+            "name": "Fatal Affliction",
+            "desc": "+40% Direct Damage per Status Type affecting the target.",
+            "values": [
+              "-",
+              "-"
+            ],
+            "notes": "-"
+          }
+        ]
+      }
+    ]
+  }
+}

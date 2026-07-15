@@ -10,7 +10,8 @@ Warframe mastery tracker, hosted version with Supabase cloud sync.
 | `app.js` | All UI logic (~4950 lines) |
 | `data/data-meta.js` | `MASTERY` rank table (~57 lines) |
 | `data/data-items.js` | All item arrays (warframes/weapons/etc.), circuit schedules, star chart, `TAB_DATA`, `PFX` (~968 lines) |
-| `data/data-blueprints.js` | `INCARNON_WEAPONS`, `INCARNON_REQUIREMENTS`, `CURRENCIES`, `BLUEPRINTS` (~1455 lines) |
+| `data/data-blueprints.js` | `CURRENCIES`, `BLUEPRINTS` (~1353 lines) |
+| `data/data-incarnons.js` | `INCARNON_WEAPONS`, `INCARNON_REQUIREMENTS`, `INCARNON_EVOLUTIONS` (~194 lines) |
 | `data/data-mods.js` | `MODS`, `MOD_DESC` (~3015 lines) |
 | `data/data-arcanes.js` | `ARCANE_RANK_COPIES`, `ARCANES`, `ARCANE_DESC` (~338 lines) |
 | `data/data-kitguns.js` | `KITGUN_*`, `ZAW_*` component maps (~102 lines) |
@@ -165,6 +166,7 @@ let _blpSubForm    = null;        // null = main build, string = exalted sub-for
 | `starChart` | — | isSpecial: hides all filters |
 | `summary` | — | isSpecial: hides all filters |
 | `checklist` | — | isSpecial: hides all filters; uses `#checklist-view` |
+| `incarnons` | — | isSpecial: `#incarnons-view`; dedicated Incarnon Acquired/Installed tracker, grouped by genesis |
 | `builds` | — | isSpecial: `#builds-view`; the My Builds planner |
 | `kitgunBuilder` | — | isSpecial: `#kitgun-view`; Kitgun/Zaw builder |
 | `ducats` | — | isSpecial: `#ducats-view`; ducat value calculator |
@@ -180,7 +182,8 @@ let _blpSubForm    = null;        // null = main build, string = exalted sub-for
 |-------------|---------|
 | `PFX[tab] + name` | Item rank (0–maxRank) |
 | `'aq:' + itemKey(tab, name)` | Acquired flag (AQ_TABS only) |
-| `'inc:' + itemKey(tab, name)` | Incarnon Genesis acquired flag |
+| `'inc:' + itemKey(tab, name)` | Incarnon Genesis **installed** flag (applied to the weapon) |
+| `'incAcq:' + itemKey(tab, name)` | Incarnon Genesis **acquired** flag (have the adapter, not yet installed) |
 | `'arc:' + name` | Arcane copy count |
 | `itemKey('mods', name)` | Mod rank |
 | `aqKey('mods', name)` | Mod owned flag |
@@ -196,9 +199,68 @@ let _blpSubForm    = null;        // null = main build, string = exalted sub-for
 
 ### Incarnon tracking
 
-`incarnonKey(tab, name)` returns `'inc:' + itemKey(tab, name)`.
-`toggleIncarnon(tab, name)` sets/clears this key; also set automatically by `markChecklistDone()`.
+Two distinct per-weapon states, both keyed by `tab + name` (not by genesis — a genesis can cover
+several weapon variants, e.g. Braton/Braton Vandal/Braton Prime/Mk1-Braton all share "Braton
+Incarnon Genesis", but each variant tracks its own Acquired/Installed independently, matching how
+the weapon cards have always worked):
+
+- **Acquired** — `incAcqKey(tab, name)` returns `'incAcq:' + itemKey(tab, name)`. Have the Incarnon
+  Genesis Adapter. Toggled by `toggleIncarnonAcquired(tab, name)`; also set automatically by
+  `markChecklistDone('incarnon', name)` when the checklist item is crafted.
+- **Installed** — `incarnonKey(tab, name)` returns `'inc:' + itemKey(tab, name)`. Applied to the
+  weapon, unlocking its Incarnon form. Toggled by `toggleIncarnon(tab, name)`.
+
+The two cascade to stay consistent: installing sets acquired too; un-acquiring clears installed too.
+
 `INCARNON_WEAPON_TAB` — a `Map<weaponName, tab>` built from `INCARNON_WEAPONS` at startup.
+
+On weapon cards, the "Incarnon" badge (`.card-incarnon`) is orange (neither), blue/`.acq` (acquired
+only), or purple/`.on` (installed). `openAcqMenu()` exposes "Weapon acquired" / "Incarnon acquired" /
+"Incarnon installed" as three independent toggles.
+
+The dedicated `incarnons` tab (`renderIncarnonsPage()`) groups all Incarnon-capable weapons by
+genesis name (`incGroups()`), shows Acquired/Installed toggle buttons per weapon variant, a Circuit
+week badge per genesis, and quick status filters (`incFilter` / `setIncFilter()`).
+
+### Incarnon Evolutions
+
+Each weapon row on the `incarnons` tab shows its "Evolutions" section automatically once that
+variant is **Installed** (`showEvo = hasEvo && isInst` in `renderIncarnonsPage()`) — no manual
+expand/collapse, it just appears/disappears with the Installed toggle. Renders all 4 Evolution tiers
+from `INCARNON_EVOLUTIONS` via `buildIncEvoTiers(tab, name, genesisName)`.
+
+Tier I is always a single fixed perk (read-only). Tiers II–IV usually have 2-3 selectable perks —
+rendered as a `<select>`; the choice is stored per weapon variant (not per genesis, since stat
+values differ by variant) via `incEvoKey(tab, name, tierIdx)` → `'incEvo:' + itemKey(tab, name) +
+':' + tierIdx`, value = the chosen perk's index, set by `setIncEvoChoice(tab, name, tierIdx, perkIdx)`.
+
+Each perk's `desc` contains `+X`/`+Y`-style placeholders; `substituteEvoValues(desc, valuesStr)`
+fills them in with that specific weapon variant's own numbers (looked up via
+`evo.weapons.indexOf(name)` — the column index into each perk's `values` array) before the text is
+run through `formatStatText()` for damage-icon rendering, so e.g. Braton and Mk1-Braton show the
+same perk name but different substituted numbers.
+
+### Incarnon Wishlist
+
+Right-hand sticky panel on the `incarnons` tab (`buildIncWishlistPanel()`, laid out via `.inc-layout`
+grid — same two-column/sticky-panel convention as the Checklist tab's `.cl-layout`). `incWishlist`
+is a `Set<genesisName>`, toggled per-genesis via the ☆/★ button — present both on each group header
+and on every weapon row (`.inc-row-toggles`, replacing the old per-row Evolutions toggle slot; all
+variant rows in a group share and reflect the same genesis-level state) — both call
+`toggleIncWishlist(genesisName)`, persisted to `localStorage['wf-inc-wishlist']` and included in
+Import/Export (`buildSave()`/`applySave()`), and synced to Supabase (`syncToCloud()`/`loadFromCloud()`)
+via an `inc_wishlist` column on the `saves` table (`jsonb`, array of genesis-name strings) — **this
+column must exist in Supabase** or `syncToCloud()`'s upsert will fail (PostgREST rejects unknown
+columns), which would also silently stop `progress`/`checklist`/etc. from syncing since it's one
+upsert call. There is no migrations folder in this repo — the column must be added directly in the
+Supabase dashboard/SQL editor: `alter table saves add column if not exists inc_wishlist jsonb
+default '[]'::jsonb;`
+
+`incWishlistSorted()` orders entries by: items matching `CIRCUIT_WEEK_NOW` first, then the rest by
+circuit week descending. Since `CIRCUIT_WEEK_NOW` changes weekly, a different subset floats to the
+top each week. Reuses `.card-circuit`/`.circuit-now` (the same badge class as group headers and
+weapon cards elsewhere) for the week indicator, so the "current week" highlight stays visually
+consistent app-wide.
 
 ## Data File Exports (split across data-*.js files)
 
@@ -207,6 +269,7 @@ let _blpSubForm    = null;        // null = main build, string = exalted sub-for
 | `MASTERY` | Array | `{r, t, xp}` per MR rank |
 | `INCARNON_WEAPONS` | Map | weapon name → genesis name |
 | `INCARNON_REQUIREMENTS` | Map | genesis name → `[[resource, count], ...]` |
+| `INCARNON_EVOLUTIONS` | Map | genesis name → `{ weapons: [variantName,...], tiers: [{ challenge, perks: [{name,desc,values,notes}] }] }` — the 4 Evolution tiers, scraped per-weapon-page (see `dev/update-incarnon-evolutions.js`) |
 | `CURRENCIES` | Map | blueprint/item name → `{currencyName: amount}` for vendor-purchased components |
 | `BLUEPRINTS` | Map | item name → `[credits, craftTime_s, [[partName, count, type?, subCost?], ...]]` |
 | `WARFRAMES` / `PRIMARY` / `SECONDARY` / `MELEE` / `VEHICLES` / `COMPANIONS` / `COMP_WEAPONS` / `ARCH_WEAPONS` / `AMPS` / `INTRINSICS` | Arrays | Item data `["Name", "Category", "Obtain", maxRank, xpPerLevel, tradable?, compFor?]` |
@@ -420,7 +483,8 @@ Offline tools for maintaining data.js:
 | `overframe_proxy.js` | Local proxy server for Overframe API (port 3001) |
 | `update.js` | Main data update script |
 | `extract-blueprints.js` / `generate-blueprints-map.js` | Blueprint scraping pipeline |
-| `scrape-incarnon-requirements.js` | Scrapes incarnon genesis resource costs |
+| `scrape-incarnon-requirements.js` | (archived) Scrapes incarnon genesis resource costs into `INCARNON_REQUIREMENTS` |
+| `update-incarnon-evolutions.js` | Scrapes each Incarnon Genesis wiki page's Evolutions table into `INCARNON_EVOLUTIONS` (per-page fetch — no wiki Lua module exists for this data) |
 | `scrape-weapon-mr.js` | Scrapes weapon MR data |
 | `scrape_overframe_ids.js` | Scrapes Overframe item IDs into `OVERFRAME_MAP` |
 | `Import/` | Google Sheets + xlsx import helpers (`sheets-import.gs`, SheetJS) |

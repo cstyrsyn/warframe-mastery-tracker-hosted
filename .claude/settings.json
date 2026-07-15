@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check app.js)",
+      "Bash(npx playwright *)",
+      "Bash(node \"C:\\\\Users\\\\CALLUM~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Dev-Personal-Warframe-Mastery-Tracker-warframe-mastery-tracker-hosted\\\\c4ea73e6-30c1-4b5b-81ae-4205ef947e0a\\\\scratchpad\\\\test-elem.js\")",
+      "Bash(npm install *)",
+      "Bash(node ./_test-elem.js)",
+      "Bash(node ./_test-elem2.js)",
+      "Bash(rm -f _test-elem.js _test-elem2.js _list-view.png config.js)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"http.server 8734\")",
+      "Bash(git status *)",
+      "Bash(rm -f _test-elem3.js config.js)",
+      "Bash(node ./_test-elem4.js)",
+      "Bash(rm -f _test-elem4.js config.js _unowned.png _acquired.png _menu-open.png _maxed-tile.png _maxed-list.png)",
+      "Bash(node ./_test-elem5.js)"
+    ]
+  }
+}
