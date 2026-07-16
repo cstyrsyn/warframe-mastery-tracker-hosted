@@ -905,6 +905,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   font-weight: 600; font-size: 12px; color: var(--text);
 }
 .inc-wishlist-count { color: var(--text-muted); font-weight: 400; font-size: 10px; }
+.inc-wishlist-week { margin-left: auto; }
 .inc-wishlist-list { display: flex; flex-direction: column; max-height: calc(100vh - 140px); overflow-y: auto; }
 .inc-wishlist-empty { padding: 20px 14px; font-size: 11px; color: var(--text-dim); text-align: center; }
 .inc-wish-item {
@@ -1122,6 +1123,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 .blp-comp-select:focus { outline: none; border-color: var(--blue); }
 .blp-kitgun-type { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; background: rgba(74,150,210,0.15); color: var(--blue); border: 1px solid rgba(74,150,210,0.35); }
 #blp-capacity-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+#blp-inc-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
 #blp-rank-slider { flex: 1; min-width: 80px; max-width: 160px; accent-color: var(--blue); cursor: pointer; }
 #blp-rank-val, #blp-cap-used, #blp-cap-total { font-size: 12px; color: var(--text); font-weight: 600; min-width: 20px; }
 .blp-cap-label { font-size: 11px; color: var(--text-muted); }
@@ -1377,6 +1379,70 @@ body.topbar-mode .sidebar-divider { display: none; }
 }
 .blp-action-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
 .blp-action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+#loadouts-view {
+  display: none; flex-direction: column; margin: -14px -16px;
+  min-height: calc(100vh - 100px);
+}
+#lp-body { display: flex; flex-direction: row; flex: 1; overflow: hidden; min-height: 0; }
+#lp-list {
+  width: 220px; flex-shrink: 0; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#lp-new-btn {
+  margin: 8px; font-size: 11px; padding: 7px 10px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit;
+}
+#lp-new-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+#lp-loadout-list { overflow-y: auto; flex: 1; }
+.lp-loadout-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  padding: 8px 12px; cursor: pointer; font-size: 12px; color: var(--text);
+  border-left: 2px solid transparent;
+}
+.lp-loadout-row:hover { background: rgba(255,255,255,0.03); }
+.lp-loadout-row.active { background: rgba(180,140,60,0.08); border-left-color: var(--gold); color: var(--gold); }
+.lp-loadout-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-loadout-count { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+.lp-empty-hint { padding: 12px; font-size: 11px; color: var(--text-muted); }
+#lp-editor { flex: 1; min-width: 0; padding: 18px 20px; overflow-y: auto; }
+#lp-editor-empty { color: var(--text-muted); font-size: 13px; padding: 40px 0; }
+#lp-name-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.lp-name-input {
+  flex: 1; min-width: 0; background: transparent; border: none;
+  border-bottom: 1px solid var(--border); color: var(--text);
+  font-size: 18px; font-weight: 600; font-family: inherit; padding: 2px 4px; outline: none;
+}
+.lp-name-input:focus { border-bottom-color: var(--blue); }
+.lp-slot-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+}
+.lp-slot-card {
+  background: var(--surface); border: 1px solid var(--border-soft); border-radius: 6px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.lp-slot-card.empty { background: var(--surface2); }
+.lp-slot-card.required.empty { border-color: var(--red); }
+.lp-slot-hdr { display: flex; align-items: center; justify-content: space-between; }
+.lp-slot-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.lp-slot-clear {
+  border: none; background: transparent; color: var(--text-dim); cursor: pointer;
+  font-size: 13px; line-height: 1; padding: 0 2px;
+}
+.lp-slot-clear:hover { color: var(--red); }
+.lp-slot-select, .lp-slot-build-select {
+  width: 100%; box-sizing: border-box; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text); padding: 5px 6px; font-size: 12px; font-family: inherit; cursor: pointer;
+}
+.lp-slot-select:focus, .lp-slot-build-select:focus { outline: none; border-color: var(--blue); }
+.lp-slot-build-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lp-slot-build-select { flex: 1; min-width: 0; }
+.lp-slot-nobuild { font-size: 10px; color: var(--text-muted); flex: 1; }
+.lp-slot-editlink { font-size: 10px; color: var(--blue); cursor: pointer; white-space: nowrap; }
+.lp-slot-editlink:hover { text-decoration: underline; }
+@media (max-width: 720px) {
+  #lp-body { flex-direction: column; }
+  #lp-list { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 200px; }
+}
 .kg-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .kg-build { border-bottom: 1px solid var(--border-soft); }
 .kg-build:last-child { border-bottom: none; }
@@ -1511,6 +1577,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div class="tab" data-tab="checklist">Checklist</div>
   <div class="tab" data-tab="incarnons">Incarnons</div>
   <div class="tab" data-tab="builds">Builds</div>
+  <div class="tab" data-tab="loadouts">Loadouts</div>
   <div class="tab" data-tab="kitgunBuilder">Kitgun/Zaw Builder</div>
   <div class="tab" data-tab="ducats">Ducats</div>
 </div>
@@ -1540,6 +1607,19 @@ body.topbar-mode .sidebar-divider { display: none; }
       <div id="blp-editor">
         <div id="blp-editor-inner">
           <div id="blp-editor-empty">Select an item on the left to view or create a build.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="loadouts-view">
+    <div id="lp-body">
+      <div id="lp-list">
+        <button id="lp-new-btn" onclick="lpCreateLoadout()">+ New Loadout</button>
+        <div id="lp-loadout-list"></div>
+      </div>
+      <div id="lp-editor">
+        <div id="lp-editor-inner">
+          <div id="lp-editor-empty">Select or create a loadout on the left.</div>
         </div>
       </div>
     </div>
