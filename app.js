@@ -934,10 +934,34 @@ function blpRenderEditor() {
     ${blpComponentsHtml(build)}
     <div id="blp-slots">${blpSlotsHtml(slots)}</div>
     ${blpResolvedTab() === 'warframes' && (!_blpSubForm || _blpItem === 'Sirius & Orion') ? blpShardsHtml(build) : ''}
+    ${blpIncarnonHtml()}
     <div id="blp-actions">
       <button class="blp-action-btn danger" onclick="blpClearBuild()">Clear Slots</button>
     </div>
   `;
+}
+
+// Weapon-level Incarnon Acquired/Installed toggles + Evolutions selector, reusing the exact same
+// state/markup/logic as the Incarnons page (toggleIncarnon, toggleIncarnonAcquired, buildIncEvoTiers)
+// so both pages stay in sync automatically — there's only one underlying progress flag per weapon.
+function blpIncarnonHtml() {
+  if (_blpSubForm || !_blpItem || !INCARNON_WEAPONS.has(_blpItem)) return '';
+  const tab = blpItemSourceTab();
+  const name = _blpItem;
+  const ename = jsStr(name);
+  const genesisName = INCARNON_WEAPONS.get(name);
+  const isAcq  = !!progress[incAcqKey(tab, name)];
+  const isInst = !!progress[incarnonKey(tab, name)];
+  const hasEvo = INCARNON_EVOLUTIONS.has(genesisName) && INCARNON_EVOLUTIONS.get(genesisName).weapons.includes(name);
+  const evoTiers = (hasEvo && isInst) ? buildIncEvoTiers(tab, name, genesisName) : '';
+  return `<div id="blp-inc-wrap">
+    <div class="inc-row-toggles" style="margin-bottom:6px">
+      <a class="inc-group-title" href="${esc(wikiUrl(genesisName))}" target="_blank" rel="noopener" style="margin-right:auto;font-size:11px;font-weight:600">${esc(genesisName)}</a>
+      <button class="inc-toggle${isAcq ? ' on' : ''}" onclick="toggleIncarnonAcquired('${tab}','${ename}')">Acquired</button>
+      <button class="inc-toggle inc-toggle--inst${isInst ? ' on' : ''}" onclick="toggleIncarnon('${tab}','${ename}')">Installed</button>
+    </div>
+    ${evoTiers}
+  </div>`;
 }
 
 function blpCreateBuild() {
@@ -963,6 +987,7 @@ function blpDeleteBuild() {
   const idx    = builds.findIndex(b => b.id === _blpBuildId);
   if (idx !== -1) builds.splice(idx, 1);
   if (!builds.length) delete myBuilds[_blpItem];
+  lpCleanupBuildRef(_blpItem, build.id);
   _blpBuildId = myBuilds[_blpItem]?.[0]?.id || null;
   _blpSubForm = null;
   saveMyBuilds();
@@ -2511,6 +2536,246 @@ function updateChecklistOwned(resource, rawVal) {
 }
 
 // ─────────────────────────────────────────────
+// MY LOADOUTS PAGE
+// ─────────────────────────────────────────────
+const MY_LOADOUTS_KEY = 'wf-my-loadouts';
+let myLoadouts   = []; // array of LoadoutEntry, order = display order
+let _lpLoadoutId = null; // id of the loadout being edited
+
+// { key, label, tab, required?, catEq?, catInc? } — catEq = exact TAB_DATA category match,
+// catInc = substring match (covers e.g. "Arch-Gun"/"Kuva Arch-Gun"/"Prime Arch-Gun" together).
+const LOADOUT_SLOTS = [
+  { key: 'warframe',        label: 'Warframe',         tab: 'warframes',   required: true },
+  { key: 'primary',         label: 'Primary',          tab: 'primary' },
+  { key: 'secondary',       label: 'Secondary',        tab: 'secondary' },
+  { key: 'melee',           label: 'Melee',            tab: 'melee' },
+  { key: 'companion',       label: 'Companion',        tab: 'companions' },
+  { key: 'companionWeapon', label: 'Companion Weapon', tab: 'compWeapons' },
+  { key: 'necramech',       label: 'Necramech',        tab: 'vehicles',    catEq: 'Necramech' },
+  { key: 'necramechWeapon', label: 'Necramech Weapon', tab: 'archWeapons', catInc: 'Arch-Gun' },
+  { key: 'archwing',        label: 'Archwing',         tab: 'vehicles',    catEq: 'Archwing' },
+  { key: 'archGun',         label: 'Arch Gun',         tab: 'archWeapons', catInc: 'Arch-Gun' },
+  { key: 'archMelee',       label: 'Arch Melee',       tab: 'archWeapons', catInc: 'Arch-Melee' },
+];
+
+function lpGenId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function loadMyLoadouts() {
+  let raw = [];
+  try { raw = JSON.parse(localStorage.getItem(MY_LOADOUTS_KEY) || '[]'); } catch {}
+  myLoadouts = Array.isArray(raw) ? raw : [];
+}
+function saveMyLoadouts() { localStorage.setItem(MY_LOADOUTS_KEY, JSON.stringify(myLoadouts)); deferCloudSync(); }
+
+function sanitizeMyLoadouts(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter(l => l && typeof l.id === 'string' && typeof l.name === 'string' && l.slots && typeof l.slots === 'object')
+    .map(l => {
+      const slots = {};
+      for (const s of LOADOUT_SLOTS) {
+        const v = l.slots[s.key];
+        slots[s.key] = (v && typeof v.item === 'string')
+          ? { item: v.item, buildId: typeof v.buildId === 'string' ? v.buildId : null }
+          : null;
+      }
+      return { id: l.id, name: l.name, slots };
+    });
+}
+
+function lpEmptySlots() {
+  const slots = {};
+  for (const s of LOADOUT_SLOTS) slots[s.key] = null;
+  return slots;
+}
+function lpNewLoadoutEntry(name) {
+  return { id: lpGenId(), name: name || 'Loadout 1', slots: lpEmptySlots() };
+}
+
+// Removes references to a deleted build from every loadout slot that pointed at it,
+// leaving the item assignment itself intact (called from blpDeleteBuild).
+function lpCleanupBuildRef(itemName, buildId) {
+  let changed = false;
+  for (const loadout of myLoadouts) {
+    for (const slotDef of LOADOUT_SLOTS) {
+      const slot = loadout.slots[slotDef.key];
+      if (slot && slot.item === itemName && slot.buildId === buildId) {
+        slot.buildId = null;
+        changed = true;
+      }
+    }
+  }
+  if (changed) saveMyLoadouts();
+}
+
+function lpItemsForSlot(slotDef) {
+  const arr = TAB_DATA[slotDef.tab] || [];
+  return arr
+    .filter(it => {
+      if (slotDef.catEq)  return it[1] === slotDef.catEq;
+      if (slotDef.catInc) return typeof it[1] === 'string' && it[1].includes(slotDef.catInc);
+      return true;
+    })
+    .map(it => it[0])
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function lpCurrentLoadout() {
+  return myLoadouts.find(l => l.id === _lpLoadoutId) || null;
+}
+
+function renderLoadoutsPage() {
+  lpRenderList();
+  lpRenderEditor();
+}
+
+function lpRenderList() {
+  const el = document.getElementById('lp-loadout-list');
+  if (!el) return;
+  if (!myLoadouts.length) {
+    el.innerHTML = '<div class="lp-empty-hint">No loadouts yet.</div>';
+    return;
+  }
+  el.innerHTML = myLoadouts.map(l => {
+    const filled   = LOADOUT_SLOTS.filter(s => l.slots[s.key]).length;
+    const isActive = l.id === _lpLoadoutId;
+    return `<div class="lp-loadout-row${isActive ? ' active' : ''}" onclick="lpSelectLoadout('${jsStr(l.id)}')">
+      <span class="lp-loadout-name">${esc(l.name)}</span>
+      <span class="lp-loadout-count">${filled}/${LOADOUT_SLOTS.length}</span>
+    </div>`;
+  }).join('');
+}
+
+function lpSlotCardHtml(loadout, slotDef) {
+  const slot    = loadout.slots[slotDef.key];
+  const isEmpty = !slot;
+  const items   = lpItemsForSlot(slotDef);
+
+  const itemOptions = items.map(n =>
+    `<option value="${esc(n)}"${slot?.item === n ? ' selected' : ''}>${esc(n)}</option>`
+  ).join('');
+  const itemSelectHtml = `<select class="lp-slot-select" onchange="lpSetSlotItem('${jsStr(slotDef.key)}', this.value)">
+      <option value="">— Select ${esc(slotDef.label)} —</option>
+      ${itemOptions}
+    </select>`;
+
+  let buildRowHtml = '';
+  if (!isEmpty) {
+    const builds = blpItemBuilds(slot.item);
+    const buildSelectHtml = builds.length
+      ? `<select class="lp-slot-build-select" onchange="lpSetSlotBuild('${jsStr(slotDef.key)}', this.value)">
+          <option value=""${!slot.buildId ? ' selected' : ''}>No specific build</option>
+          ${builds.map(b => `<option value="${esc(b.id)}"${slot.buildId === b.id ? ' selected' : ''}>${esc(b.name)}</option>`).join('')}
+        </select>`
+      : `<span class="lp-slot-nobuild">No saved builds</span>`;
+    const linkLabel = slot.buildId ? 'Edit build →' : (builds.length ? '' : 'Create build →');
+    const editLinkHtml = linkLabel
+      ? `<a class="lp-slot-editlink" onclick="lpOpenInBuilds('${jsStr(slotDef.key)}')">${linkLabel}</a>`
+      : '';
+    buildRowHtml = `<div class="lp-slot-build-row">${buildSelectHtml}${editLinkHtml}</div>`;
+  }
+
+  const cardClasses = 'lp-slot-card' + (isEmpty ? ' empty' : '') + (slotDef.required ? ' required' : '');
+  return `<div class="${cardClasses}">
+    <div class="lp-slot-hdr">
+      <span class="lp-slot-label">${esc(slotDef.label)}${slotDef.required ? ' *' : ''}</span>
+      ${isEmpty ? '' : `<button class="lp-slot-clear" title="Clear slot" onclick="lpClearSlot('${jsStr(slotDef.key)}')">✕</button>`}
+    </div>
+    ${itemSelectHtml}
+    ${buildRowHtml}
+  </div>`;
+}
+
+function lpRenderEditor() {
+  const inner = document.getElementById('lp-editor-inner');
+  if (!inner) return;
+  const loadout = lpCurrentLoadout();
+  if (!loadout) {
+    inner.innerHTML = '<div id="lp-editor-empty">Select or create a loadout on the left.</div>';
+    return;
+  }
+  inner.innerHTML = `
+    <div id="lp-name-bar">
+      <input id="lp-name-input" class="lp-name-input" type="text" value="${esc(loadout.name)}"
+        onchange="lpRenameLoadout(this.value)" onblur="lpRenameLoadout(this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()">
+      <button class="blp-action-btn danger" onclick="lpDeleteLoadout()">Delete</button>
+    </div>
+    <div class="lp-slot-grid">
+      ${LOADOUT_SLOTS.map(s => lpSlotCardHtml(loadout, s)).join('')}
+    </div>
+  `;
+}
+
+function lpSelectLoadout(id) {
+  _lpLoadoutId = id;
+  renderLoadoutsPage();
+}
+
+function lpCreateLoadout() {
+  const entry = lpNewLoadoutEntry(`Loadout ${myLoadouts.length + 1}`);
+  myLoadouts.push(entry);
+  _lpLoadoutId = entry.id;
+  saveMyLoadouts();
+  renderLoadoutsPage();
+  setTimeout(() => { const n = document.getElementById('lp-name-input'); if (n) n.select(); }, 0);
+}
+
+function lpDeleteLoadout() {
+  const idx = myLoadouts.findIndex(l => l.id === _lpLoadoutId);
+  if (idx === -1) return;
+  myLoadouts.splice(idx, 1);
+  _lpLoadoutId = myLoadouts[0]?.id || null;
+  saveMyLoadouts();
+  renderLoadoutsPage();
+}
+
+function lpRenameLoadout(name) {
+  const loadout = lpCurrentLoadout();
+  if (!loadout) return;
+  const trimmed = name.trim() || 'Loadout 1';
+  if (loadout.name === trimmed) return;
+  loadout.name = trimmed;
+  saveMyLoadouts();
+  lpRenderList();
+}
+
+function lpSetSlotItem(slotKey, itemName) {
+  const loadout = lpCurrentLoadout();
+  if (!loadout) return;
+  loadout.slots[slotKey] = itemName ? { item: itemName, buildId: null } : null;
+  saveMyLoadouts();
+  renderLoadoutsPage();
+}
+
+function lpSetSlotBuild(slotKey, buildId) {
+  const slot = lpCurrentLoadout()?.slots[slotKey];
+  if (!slot) return;
+  slot.buildId = buildId || null;
+  saveMyLoadouts();
+  renderLoadoutsPage();
+}
+
+function lpClearSlot(slotKey) {
+  const loadout = lpCurrentLoadout();
+  if (!loadout) return;
+  loadout.slots[slotKey] = null;
+  saveMyLoadouts();
+  renderLoadoutsPage();
+}
+
+// Jumps to the Builds page with the slot's item (and linked build, if any) pre-selected.
+function lpOpenInBuilds(slotKey) {
+  const slot = lpCurrentLoadout()?.slots[slotKey];
+  if (!slot) return;
+  const tabEl = document.querySelector('.tab[data-tab="builds"]');
+  if (tabEl) switchTab(tabEl);
+  blpSetTab('mybuilds');
+  blpSelectItem(slot.item);
+  if (slot.buildId) blpSelectBuild(slot.buildId);
+}
+
+// ─────────────────────────────────────────────
 // KITGUN BUILDER STATE
 // ─────────────────────────────────────────────
 let modularBuilds = [];  // [{id, chamber, grip, loader, gildAt}]
@@ -2877,6 +3142,7 @@ function toggleIncarnon(tab, name) {
   else delete progress[k];
   saveProgress();
   render();
+  if (activeTab === 'builds') blpRenderEditor();
 }
 function toggleIncarnonAcquired(tab, name) {
   const k = incAcqKey(tab, name);
@@ -2888,6 +3154,7 @@ function toggleIncarnonAcquired(tab, name) {
   }
   saveProgress();
   render();
+  if (activeTab === 'builds') blpRenderEditor();
 }
 
 // ── Kuva / Tenet / Coda bonus element tracking ──
@@ -3446,18 +3713,20 @@ function switchTab(tabEl) {
   const isKitgun  = activeTab === 'kitgunBuilder';
   const isBuilds  = activeTab === 'builds';
   const isIncarnons = activeTab === 'incarnons';
-  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds || isIncarnons;
+  const isLoadouts = activeTab === 'loadouts';
+  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds || isIncarnons || isLoadouts;
   document.getElementById('summary').classList.toggle('open', isSummary);
   document.getElementById('checklist-view').style.display = isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = isBuilds  ? 'flex'  : 'none';
   document.getElementById('incarnons-view').style.display = isIncarnons ? 'block' : 'none';
+  document.getElementById('loadouts-view').style.display  = isLoadouts ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (isSpecial && !isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = (isCl || isKitgun || isBuilds) ? 'none' : '';
+  document.getElementById('search').style.display   = (isCl || isKitgun || isBuilds || isLoadouts) ? 'none' : '';
   document.getElementById('status-dd').style.display = isSpecial ? 'none' : '';
   const isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = isIncarnon ? '' : 'none';
@@ -3914,6 +4183,7 @@ function render() {
   if (activeTab === 'checklist')     { renderChecklist();     updateTabStat(); return; }
   if (activeTab === 'builds')        { renderBuildsPage();    return; }
   if (activeTab === 'incarnons')     { renderIncarnonsPage(); updateTabStat(); return; }
+  if (activeTab === 'loadouts')      { renderLoadoutsPage();  return; }
   if (activeTab === 'ducats')        { renderDucats();        updateTabStat(); return; }
   if (activeTab === 'kitgunBuilder') { renderKitgunBuilder(); updateTabStat(); return; }
   const items = TAB_DATA[activeTab] || [];
@@ -4177,7 +4447,7 @@ function setRank(tab, name, rank) {
 }
 
 function updateTabStat() {
-  if (['starChart','summary','checklist','ducats','kitgunBuilder','builds','incarnons'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
+  if (['starChart','summary','checklist','ducats','kitgunBuilder','builds','incarnons','loadouts'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
     for (const { name, maxRank } of MODS) {
@@ -4355,6 +4625,7 @@ function setIncEvoChoice(tab, name, tierIdx, perkIdx) {
   if (isNaN(v)) delete progress[k]; else progress[k] = v;
   saveProgress();
   render();
+  if (activeTab === 'builds') blpRenderEditor();
 }
 // Substitutes a perk's "+X"/"X" placeholders with this weapon variant's actual values,
 // e.g. desc "Increase Base Damage by +X." + values "X = 24" -> "Increase Base Damage by +24."
@@ -4527,7 +4798,10 @@ function buildIncWishlistPanel() {
   }).join('');
 
   return `<div class="inc-wishlist-panel">
-    <div class="inc-wishlist-hdr">Wishlist <span class="inc-wishlist-count">${items.length}</span></div>
+    <div class="inc-wishlist-hdr">
+      Wishlist <span class="inc-wishlist-count">${items.length}</span>
+      <span class="card-circuit circuit-now inc-wishlist-week">Circuit Week ${CIRCUIT_WEEK_NOW}</span>
+    </div>
     <div class="inc-wishlist-list">${rows || `<div class="inc-wishlist-empty">Click ☆ on any Incarnon to add it here.</div>`}</div>
   </div>`;
 }
@@ -6202,7 +6476,7 @@ async function loadFromCloud() {
   try {
     const { data, error } = await _sb
       .from('saves')
-      .select('progress, checklist, ui_prefs, custom_items, modular_builds, my_builds, inc_wishlist, updated_at')
+      .select('progress, checklist, ui_prefs, custom_items, modular_builds, my_builds, my_loadouts, inc_wishlist, updated_at')
       .eq('user_id', currentUser.id)
       .single();
 
@@ -6247,6 +6521,11 @@ async function loadFromCloud() {
     if (data.my_builds && typeof data.my_builds === 'object') {
       myBuilds = sanitizeMyBuilds(data.my_builds);
       localStorage.setItem(MY_BUILDS_KEY, JSON.stringify(myBuilds));
+    }
+
+    if (Array.isArray(data.my_loadouts)) {
+      myLoadouts = sanitizeMyLoadouts(data.my_loadouts);
+      localStorage.setItem(MY_LOADOUTS_KEY, JSON.stringify(myLoadouts));
     }
 
     if (Array.isArray(data.inc_wishlist)) {
@@ -6296,6 +6575,7 @@ async function syncToCloud() {
       custom_items: customItems,
       modular_builds: { builds: modularBuilds, owned: modularOwned },
       my_builds:    myBuilds,
+      my_loadouts:  myLoadouts,
       inc_wishlist: [...incWishlist],
       updated_at:   new Date().toISOString(),
     });
@@ -6604,6 +6884,7 @@ loadChecklist();
 loadIncWishlist();
 loadModularBuilds();
 loadMyBuilds();
+loadMyLoadouts();
 initAuth();
 const _savedTab = localStorage.getItem('wf-ui-tab');
 if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
@@ -6620,18 +6901,20 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isKitgun  = activeTab === 'kitgunBuilder';
   const _isBuilds  = activeTab === 'builds';
   const _isIncarnons = activeTab === 'incarnons';
-  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds || _isIncarnons;
+  const _isLoadouts = activeTab === 'loadouts';
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds || _isIncarnons || _isLoadouts;
   document.getElementById('summary').classList.toggle('open', _isSummary);
   document.getElementById('checklist-view').style.display = _isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = _isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = _isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = _isBuilds  ? 'flex'  : 'none';
   document.getElementById('incarnons-view').style.display = _isIncarnons ? 'block' : 'none';
+  document.getElementById('loadouts-view').style.display  = _isLoadouts ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';
   document.getElementById('bulk-bar').style.display = _isSpecial ? 'none' : 'flex';
   document.getElementById('cat-btns').style.display = (_isSpecial && !_isDucats) ? 'none' : '';
-  document.getElementById('search').style.display   = (_isCl || _isKitgun || _isBuilds) ? 'none' : '';
+  document.getElementById('search').style.display   = (_isCl || _isKitgun || _isBuilds || _isLoadouts) ? 'none' : '';
   document.getElementById('status-dd').style.display = _isSpecial ? 'none' : '';
   const _isIncarnon = ['primary','secondary','melee'].includes(activeTab);
   document.getElementById('fb-incarnon').style.display = _isIncarnon ? '' : 'none';

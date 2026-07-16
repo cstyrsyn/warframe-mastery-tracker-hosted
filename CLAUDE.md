@@ -143,6 +143,11 @@ let _blpOFBuilds   = null;        // null=not fetched, false=loading, array=load
 let _blpOFSearch   = '';
 let _blpActiveSlot = null;
 let _blpSubForm    = null;        // null = main build, string = exalted sub-form name
+
+// ── My Loadouts Page (Loadouts tab)
+const MY_LOADOUTS_KEY = 'wf-my-loadouts';
+let myLoadouts   = [];   // array of LoadoutEntry (id, name, slots)
+let _lpLoadoutId = null; // id of the loadout being edited
 ```
 
 ## Tabs
@@ -168,6 +173,7 @@ let _blpSubForm    = null;        // null = main build, string = exalted sub-for
 | `checklist` | — | isSpecial: hides all filters; uses `#checklist-view` |
 | `incarnons` | — | isSpecial: `#incarnons-view`; dedicated Incarnon Acquired/Installed tracker, grouped by genesis |
 | `builds` | — | isSpecial: `#builds-view`; the My Builds planner |
+| `loadouts` | — | isSpecial: `#loadouts-view`; the My Loadouts planner (groups builds from `builds` into named loadouts) |
 | `kitgunBuilder` | — | isSpecial: `#kitgun-view`; Kitgun/Zaw builder |
 | `ducats` | — | isSpecial: `#ducats-view`; ducat value calculator |
 
@@ -261,6 +267,24 @@ circuit week descending. Since `CIRCUIT_WEEK_NOW` changes weekly, a different su
 top each week. Reuses `.card-circuit`/`.circuit-now` (the same badge class as group headers and
 weapon cards elsewhere) for the week indicator, so the "current week" highlight stays visually
 consistent app-wide.
+
+### Incarnon Evolutions in the Builds page
+
+The My Builds editor shows the same Acquired/Installed toggles + Evolutions tiers as the Incarnons
+page, for whichever weapon is currently selected — `blpIncarnonHtml()` (called from
+`blpRenderEditor()`, inserted right after `metaBarHtml`), guarded by `INCARNON_WEAPONS.has(_blpItem)`
+and `!_blpSubForm` (exalted sub-weapons aren't separately Incarnon-trackable). It resolves the
+item's real tab via `blpItemSourceTab()` (not `_blpTab`, which can be a Builds-page pseudo-tab like
+`'kitguns'`/`'zaws'` or the `'mybuilds'` aggregate view) and calls the **exact same** functions the
+Incarnons page uses — `toggleIncarnonAcquired`, `toggleIncarnon`, `buildIncEvoTiers` — against the
+same `progress` keys, so there is only one source of truth and the two pages are always in sync with
+no separate state or copy-pasted logic.
+
+Because `toggleIncarnon`/`toggleIncarnonAcquired`/`setIncEvoChoice` all end by calling the app-global
+`render()`, which only rebuilds `blp-editor-inner` when a *structural* change happens (item/build
+switch, etc.) — not on every toggle — each of those three functions also calls `blpRenderEditor()`
+directly when `activeTab === 'builds'`, so clicking Acquired/Installed/an Evolution `<select>` from
+within the Builds editor refreshes the editor panel immediately, not just the Incarnons page.
 
 ## Data File Exports (split across data-*.js files)
 
@@ -395,6 +419,74 @@ Full build planner for owned items. Accessed via the "Builds" tab.
 `POLARITY_LABELS = ['—','M','V','N','Z','P','','U','B','O']` (index = polarity value; 6 unused).
 `BLP_TABS` — array of `{ key, label }` for the left-panel category tabs.
 
+## My Loadouts Page (`loadouts` tab)
+
+Groups builds from the Builds page into named, multi-slot loadouts (e.g. "Eidolon Hunting" = a
+specific Warframe build + Primary + Secondary + ...). Entirely separate state/render functions from
+the Builds page (`_lp*` globals, not `_blp*`) — it only *reads* `myBuilds` via `blpItemBuilds()` to
+resolve build names, so the two pages can't desync each other.
+
+### State
+
+`myLoadouts` = array of `LoadoutEntry`:
+```
+{ id, name, slots: { <slotKey>: { item: string, buildId: string|null } | null, ... } }
+```
+A slot value of `null` means unassigned. `buildId: null` with a non-null `item` means "this item,
+no specific build linked" (allowed — a loadout slot doesn't require a saved build to exist).
+
+`LOADOUT_SLOTS` — ordered array of slot definitions, each resolving items from `TAB_DATA`:
+
+| Slot key | Label | Source tab | Category filter |
+|---|---|---|---|
+| `warframe` | Warframe | `warframes` | — (only **required** slot) |
+| `primary` | Primary | `primary` | — |
+| `secondary` | Secondary | `secondary` | — |
+| `melee` | Melee | `melee` | — |
+| `companion` | Companion | `companions` | — |
+| `companionWeapon` | Companion Weapon | `compWeapons` | — |
+| `necramech` | Necramech | `vehicles` | `category === 'Necramech'` |
+| `necramechWeapon` | Necramech Weapon | `archWeapons` | `category` includes `'Arch-Gun'` |
+| `archwing` | Archwing | `vehicles` | `category === 'Archwing'` |
+| `archGun` | Arch Gun | `archWeapons` | `category` includes `'Arch-Gun'` |
+| `archMelee` | Arch Melee | `archWeapons` | `category` includes `'Arch-Melee'` |
+
+Necramech Weapon and Arch Gun intentionally draw from the same item pool (Necramechs can only mount
+Arch-Guns, not Arch-Melee, in-game) but are tracked as independent slot choices, since a user may run
+a different weapon on their mech than in Archwing mode. `lpItemsForSlot(slotDef)` resolves the
+filtered item list for a slot.
+
+### Key functions
+
+| Function | Purpose |
+|----------|---------|
+| `renderLoadoutsPage()` | Re-renders the loadout list + editor |
+| `lpSelectLoadout(id)` | Select a loadout to edit |
+| `lpCreateLoadout()` / `lpDeleteLoadout()` / `lpRenameLoadout(name)` | Loadout CRUD |
+| `lpSetSlotItem(slotKey, itemName)` | Assign/clear an item on a slot (clears any linked build) |
+| `lpSetSlotBuild(slotKey, buildId)` | Link/unlink a specific My Builds entry to a filled slot |
+| `lpClearSlot(slotKey)` | Unassign a slot entirely |
+| `lpOpenInBuilds(slotKey)` | Jumps to the Builds page with that slot's item/build pre-selected |
+
+**Stale build cleanup**: `blpDeleteBuild()` (Builds page) calls `lpCleanupBuildRef(itemName, buildId)`
+after removing a build — any loadout slot pointing at that exact `(item, buildId)` pair has its
+`buildId` reset to `null` (the item assignment itself is left alone, since items are static data and
+never disappear).
+
+### Persistence & cloud sync
+
+`loadMyLoadouts()` / `saveMyLoadouts()` mirror `loadMyBuilds()`/`saveMyBuilds()` exactly (localStorage
+key `MY_LOADOUTS_KEY = 'wf-my-loadouts'`, `saveMyLoadouts()` calls `deferCloudSync()`). Synced to
+Supabase via a `my_loadouts` column on the `saves` table (`jsonb`, array of `LoadoutEntry`), read
+through `sanitizeMyLoadouts()` on cloud load — same pattern and **same caveat** as `inc_wishlist`
+(see Incarnon Wishlist above): **this column must exist in Supabase** or the whole `saves` upsert
+fails silently, breaking sync for `progress`/`checklist`/`myBuilds`/etc. too. Add it via the Supabase
+dashboard/SQL editor: `alter table saves add column if not exists my_loadouts jsonb default
+'[]'::jsonb;`
+
+Not included in manual JSON Import/Export (`buildSave()`/`applySave()`) — same as `myBuilds`, which
+also isn't included there today.
+
 ## Key Functions (app.js)
 
 ### Tab switching
@@ -468,6 +560,7 @@ const STATUS_LABELS = { 'unowned': 'Unowned', 'notStarted': 'Not Started', 'inPr
 | `'wf-checklist-bp-owned'` | `saveClBpOwned()` |
 | `'wf-build-picks'` | `saveBuildPicks()` / `loadBuildPicks()` |
 | `'wf-my-builds'` | `saveMyBuilds()` / `loadMyBuilds()` |
+| `'wf-my-loadouts'` | `saveMyLoadouts()` / `loadMyLoadouts()` |
 | `'navLayout'` | `toggleLayout()` — `'topbar'` or `'sidebar'` |
 | `'filtersOpen-<tab>'` | `toggleFilterRow()` — `'1'` or `'0'` |
 | `'wf-ui-wftile'` | tile art toggle — `'0'` = off |
