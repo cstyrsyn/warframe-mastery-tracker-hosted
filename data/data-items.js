@@ -165,7 +165,7 @@ const VAULTED_WF = new Set([
   'Nidus Prime','Nova Prime','Oberon Prime','Octavia Prime','Protea Prime',
   'Revenant Prime','Rhino Prime','Saryn Prime','Sevagoth Prime','Titania Prime',
   'Trinity Prime','Vauban Prime','Volt Prime','Wisp Prime','Wukong Prime',
-  'Zephyr Prime',
+  'Xaku Prime','Zephyr Prime',
 ]);
 
 // ── COMPANIONS ───────────────────────────────────────────────────
@@ -415,6 +415,8 @@ const PRIMARY = [
   ["Zhuge Prime","Prime","Relics",30,1],
   ["Afentis Prime","Prime","Relics",30,1],
   ["Haalvu","Rifles","TODO: obtain method",30],
+  ["Nunchasa","Bows","TODO: obtain method",30],
+  ["Steflos Prime","Shotguns","TODO: obtain method",30],
 ];
 
 // ── SECONDARY WEAPONS ─────────────────────────────────────────────
@@ -575,6 +577,7 @@ const SECONDARY = [
   ["Tenet Diplos","Tenet","Sister of Parvos",40],
   ["Tenet Plinx","Tenet","Sister of Parvos",40],
   ["Tenet Spirex","Tenet","Sister of Parvos",40],
+  ["Aksondol","Pistols","TODO: obtain method",30],
 ];
 
 // ── MELEE WEAPONS ─────────────────────────────────────────────────
@@ -897,6 +900,7 @@ const ARCH_WEAPONS = [
   ["Prisma Veritux","Arch-Melee","Baro Ki'Teer",30,1],
   ["Rathbone","Arch-Melee","Market",30,1],
   ["Veritux","Arch-Melee","Odonata (Archwing)",30],
+  ["Corufell Prime","Prime Arch-Melee","TODO: obtain method",30],
 ];
 
 // ── AMPS ──────────────────────────────────────────────────────────
