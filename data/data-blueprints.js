@@ -185,6 +185,7 @@ const CURRENCIES = new Map([
 
 const BLUEPRINTS = new Map([
   ["Afentis Prime",[15000,43200,[["Barrel",1,"PrimePart"],["Blade",1,"PrimePart"],["Barrel",1,"PrimePart"],["Orokin Cell",10,"Resource"]]]],
+  ["Aksondol",[15000,43200,[[null,2,"Resource"],[null,1,"Resource"],[null,1,"Resource"],[null,2,"Resource"]]]],
   ["Athodai Prime",[15000,43200,[["Barrel",1,"PrimePart"],["Receiver",1,"PrimePart"],["Orokin Cell",10,"Resource"]]]],
   ["AX-52",[25000,43200,[["Techrot Motherboard",5,"Resource"],["Techrot Chitin",25,"Resource"],["Efervon Sample",60,"Resource"],["Höllvanian Pitchweave Fragment",60,"Resource"]]]],
   ["Acceltra",[25000,86400,[["Neurodes",4,"Resource"],["Hexenon",200,"Resource"],["Plastids",925,"Resource"],["Nano Spores",8000,"Resource"]]]],
@@ -355,6 +356,7 @@ const BLUEPRINTS = new Map([
   ["Cortege",[20000,43200,[["Barrel",1,"Item",[1000,60,[["Damaged Necramech Weapon Barrel",1],["Adramal Alloy",80],["Spinal Core Section",20],["Fersteel Alloy",20]]]],["Receiver",1,"Item",[1000,60,[["Damaged Necramech Weapon Receiver",1],["Devolved Namalon",80],["Trapezium Xenorhast",10],["Tink Dissipator Coil",15]]]],["Stock",1,"Item",[1000,60,[["Damaged Necramech Weapon Stock",1],["Tempered Bapholite",80],["Cabochon Embolos",10],["Hexenon",250]]]]]]],
   ["Cortege (Atmosphere)",[20000,43200,[["Barrel",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"]]]],
   ["Corufell",[15000,43200,[["Corufell Barrel",1,"Item"],["Corufell Handle",1,"Item"],["Corufell Receiver",1,"Item"],["Orokin Cell",3,"Resource"]]]],
+  ["Corufell Prime",[15000,43200,[[null,1,"Resource"],[null,1,"Resource"],[null,15,"Resource"],[null,1,"Resource"],[null,1,"Resource"]]]],
   ["Corvas",[45000,43200,[["Barrel",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"],["Argon Crystal",2,"Resource"]]]],
   ["Corvas (Atmosphere)",[45000,43200,[["Barrel",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"],["Argon Crystal",2,"Resource"]]]],
   ["Corvas Prime",[45000,86400,[["Barrel",1,"PrimePart"],["Receiver",1,"PrimePart"],["Stock",1,"PrimePart"],["Orokin Cell",10,"Resource"]]]],
@@ -856,6 +858,7 @@ const BLUEPRINTS = new Map([
   ["Nova Prime Systems",[15000,43200,[["Control Module",1,"Resource"],["Morphics",1,"Resource"],["Ferrite",600,"Resource"],["Circuits",200,"Resource"]]]],
   ["Nova Systems",[15000,43200,[["Control Module",1,"Resource"],["Morphics",1,"Resource"],["Salvage",500,"Resource"],["Plastids",600,"Resource"]]]],
   ["Nukor",[30000,86400,[["Detonite Injector",2,"Resource"],["Morphics",2,"Resource"],["Salvage",5500,"Resource"],["Forma",1,"Resource"]]]],
+  ["Nunchasa",[20000,86400,[[null,1,"Resource"],[null,1,"Resource"],[null,1,"Resource"],[null,1,"Resource"],[null,1,"Resource"]]]],
   ["Nyx",[25000,259200,[["Neuroptics",1,"Item"],["Chassis",1,"Item"],["Systems",1,"Item"],["Orokin Cell",1,"Resource"]]]],
   ["Nyx Chassis",[15000,43200,[["Morphics",1,"Resource"],["Ferrite",1000,"Resource"],["Rubedo",300,"Resource"]]]],
   ["Nyx Neuroptics",[15000,43200,[["Alloy Plate",150,"Resource"],["Neural Sensors",1,"Resource"],["Polymer Bundle",150,"Resource"],["Rubedo",500,"Resource"]]]],
@@ -1067,6 +1070,7 @@ const BLUEPRINTS = new Map([
   ["Stahlta",[30000,86400,[["Barrel",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"]]]],
   ["Staticor",[25000,86400,[["Fieldron",10,"Resource"],["Alloy Plate",6000,"Resource"],["Ferrite",9000,"Resource"],["Nitain Extract",3,"Resource"]]]],
   ["Steflos",[20000,43200,[["Barrel",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"],["Neurodes",4,"Resource"]]]],
+  ["Steflos Prime",[15000,43200,[[null,1,"Resource"],[null,1,"Resource"],[null,10,"Resource"],[null,1,"Resource"],[null,1,"Resource"]]]],
   ["Stradavar",[20000,43200,[["Ferrite",15000,"Resource"],["Polymer Bundle",8000,"Resource"],["Neural Sensors",3,"Resource"],["Argon Crystal",2,"Resource"]]]],
   ["Stradavar Prime",[20000,43200,[["Barrel",1,"PrimePart"],["Receiver",1,"PrimePart"],["Stock",1,"PrimePart"],["Orokin Cell",10,"Resource"]]]],
   ["Stropha",[30000,86400,[["Barrel",1,"Item"],["Blade",1,"Item"],["Receiver",1,"Item"],["Stock",1,"Item"]]]],
