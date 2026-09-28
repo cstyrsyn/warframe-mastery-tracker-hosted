@@ -117,6 +117,8 @@ const WARFRAMES = [
   ['Yareli Prime','Prime','Relics',30,1],
   ['Zephyr Prime','Prime','Relics',30,1],
   ['Excalibur Umbra','Umbra','Quest: The Sacrifice',30],
+  ['Citrine Prime','Prime','TODO: obtain method',30,1],
+  ['Narin','Base','TODO: obtain method',30],
 ];
 
 // Warframes available in The Circuit (Duviri), base variants only

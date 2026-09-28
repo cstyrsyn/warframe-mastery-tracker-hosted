@@ -658,7 +658,13 @@ async function main() {
   // Also runs automatically during --apply so new stubs get their images in the same pass.
   if (doImages || apply) {
     const IMAGES_DIR = path.join(__dirname, '..', 'Images', 'warframes');
-    const missing = [...existing.keys()].filter(name => {
+    // `existing` was read before any stubs were inserted, so add this run's new names explicitly.
+    const tracked = new Set(existing.keys());
+    if (apply) {
+      readyToAdd.forEach(n => tracked.add(n));
+      newPaired.forEach(p => tracked.add(p.combinedName));
+    }
+    const missing = [...tracked].filter(name => {
       const dest = path.join(IMAGES_DIR, name.replace(/ /g, '') + 'Helmet.png');
       return !fs.existsSync(dest);
     });
