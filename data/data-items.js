@@ -417,8 +417,8 @@ const PRIMARY = [
   ["Zhuge Prime","Prime","Relics",30,1],
   ["Afentis Prime","Prime","Relics",30,1],
   ["Haalvu","Rifles","TODO: obtain method",30],
-  ["Nunchasa","Bows","TODO: obtain method",30],
-  ["Steflos Prime","Shotguns","TODO: obtain method",30],
+  ["Nunchasa","Bows","Entropic Kuva",30],
+  ["Steflos Prime","Shotguns","Relics",30],
 ];
 
 // ── SECONDARY WEAPONS ─────────────────────────────────────────────
@@ -579,7 +579,7 @@ const SECONDARY = [
   ["Tenet Diplos","Tenet","Sister of Parvos",40],
   ["Tenet Plinx","Tenet","Sister of Parvos",40],
   ["Tenet Spirex","Tenet","Sister of Parvos",40],
-  ["Aksondol","Pistols","TODO: obtain method",30],
+  ["Aksondol","Pistols","Entropic Kuva",30],
 ];
 
 // ── MELEE WEAPONS ─────────────────────────────────────────────────
@@ -824,7 +824,7 @@ const MELEE = [
   ["Pride","Heavy Scythes","Pontis Tower",30],
   ["War Prime","Prime","Pontis Tower",30],
   ["Wrath","Heavy Scythes","Pontis Tower",30],
-  ["Corufell Prime","Prime","TODO: obtain method",30,1],
+  ["Corufell Prime","Prime","Relics",30,1],
 ];
 
 // ── VEHICLES ──────────────────────────────────────────────────────
