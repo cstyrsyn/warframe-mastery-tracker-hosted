@@ -327,7 +327,10 @@ function stubFromWfcd(name, item, isWarframe) {
   const isPrime = name.includes(' Prime');
   const parts   = [];
   for (const comp of components) {
-    if (comp.name === 'Blueprint') continue;
+    if (comp.name === 'Blueprint' || /Blueprint$/.test(comp.uniqueName || '')) continue;
+    // Freshly released items can have unnamed components in WFCD (uniqueName + count only) —
+    // bail so the caller falls back to the wiki instead of writing null part names.
+    if (!comp.name) return null;
     const tradable = comp.tradable ?? false;
     let type, partName;
     if (!tradable) {
@@ -351,6 +354,7 @@ function stubFromWiki(name, entry, isWarframe) {
   const credits = entry.Credits || 0;
   const time    = entry.Time    || 0;
   // Warframe components are Items (relic drops), not Resources — default accordingly when wiki omits Type
+  if ((entry.Parts || []).some(p => !p.Name)) return null;
   const parts   = (entry.Parts || []).map(p => [p.Name, p.Count || 1, p.Type || (isWarframe ? 'Item' : 'Resource')]);
   return formatEntry(name, credits, time, parts);
 }
