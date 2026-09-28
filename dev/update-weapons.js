@@ -69,9 +69,12 @@ const CONFIGS = [
   },
   {
     varName:     'MELEE',
-    wfcdFiles:   ['Melee.json'],
+    // WFCD files some regular melee under Arch-Melee.json (e.g. Corufell Prime, whose uniqueName
+    // sits under Archwing/Melee/) — productCategory 'Melee' vs 'SpaceMelee' is the reliable split.
+    wfcdFiles:   ['Melee.json', 'Arch-Melee.json'],
     // Zaw Component = individual pieces, not standalone weapons
-    excludeWfcd: w => w.type === 'Zaw Component' || hasFounderTag(w),
+    excludeWfcd: w => w.type === 'Zaw Component' || hasFounderTag(w)
+      || (w.type === 'Arch-Melee' && w.productCategory !== 'Melee'),
     wikiSubpage: 'melee',
     wikiSlots:   new Set(['Melee']),
     imageDir:    'Images/melee',
@@ -79,7 +82,8 @@ const CONFIGS = [
   {
     varName:     'ARCH_WEAPONS',
     wfcdFiles:   ['Arch-Gun.json', 'Arch-Melee.json'],
-    excludeWfcd: () => false,
+    // Regular melee misfiled in Arch-Melee.json — tracked in MELEE instead (see above)
+    excludeWfcd: w => w.productCategory === 'Melee',
     wikiSubpage: 'archwing',
     // 'Archgun (Atmosphere)' entries are the same weapons in a different context — skip duplicates
     wikiSlots:   new Set(['Archgun', 'Archmelee']),
@@ -252,7 +256,7 @@ function nodeToJs(node) {
 
 // ── data-items.js readers ─────────────────────────────────────────────────────
 
-const _dataItemsCache = fs.readFileSync(DATA_ITEMS, 'utf-8');
+let _dataItemsCache = fs.readFileSync(DATA_ITEMS, 'utf-8');
 
 // Returns Map<name, lowercasedName> for an array in data-items.js
 function getExistingNames(varName) {
@@ -588,6 +592,8 @@ async function main() {
     const wrote = applyNewWeapons(stubsByVar);
     if (wrote) {
       console.log('\ndata-items.js updated. Search for "TODO: obtain method" to fill in the missing fields.');
+      // Refresh so the image scan below sees the stubs just inserted.
+      _dataItemsCache = fs.readFileSync(DATA_ITEMS, 'utf-8');
     }
   }
 

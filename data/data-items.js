@@ -117,8 +117,8 @@ const WARFRAMES = [
   ['Yareli Prime','Prime','Relics',30,1],
   ['Zephyr Prime','Prime','Relics',30,1],
   ['Excalibur Umbra','Umbra','Quest: The Sacrifice',30],
-  ['Citrine Prime','Prime','TODO: obtain method',30,1],
-  ['Narin','Base','TODO: obtain method',30],
+  ['Citrine Prime','Prime','Relics',30,1],
+  ['Narin','Base','Zariman Missions',30],
 ];
 
 // Warframes available in The Circuit (Duviri), base variants only
@@ -820,9 +820,11 @@ const MELEE = [
   ["Tenet Exec","Tenet","Ergo Glast",40],
   ["Tenet Grigori","Tenet","Ergo Glast",40],
   ["Tenet Livia","Tenet","Ergo Glast",40],
+  //----New Weapons ----
   ["Pride","Heavy Scythes","Pontis Tower",30],
   ["War Prime","Prime","Pontis Tower",30],
   ["Wrath","Heavy Scythes","Pontis Tower",30],
+  ["Corufell Prime","Prime","TODO: obtain method",30,1],
 ];
 
 // ── VEHICLES ──────────────────────────────────────────────────────
@@ -902,7 +904,6 @@ const ARCH_WEAPONS = [
   ["Prisma Veritux","Arch-Melee","Baro Ki'Teer",30,1],
   ["Rathbone","Arch-Melee","Market",30,1],
   ["Veritux","Arch-Melee","Odonata (Archwing)",30],
-  ["Corufell Prime","Prime Arch-Melee","TODO: obtain method",30],
 ];
 
 // ── AMPS ──────────────────────────────────────────────────────────
