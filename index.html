@@ -123,7 +123,12 @@ body.topbar-mode #tabs { flex-direction: row; padding: 0 12px; }
 body.topbar-mode .tab { border-left: none; border-bottom: 2px solid transparent; flex-shrink: 0; }
 body.topbar-mode .tab:hover { background: transparent; }
 body.topbar-mode .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
-body.topbar-mode .sidebar-divider { display: none; }
+/* Section separators: divider → short vertical rule, heading → inline label after it.
+   Scoped under #tabs so they beat the base .sidebar-divider/.tabtext rules defined further down. */
+/* Heading gets the same 14px side padding + 2px bottom border as .tab, so the gap to the next tab
+   matches tab-to-tab and its text centres on the same line; divider margins are symmetric. */
+body.topbar-mode #tabs .sidebar-divider { width: 1px; height: 16px; margin: 0 4px; align-self: center; flex-shrink: 0; }
+body.topbar-mode #tabs .tabtext { padding: 0 14px; border-left: none; border-bottom: 2px solid transparent; align-self: center; flex-shrink: 0; font-size: 10px; }
 @media (max-width: 700px) { /* Detect screens/size under 700px to force topbar mode*/
   #app-body { display: block; }
   #sidebar { position: static; width: 100%; height: auto; z-index: auto; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; border-right: none; border-bottom: 1px solid var(--border); }
@@ -131,7 +136,8 @@ body.topbar-mode .sidebar-divider { display: none; }
   .tab { border-left: none; border-bottom: 2px solid transparent; flex-shrink: 0; }
   .tab:hover { background: transparent; }
   .tab.active { border-left-color: transparent; border-bottom-color: var(--gold); background: transparent; }
-  .sidebar-divider { display: none; }
+  #tabs .sidebar-divider { width: 1px; height: 16px; margin: 0 4px; align-self: center; flex-shrink: 0; }
+  #tabs .tabtext { padding: 0 14px; border-left: none; border-bottom: 2px solid transparent; align-self: center; flex-shrink: 0; font-size: 10px; }
   #btn-layout { display: none; }
 }
 
@@ -154,10 +160,22 @@ body.topbar-mode .sidebar-divider { display: none; }
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   user-select: none;
 }
+/* Sidebar section heading — deliberately not a .tab, so switchTab() never binds a click to it */
+.tabtext {
+  padding: 10px 14px 4px;
+  border-left: 2px solid transparent; /* same as .tab, so heading text lines up with tab labels */
+  cursor: default;
+  color: var(--gold-dim);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  user-select: none;
+}
 .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
 .tab.active { color: var(--gold); border-left-color: var(--gold); background: rgba(200,170,110,0.06); }
 .sidebar-divider { height: 1px; background: var(--border); margin: 6px 12px; }
-
 /* ── CONTROLS ── */
 #ctrl {
   background: var(--surface);
@@ -1591,6 +1609,7 @@ body.topbar-mode .sidebar-divider { display: none; }
 <div id="app-body">
 <div id="sidebar">
 <div id="tabs">
+  <div class="tabtext">Mastery Tracking</div>
   <div class="tab active" data-tab="summary">Summary</div>
   <div class="tab" data-tab="warframes">Warframes</div>
   <div class="tab" data-tab="primary">Primary</div>
@@ -1604,15 +1623,18 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div class="tab" data-tab="intrinsics">Intrinsics</div>
   <div class="tab" data-tab="starChart">Star Chart</div>
   <div class="sidebar-divider"></div>
+  <div class="tabtext">Non-Mastery Tracking</div>
+  <div class="tab" data-tab="helminth">Helminth</div>
+  <div class="tab" data-tab="incarnons">Incarnons</div>
   <div class="tab" data-tab="mods">Mods</div>
   <div class="tab" data-tab="arcanes">Arcanes</div>
-  <div class="tab" data-tab="checklist">Checklist</div>
-  <div class="tab" data-tab="incarnons">Incarnons</div>
-  <div class="tab" data-tab="helminth">Helminth</div>
+  <div class="sidebar-divider"></div>
+  <div class="tabtext">Tools</div>
+  <div class="tab" data-tab="checklist">In-Progress Checklist</div>
   <div class="tab" data-tab="builds">Builds</div>
   <div class="tab" data-tab="loadouts">Loadouts</div>
   <div class="tab" data-tab="kitgunBuilder">Kitgun/Zaw Builder</div>
-  <div class="tab" data-tab="ducats">Ducats</div>
+  <div class="tab" data-tab="ducats">Ducat Tracker</div>
 </div>
 </div>
 
