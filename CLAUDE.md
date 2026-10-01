@@ -613,3 +613,30 @@ Offline tools for maintaining data.js:
 ## ⚠ Dual Init Block
 
 `app.js` has two places that wire up DOM visibility for the initial tab on page load — one inside `switchTab()` and one in a standalone block near the bottom of the file. If you change what `switchTab()` shows/hides, you **must also update the second block** or the initial page load will be inconsistent.
+
+## ⚠ Input handlers must not re-render their own input
+
+An `oninput` handler (text box, number box, slider) must never rebuild — via `innerHTML` or a full
+`render*()` call — the element that *contains* its own input. That replaces the input mid-typing:
+focus is lost after one keystroke (or a slider drag stops), and partial values like `-` get wiped.
+Instead, save the value and update only the dependent pieces in place. Existing examples:
+`setSCOverride()` → `updateSCOverrideUI()` (Star Chart override), `setHelminthLevel()` →
+`renderHelminthCards()` (slider sits outside `#helm-cards`), `sliderInput()` / `updateChecklistOwned()`
+(patch text/classes on the card/row). Re-rendering a *sibling* list is fine (the Builds-page search
+boxes rebuild `#blp-of-results`, `#blp-dd-N`, `#blp-ability-opts-N`, never the box itself). Full
+re-renders belong in `onchange`/click handlers, where losing focus doesn't matter.
+
+## ⚠ UI text size (CSS zoom)
+
+The Text size setting (`layout.js`: `applyUiZoom()`) sets `--zoom` on `<html>`, and `html { zoom:
+var(--zoom) }` scales the whole page. Two things don't scale correctly on their own:
+
+- **`vh` units** aren't zoom-adjusted (`100vh` renders as zoom × the window height). Any new viewport
+  height must be written as `calc(100vh / var(--zoom) …)`.
+- **Pop-ups positioned from a click** (`position: fixed` + `style.left/top/right`): those values get
+  multiplied by the zoom, but `getBoundingClientRect()` and `window.innerWidth/innerHeight` are already
+  in screen pixels. Use `pageRect(el)` and `pageViewport()` (layout.js) instead, so everything is in
+  page pixels — see `openAcqMenu()`, `openChecklistMenu()`, `openElemMenu()`, the mod-drops overlay.
+
+Ratios of screen measurements (e.g. the touch-slider guard in layout.js) are zoom-independent and
+need no change.

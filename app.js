@@ -5177,6 +5177,9 @@ function toggleSC(type, name) {
   renderStarChart();
 }
 
+// Called on every keystroke in an override box. Must NOT re-render the Star Chart: replacing
+// #sc's innerHTML destroys the focused <input>, so typing would stop after one character.
+// Instead, only the pieces that depend on the override are updated in place.
 function setSCOverride(key, val) {
   const num = Math.round(parseFloat(val));
   if (val === '' || isNaN(num) || num < 0) {
@@ -5186,14 +5189,39 @@ function setSCOverride(key, val) {
   }
   saveProgress();
   updateHeader();
-  renderStarChart();
+  updateSCOverrideUI(key);
 }
 
-function renderStarChart() {
-  updateTabStat();
-  const sc = document.getElementById('sc');
+function scOverride(ovKey) {
+  return (progress[ovKey] != null && progress[ovKey] >= 0) ? progress[ovKey] : null;
+}
 
-  const groups = [
+function scGroupStatHtml({ ovKey, sections }) {
+  const ovr = scOverride(ovKey);
+  if (ovr != null)
+    return `<span style="color:var(--gold-dim)">${fmt(ovr)} XP <span style="color:var(--text-muted);font-size:8px;letter-spacing:1px">OVERRIDE</span></span>`;
+  const totalGroupXP    = sections.reduce((s, { items, getXP }) => s + items.reduce((ss, n) => ss + getXP(n), 0), 0);
+  const doneGroupXP     = sections.reduce((s, { items, type, getXP }) => s + items.filter(n => progress[scKey(type,n)]).reduce((ss,n) => ss + getXP(n), 0), 0);
+  const doneGroupCount  = sections.reduce((s, { items, type }) => s + items.filter(n => progress[scKey(type,n)]).length, 0);
+  const totalGroupCount = sections.reduce((s, { items }) => s + items.length, 0);
+  return `<span style="color:var(--text-muted);font-weight:400">${doneGroupCount}/${totalGroupCount} · ${fmt(doneGroupXP)} XP / ${fmt(totalGroupXP)}</span>`;
+}
+
+function updateSCOverrideUI(ovKey) {
+  const group = [...document.querySelectorAll('#sc .sc-group')].find(g => g.dataset.ovkey === ovKey);
+  const def   = scGroups().find(g => g.ovKey === ovKey);
+  if (!group || !def) return;
+  const active = scOverride(ovKey) != null;
+  group.querySelector('.sc-group-stat').innerHTML = scGroupStatHtml(def);
+  group.querySelector('.sc-ovr-input').classList.toggle('active', active);
+  group.querySelector('.sc-ovr-note').hidden = !active;
+  group.querySelectorAll('.sc-grid').forEach(g => g.classList.toggle('dimmed', active));
+  document.getElementById('tab-stat').innerHTML =
+    `<b>${fmt(scXP())}</b> / ${fmt(SC_MAX_XP)} XP from star chart`;
+}
+
+function scGroups() {
+  return [
     {
       ovKey: 'sc-ovr:regular',
       label: 'Regular Star Chart',
@@ -5211,18 +5239,15 @@ function renderStarChart() {
       ],
     },
   ];
+}
 
-  sc.innerHTML = groups.map(({ ovKey, label, sections }) => {
-    const ovr = (progress[ovKey] != null && progress[ovKey] >= 0) ? progress[ovKey] : null;
+function renderStarChart() {
+  updateTabStat();
+  const sc = document.getElementById('sc');
 
-    const totalGroupXP  = sections.reduce((s, { items, getXP }) => s + items.reduce((ss, n) => ss + getXP(n), 0), 0);
-    const doneGroupXP   = sections.reduce((s, { items, type, getXP }) => s + items.filter(n => progress[scKey(type,n)]).reduce((ss,n) => ss + getXP(n), 0), 0);
-    const doneGroupCount = sections.reduce((s, { items, type }) => s + items.filter(n => progress[scKey(type,n)]).length, 0);
-    const totalGroupCount = sections.reduce((s, { items }) => s + items.length, 0);
-
-    const groupStat = ovr != null
-      ? `<span style="color:var(--gold-dim)">${fmt(ovr)} XP <span style="color:var(--text-muted);font-size:8px;letter-spacing:1px">OVERRIDE</span></span>`
-      : `<span style="color:var(--text-muted);font-weight:400">${doneGroupCount}/${totalGroupCount} · ${fmt(doneGroupXP)} XP / ${fmt(totalGroupXP)}</span>`;
+  sc.innerHTML = scGroups().map(group => {
+    const { ovKey, label, sections } = group;
+    const ovr = scOverride(ovKey);
 
     const sectionsHtml = sections.map(({ title, items, type, getXP }) => {
       const done = items.filter(n => progress[scKey(type,n)]).length;
@@ -5244,10 +5269,10 @@ function renderStarChart() {
 </div>`;
     }).join('');
 
-    return `<div class="sc-group">
+    return `<div class="sc-group" data-ovkey="${ovKey}">
   <div class="sc-group-hdr">
     <span class="sc-group-title">${esc(label)}</span>
-    ${groupStat}
+    <span class="sc-group-stat">${scGroupStatHtml(group)}</span>
   </div>
   <div class="sc-ovr-row">
     <span>[OVERRIDE] Game total XP:</span>
@@ -5255,7 +5280,7 @@ function renderStarChart() {
       placeholder="blank = use checkboxes"
       value="${ovr != null ? ovr : ''}"
       oninput="setSCOverride('${ovKey}', this.value)">
-    ${ovr != null ? '<span class="sc-ovr-note">Override active — checkboxes ignored</span>' : ''}
+    <span class="sc-ovr-note"${ovr != null ? '' : ' hidden'}>Override active — checkboxes ignored</span>
   </div>
   ${sectionsHtml}
 </div>`;
@@ -6853,11 +6878,14 @@ function buildDucatSets(searchTerm) {
   return sets;
 }
 
-function ducatInput(el) {
+// oninput: updates totals live but leaves the box's text alone, so it can be cleared and retyped
+// (rewriting it here turned an emptied box into "0" mid-edit, giving "05").
+// onchange (commit = true): tidies the text to the stored whole number, e.g. "" → 0, "-3" → 0, "2.5" → 2.
+function ducatInput(el, commit = false) {
   const row   = el.closest('.dc-part-row');
   const setEl = el.closest('.dc-set');
   const qty   = Math.max(0, parseInt(el.value) || 0);
-  el.value    = qty;
+  if (commit) el.value = qty;
   const item  = row.dataset.item;
   const part  = row.dataset.part;
   const value = parseInt(row.dataset.value);
@@ -6984,7 +7012,7 @@ function renderDucats() {
           partsHtml += `<div class="dc-part-row" data-item="${esc(set.name)}" data-part="${esc(part.name)}" data-value="${part.value}">
   <span class="dc-part-name">${esc(part.name)}</span>
   <span class="dc-rarity ${R_CLS[part.rarity]}">${part.value}D</span>
-  <input class="dc-qty" type="number" min="0" max="999" value="${qty}" oninput="ducatInput(this)">
+  <input class="dc-qty" type="number" min="0" max="999" value="${qty}" oninput="ducatInput(this)" onchange="ducatInput(this, true)">
   <span class="dc-part-total">${partDucats > 0 ? fmt(partDucats) : '—'}</span>
 </div>`;
         }
