@@ -1,11 +1,13 @@
 // update-warframes.js
 // Checks WFCD and wiki for new warframes not yet in data-items.js.
 // With --apply: inserts stubs into WARFRAMES (obtain method left as TODO),
-// syncs VAULTED_WF, and adds derivable WARFRAME_ABILITIES entries.
+// syncs VAULTED_WF, adds derivable WARFRAME_ABILITIES entries, and adds each tracked frame's
+// Helminth subsume ability to HELMINTH_OF_IDS (+ its icon). Subsume data is wiki-only — WFCD has
+// none — so the wiki is fetched on every run unless --wfcd-only.
 //
 // Usage:
-//   node dev/update-warframes.js              # detect new warframes + vaulted/ability changes
-//   node dev/update-warframes.js --wfcd-only  # skip wiki fallback
+//   node dev/update-warframes.js              # detect new warframes + vaulted/ability/helminth changes
+//   node dev/update-warframes.js --wfcd-only  # skip wiki fallback (and the Helminth subsume check)
 //   node dev/update-warframes.js --wiki-only  # skip WFCD, use wiki directly
 //   node dev/update-warframes.js --all        # always fetch wiki (ensures ability data when WFCD has new frames)
 //   node dev/update-warframes.js --apply      # insert stubs + write VAULTED_WF + ability changes
@@ -18,6 +20,7 @@ const fs       = require('fs');
 const path     = require('path');
 const https    = require('https');
 const luaparse = require('luaparse');
+const { downloadAbilityIcons } = require('./update-ability-images');
 
 const WFCD_WARFRAMES = path.join(__dirname, 'node_modules/@wfcd/items/data/json/Warframes.json');
 const DATA_ITEMS     = path.join(__dirname, '..', 'data', 'data-items.js');
@@ -201,6 +204,7 @@ function extractFromWfcd() {
 //   standard : Map<name, { vaulted, abilities: string[]|null }>  — regular warframes
 //   paired   : [{ combinedName, members, vaulted, memberAbilities }]  — duo frames sharing one slot
 //   special  : [{ name, entry }]  — solo _IgnoreEntry frames needing manual review
+//   subsumed : Map<abilityName, sourceFrame>  — Helminth subsume ability per base frame
 async function extractFromWiki() {
   console.log('  Fetching wiki Module:Warframes/data…');
   const lua = await fetch(WIKI_URL);
@@ -239,6 +243,19 @@ async function extractFromWiki() {
     byLink.get(link).push({ name, entry });
   }
 
+  // Helminth subsume ability per frame — the wiki `Subsumed` field (WFCD has no equivalent).
+  // `Link` resolves sub-entries to the page/frame name data-items.js uses: "Sirius & Orion#Orion" and
+  // "Sevagoth/Abilities" (Sevagoth's Shadow) → strip from the first # or /. Prime/Umbra forms share the
+  // base frame's ability, so only base frames are sources. Unreleased frames are filtered out later by
+  // requiring the source frame to be tracked in data-items.js.
+  const subsumed = new Map(); // ability → source frame
+  for (const [name, entry] of Object.entries(wfSection)) {
+    if (typeof entry.Subsumed !== 'string' || !entry.Subsumed) continue;
+    if (/ Prime\b|Umbra/.test(name)) continue;
+    const source = (entry.Link || name).split(/[#/]/)[0];
+    if (!subsumed.has(entry.Subsumed)) subsumed.set(entry.Subsumed, source);
+  }
+
   const paired  = [];
   const special = [];
   for (const [link, group] of byLink) {
@@ -260,7 +277,7 @@ async function extractFromWiki() {
     }
   }
 
-  return { standard, paired, special };
+  return { standard, paired, special, subsumed };
 }
 
 // ── relics.js corroboration ───────────────────────────────────────────────────
@@ -348,6 +365,40 @@ function applyAbilityChanges(newEntries) {
   fs.writeFileSync(DATA_ABILITIES, js, 'utf-8');
 }
 
+// ── HELMINTH_OF_IDS reader / writer ──────────────────────────────────────────
+
+// Returns { names: Set<lowercased ability>, nextLocalId } from HELMINTH_OF_IDS in data-abilities.js.
+// Local IDs (< 7000) are ours; ≥ 7000 are real Overframe IDs.
+function getHelminthAbilities() {
+  const js    = fs.readFileSync(DATA_ABILITIES, 'utf-8');
+  const block = js.match(/const HELMINTH_OF_IDS = \{([\s\S]*?)\n\};/);
+  if (!block) throw new Error('HELMINTH_OF_IDS not found in data-abilities.js');
+  const names = new Set();
+  let maxLocal = 999;
+  for (const m of block[1].matchAll(/^\s*"([^"]+)":\s*\{\s*id:\s*(\d+)/gm)) {
+    names.add(m[1].toLowerCase());
+    const id = Number(m[2]);
+    if (id < 7000) maxLocal = Math.max(maxLocal, id);
+  }
+  return { names, nextLocalId: maxLocal + 1 };
+}
+
+function makeHelminthLine(ability, source, id) {
+  return `  ${`"${ability}":`.padEnd(24)}{ id: ${id}, source: ${`"${source}"`.padEnd(11)} },`;
+}
+
+// entries: [{ ability, source, id }] — inserted at the end of the warframe-sourced section,
+// i.e. just above the "Helminth-native abilities" comment.
+function applyHelminthChanges(entries) {
+  let js = fs.readFileSync(DATA_ABILITIES, 'utf-8');
+  const anchor = js.indexOf('  // ── Helminth-native abilities');
+  if (anchor === -1) throw new Error('Helminth-native section marker not found in HELMINTH_OF_IDS');
+  const eol   = js.includes('\r\n') ? '\r\n' : '\n';
+  const lines = entries.map(e => makeHelminthLine(e.ability, e.source, e.id) + eol).join('');
+  js = js.slice(0, anchor) + lines + js.slice(anchor);
+  fs.writeFileSync(DATA_ABILITIES, js, 'utf-8');
+}
+
 // ── WARFRAMES inserter ────────────────────────────────────────────────────────
 
 function applyWarframeStubs(stubs) {
@@ -416,6 +467,7 @@ async function main() {
   let wfcdNames = new Set();     // names confirmed by WFCD (used to flag wiki-only entries)
   let wikiPaired  = [];          // [{ combinedName, members, vaulted }]
   let wikiSpecial = [];          // [{ name, entry }]
+  let wikiSubsumed = null;       // Map<ability, sourceFrame> — wiki only; null if not fetched
 
   const wfcdAbilities = v =>
     Array.isArray(v.abilities) ? v.abilities.map(a => a.name).filter(Boolean) : null;
@@ -426,6 +478,7 @@ async function main() {
     wfNames     = wiki.standard;
     wikiPaired  = wiki.paired;
     wikiSpecial = wiki.special;
+    wikiSubsumed = wiki.subsumed;
   } else {
     console.log('Checking WFCD…');
     const wfcdMap = extractFromWfcd();
@@ -441,6 +494,7 @@ async function main() {
         const wiki  = await extractFromWiki();
         wikiPaired  = wiki.paired;
         wikiSpecial = wiki.special;
+        wikiSubsumed = wiki.subsumed;
         const wikiNew = [...wiki.standard.keys()].filter(n => !existingNames.has(n));
         console.log(`  Wiki: ${wiki.standard.size} warframes, ${wikiNew.length} new vs data-items.js`);
         wikiNew.forEach(n => console.log(`    + ${n}`));
@@ -457,6 +511,15 @@ async function main() {
         vaulted: !!v.vaulted, abilities: wfcdAbilities(v),
       }]));
       wfNamesSource = 'WFCD';
+      // WFCD has no subsume data, so new WFCD frames still need the wiki for their Helminth ability.
+      if (!wfcdOnly) {
+        try {
+          console.log('  Fetching wiki for Helminth subsume abilities…');
+          wikiSubsumed = (await extractFromWiki()).subsumed;
+        } catch (e) {
+          console.warn(`  Wiki fetch failed (${e.message}) — skipping Helminth subsume check`);
+        }
+      }
     }
   }
 
@@ -604,6 +667,35 @@ async function main() {
     console.log();
   }
 
+  // ── HELMINTH_OF_IDS sync ──────────────────────────────────────────
+  // Subsume abilities (wiki `Subsumed` field) whose source frame is tracked — including frames this
+  // run inserts — but which the Helminth page doesn't list yet. Gating on tracked frames keeps
+  // unreleased wiki entries out. Names compare case-insensitively ("Well of Life" vs "Well Of Life").
+  const helminthGaps = [];
+  if (wikiSubsumed) {
+    const trackedFrames = new Set([...existingNames, ...readyToAdd, ...newPaired.map(p => p.combinedName)]);
+    const helminth = getHelminthAbilities();
+    let nextId = helminth.nextLocalId;
+    for (const [ability, source] of [...wikiSubsumed].sort(([a], [b]) => a.localeCompare(b))) {
+      if (helminth.names.has(ability.toLowerCase())) continue;
+      if (!trackedFrames.has(source)) continue;
+      helminthGaps.push({ ability, source, id: nextId++ });
+    }
+  }
+
+  console.log('\n' + '─'.repeat(60));
+  console.log(`\nHELMINTH_OF_IDS gaps (${helminthGaps.length}):`);
+  if (!wikiSubsumed) {
+    console.log('  Skipped — subsume data only comes from the wiki (WFCD has none).');
+  } else if (!helminthGaps.length) {
+    console.log('  None — every tracked frame\'s subsume ability is listed.');
+  } else {
+    console.log('  Subsume abilities to add to HELMINTH_OF_IDS in data-abilities.js (local IDs):');
+    console.log();
+    for (const g of helminthGaps) console.log(`  ${makeHelminthLine(g.ability, g.source, g.id)}`);
+    console.log();
+  }
+
   // ── Apply ─────────────────────────────────────────────────────────
   const newStubs           = [
     ...readyToAdd.map(n => makeStubLine(n)),
@@ -613,10 +705,11 @@ async function main() {
   const hasVaultedChanges  = toAdd.length + toRemove.length > 0;
   const hasAbilityChanges  = autoApplicable.length > 0;
   const hasManualAbilities = abilityGaps.length > autoApplicable.length;
-  const hasAnyChanges      = hasNewWarframes || hasVaultedChanges || hasAbilityChanges;
+  const hasHelminthChanges = helminthGaps.length > 0;
+  const hasAnyChanges      = hasNewWarframes || hasVaultedChanges || hasAbilityChanges || hasHelminthChanges;
 
   console.log('\n' + '─'.repeat(60));
-  console.log(`${totalNew} new warframes | ${toAdd.length + toRemove.length} vaulted changes | ${abilityGaps.length} ability gaps`);
+  console.log(`${totalNew} new warframes | ${toAdd.length + toRemove.length} vaulted changes | ${abilityGaps.length} ability gaps | ${helminthGaps.length} helminth gaps`);
 
   if (!hasAnyChanges && !hasManualAbilities) {
     console.log('Nothing to update.');
@@ -635,6 +728,10 @@ async function main() {
         applyAbilityChanges(autoApplicable);
         console.log(`  data-abilities.js updated (+${autoApplicable.length} entries)`);
       }
+      if (hasHelminthChanges) {
+        applyHelminthChanges(helminthGaps);
+        console.log(`  data-abilities.js updated (HELMINTH_OF_IDS +${helminthGaps.length})`);
+      }
       if (hasManualAbilities) {
         const n = abilityGaps.length - autoApplicable.length;
         console.log(`  ${n} ability entry/entries still need manual input (TODO placeholders above).`);
@@ -647,6 +744,7 @@ async function main() {
     if (hasNewWarframes)   parts.push(`${newStubs.length} new warframe stub(s)`);
     if (hasVaultedChanges) parts.push(`${toAdd.length + toRemove.length} VAULTED_WF change(s)`);
     if (hasAbilityChanges) parts.push(`${autoApplicable.length} abilities`);
+    if (hasHelminthChanges) parts.push(`${helminthGaps.length} Helminth subsume abilit${helminthGaps.length === 1 ? 'y' : 'ies'}`);
     if (hasManualAbilities && !hasAnyChanges)
       console.log('\nNo auto-derivable changes — fill in the TODO abilities above, then re-run --apply.');
     else if (parts.length)
@@ -690,6 +788,13 @@ async function main() {
       console.log(`\n  Downloaded: ${downloaded}  Not found on wiki: ${notFound}`);
       if (apply && notFound > 0)
         console.log(`  ${notFound} image(s) not yet on wiki — re-run with --images once available.`);
+    }
+
+    // Helminth ability icons — picks up any just added to HELMINTH_OF_IDS above (no-op if none missing)
+    try {
+      await downloadAbilityIcons();
+    } catch (e) {
+      console.warn(`  Ability icon download failed (${e.message}) — run: node dev/update-ability-images.js`);
     }
   }
 }

@@ -284,8 +284,14 @@ The `helminth` tab (`renderHelminthPage()`) shows every ability in `HELMINTH_OF_
   one on the base Warframe card (`buildItem()`, shown when `HELMINTH_SUBSUME_SOURCES.has(name)`) are
   the same flag via `toggleSubsumed()`. A frame with two abilities (Sirius & Orion) unlocks both.
 
-To add a new subsumable ability, add `"Ability": { id, source: "<Warframe>" }` to `HELMINTH_OF_IDS`
-— the source must match the Warframe's name in `WARFRAMES` exactly. Native abilities also need `level`.
+New subsumable abilities are added automatically by `dev/update-warframes.js --apply` (also run by
+the Apply Content Updates workflow): it reads each frame's `Subsumed` field from the wiki's
+`Module:Warframes/data` — WFCD has no subsume data at all, so the wiki is fetched on every run unless
+`--wfcd-only` — and inserts any ability whose source frame is tracked in `WARFRAMES` but missing from
+`HELMINTH_OF_IDS`, with the next free local id (< 7000; ≥ 7000 are real Overframe ids), then
+downloads its icon via `update-ability-images.js`. To add one by hand: `"Ability": { id, source:
+"<Warframe>" }` — the source must match the Warframe's name in `WARFRAMES` exactly. Helminth-native
+abilities also need `level`, which no data source provides — always manual.
 
 ### Incarnon Evolutions in the Builds page
 

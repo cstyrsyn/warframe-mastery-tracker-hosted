@@ -8,7 +8,9 @@
 // /images/thumb/…/50px-… URLs in page HTML are just resized copies, and the ?xxxxx suffix is a
 // cache-buster.
 //
-// Also reports wiki abilities flagged Subsumable that HELMINTH_OF_IDS doesn't list yet.
+// When it fetches the wiki, also reports abilities flagged Subsumable that HELMINTH_OF_IDS doesn't list.
+// (update-warframes.js is what actually adds new subsume abilities — from each frame's Subsumed field —
+// and calls downloadAbilityIcons() for them.)
 //
 // Usage:
 //   node dev/update-ability-images.js           # download missing icons
@@ -147,21 +149,30 @@ async function fetchWikiAbilities() {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-async function main() {
-  const force    = process.argv.includes('--force');
+// Downloads icons for every HELMINTH_OF_IDS ability (only missing ones unless force).
+// Exported so update-warframes.js can fetch icons for abilities it adds in the same run.
+// Skips the wiki fetch entirely when nothing is missing.
+async function downloadAbilityIcons({ force = false } = {}) {
   const helminth = loadHelminthAbilities();
-  const wiki     = await fetchWikiAbilities();
   fs.mkdirSync(OUT_DIR, { recursive: true });
+
+  const wanted = Object.keys(helminth).sort()
+    .map(name => ({ name, dest: path.join(OUT_DIR, iconFilename(name)) }));
+  const missing = force ? wanted : wanted.filter(w => !fs.existsSync(w.dest));
+  const present = wanted.length - missing.length;
+  if (!missing.length) {
+    console.log(`\nAll ${wanted.length} ability icons already present.`);
+    return;
+  }
+
+  const wiki = await fetchWikiAbilities();
 
   // Case-insensitive lookup — tracker keys don't always match wiki casing ("Well Of Life" vs "Well of Life"),
   // and renaming the key would break saved builds that reference the ability by name.
   const wikiLower = new Map([...wiki].map(([n, a]) => [n.toLowerCase(), a]));
 
   const queue = [], noIcon = [];
-  let present = 0;
-  for (const name of Object.keys(helminth).sort()) {
-    const dest = path.join(OUT_DIR, iconFilename(name));
-    if (!force && fs.existsSync(dest)) { present++; continue; }
+  for (const { name, dest } of missing) {
     const icon = wikiLower.get(name.toLowerCase())?.icon;
     if (!icon) { noIcon.push(name); continue; }
     queue.push({ name, icon, dest });
@@ -200,4 +211,10 @@ async function main() {
   }
 }
 
-main().then(() => process.exit(0)).catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+module.exports = { downloadAbilityIcons };
+
+if (require.main === module) {
+  downloadAbilityIcons({ force: process.argv.includes('--force') })
+    .then(() => process.exit(0))
+    .catch(err => { console.error('ERROR:', err.message); process.exit(1); });
+}

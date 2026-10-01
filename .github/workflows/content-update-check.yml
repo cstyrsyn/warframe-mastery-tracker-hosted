@@ -49,7 +49,7 @@ jobs:
           } > /tmp/check-output.txt 2>&1 || true
           cat /tmp/check-output.txt
           if grep -qE \
-            'Auto-stubs \(|Needs manual research \(|No traditional blueprint \([1-9]|New arcanes confirmed by WFCD \(|Wiki-only — verify released before adding \(|Incomplete entries with WFCD.Wiki data now available \(|New mods confirmed by WFCD \(|Incomplete entries now patchable from WFCD \(|New weapons confirmed by WFCD \(|New warframes \([1-9]|VAULTED_WF changes \([1-9]|WARFRAME_ABILITIES gaps \([1-9]|New items found \(' \
+            'Auto-stubs \(|Needs manual research \(|No traditional blueprint \([1-9]|New arcanes confirmed by WFCD \(|Wiki-only — verify released before adding \(|Incomplete entries with WFCD.Wiki data now available \(|New mods confirmed by WFCD \(|Incomplete entries now patchable from WFCD \(|New weapons confirmed by WFCD \(|New warframes \([1-9]|VAULTED_WF changes \([1-9]|WARFRAME_ABILITIES gaps \([1-9]|HELMINTH_OF_IDS gaps \([1-9]|New items found \(' \
             /tmp/check-output.txt; then
             echo "has_updates=true" >> $GITHUB_OUTPUT
           else
