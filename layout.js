@@ -4,6 +4,38 @@ function updateStickyOffset(){
   if(el) document.documentElement.style.setProperty('--sticky-offset', el.offsetHeight+'px');
 }
 
+// ── UI text size ──
+// Scales the whole page with CSS zoom via the --zoom custom property on <html> (see :root in index.html).
+// Stored under a 'wf-ui-' key so syncToCloud() carries it in ui_prefs. Default M is a step up from the
+// original sizing; S is the original. Feedback was that the tool needed browser zoom to be readable.
+const UI_ZOOM_KEY     = 'wf-ui-zoom';
+const UI_ZOOM_SIZES   = [['S', 1], ['M', 1.15], ['L', 1.3], ['XL', 1.5]];
+const UI_ZOOM_DEFAULT = 1.15;
+function getUiZoom(){
+  const v=parseFloat(localStorage.getItem(UI_ZOOM_KEY));
+  return UI_ZOOM_SIZES.some(([,z])=>z===v) ? v : UI_ZOOM_DEFAULT;
+}
+function applyUiZoom(){
+  const z=getUiZoom();
+  document.documentElement.style.setProperty('--zoom', z);
+  document.querySelectorAll('#ui-zoom-btns button').forEach(b=>b.classList.toggle('on', parseFloat(b.dataset.zoom)===z));
+  updateStickyOffset();
+}
+function setUiZoom(z){
+  localStorage.setItem(UI_ZOOM_KEY, String(z));
+  applyUiZoom();
+  if(typeof deferCloudSync==='function') deferCloudSync();
+}
+// getBoundingClientRect() and innerWidth/innerHeight are in screen pixels, but left/top/right on a
+// position:fixed pop-up get multiplied by the page zoom — so pop-ups must be positioned in page pixels.
+function uiZoom(){ return parseFloat(document.documentElement.style.getPropertyValue('--zoom')) || 1; }
+function pageRect(el){
+  const r=el.getBoundingClientRect(), z=uiZoom();
+  return { left:r.left/z, right:r.right/z, top:r.top/z, bottom:r.bottom/z, width:r.width/z, height:r.height/z };
+}
+function pageViewport(){ const z=uiZoom(); return { width:window.innerWidth/z, height:window.innerHeight/z }; }
+applyUiZoom();
+
 // Moves the sidebar element in and out of the topbar. This preserves the sidebar's scroll position and state (e.g. open filters) 
 // when switching between layouts.
 function moveSidebar(toTopbar){
@@ -57,6 +89,7 @@ document.addEventListener('click', function(e){
   const menu = document.getElementById('hdr-menu');
   if(!menu || !menu.classList.contains('open')) return;
   if(e.target.closest('#btn-menu')) return;
+  if(e.target.closest('#ui-zoom')) return; // keep the menu open while trying text sizes
   menu.classList.remove('open');
 });
 //Show filter options.
@@ -95,6 +128,7 @@ function toggleFilterRow(){
 
   on('btn-menu',         'click',  function(e){ toggleMenu(e); });
   on('btn-layout',       'click',  function(){ toggleLayout(); });
+  on('ui-zoom-btns',     'click',  function(e){ const b=e.target.closest('button[data-zoom]'); if(b) setUiZoom(parseFloat(b.dataset.zoom)); });
   on('btn-backup',       'click',  function(){ setBackupFile(); });
   on('btn-import',       'click',  function(){ openImport(); });
   on('btn-export',       'click',  function(){ openExport(); });

@@ -424,9 +424,9 @@ function openChecklistMenu(evt, tab, name) {
     menu.appendChild(btn);
   });
   document.body.appendChild(menu);
-  const rect = evt.currentTarget.getBoundingClientRect();
+  const rect = pageRect(evt.currentTarget); // page px, so the menu lands correctly at any text size
   menu.style.top   = (rect.bottom + 4) + 'px';
-  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.style.right = (pageViewport().width - rect.right) + 'px';
   setTimeout(() => document.addEventListener('click', closeChecklistMenu, { once: true }), 0);
 }
 
@@ -452,9 +452,9 @@ function openAcqMenu(evt, tab, name) {
     menu.appendChild(btn);
   });
   document.body.appendChild(menu);
-  const rect = evt.currentTarget.getBoundingClientRect();
+  const rect = pageRect(evt.currentTarget); // page px, so the menu lands correctly at any text size
   menu.style.top   = (rect.bottom + 4) + 'px';
-  menu.style.right = (window.innerWidth - rect.right) + 'px';
+  menu.style.right = (pageViewport().width - rect.right) + 'px';
   setTimeout(() => document.addEventListener('click', closeChecklistMenu, { once: true }), 0);
 }
 
@@ -3239,9 +3239,9 @@ function openElemMenu(evt, tab, name) {
     menu.appendChild(item);
   }
   document.body.appendChild(menu);
-  const rect = evt.currentTarget.getBoundingClientRect();
+  const rect = pageRect(evt.currentTarget); // page px, so the menu lands correctly at any text size
   menu.style.top  = (rect.bottom + 4) + 'px';
-  menu.style.left = Math.min(rect.left, window.innerWidth - 160) + 'px';
+  menu.style.left = Math.min(rect.left, pageViewport().width - 160) + 'px';
   setTimeout(() => document.addEventListener('click', closeElemMenu, { once: true }), 0);
 }
 
@@ -5518,17 +5518,19 @@ function toggleModDrops(event, btn) {
   overlay.innerHTML = shown.map(s => `<li>${esc(s)}</li>`).join('') +
     (extra > 0 ? `<li class="mod-drops-more">+${extra} more…</li>` : '');
 
-  const rect = btn.getBoundingClientRect();
+  // Everything in page px (rect, viewport and offsetWidth/Height) so it's consistent at any text size
+  const rect = pageRect(btn);
+  const vp   = pageViewport();
   overlay.style.display = 'block';
   overlay.style.top  = (rect.bottom + 3) + 'px';
   overlay.style.left = rect.left + 'px';
 
   // Keep within viewport horizontally
   const ow = overlay.offsetWidth;
-  if (rect.left + ow > window.innerWidth - 8)
-    overlay.style.left = Math.max(8, window.innerWidth - ow - 8) + 'px';
+  if (rect.left + ow > vp.width - 8)
+    overlay.style.left = Math.max(8, vp.width - ow - 8) + 'px';
   // Flip above if too close to bottom
-  if (rect.bottom + overlay.offsetHeight > window.innerHeight - 8)
+  if (rect.bottom + overlay.offsetHeight > vp.height - 8)
     overlay.style.top = (rect.top - overlay.offsetHeight - 3) + 'px';
 
   _modDropsBtn = btn;
@@ -6665,6 +6667,7 @@ async function loadFromCloud() {
       for (const [k, v] of Object.entries(data.ui_prefs)) {
         if (k.startsWith('wf-ui-') || k.startsWith('wf-filt-')) localStorage.setItem(k, v);
       }
+      if (typeof applyUiZoom === 'function') applyUiZoom(); // text size may have come from another device
     }
 
     localStorage.setItem('wf-cloud-ts', String(cloudTs));
