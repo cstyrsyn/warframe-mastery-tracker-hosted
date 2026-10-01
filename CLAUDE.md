@@ -172,6 +172,7 @@ let _lpLoadoutId = null; // id of the loadout being edited
 | `summary` | — | isSpecial: hides all filters |
 | `checklist` | — | isSpecial: hides all filters; uses `#checklist-view` |
 | `incarnons` | — | isSpecial: `#incarnons-view`; dedicated Incarnon Acquired/Installed tracker, grouped by genesis |
+| `helminth` | — | isSpecial: `#helminth-view`; Helminth ability unlock tracker (rank slider + subsumed toggles) |
 | `builds` | — | isSpecial: `#builds-view`; the My Builds planner |
 | `loadouts` | — | isSpecial: `#loadouts-view`; the My Loadouts planner (groups builds from `builds` into named loadouts) |
 | `kitgunBuilder` | — | isSpecial: `#kitgun-view`; Kitgun/Zaw builder |
@@ -190,6 +191,8 @@ let _lpLoadoutId = null; // id of the loadout being edited
 | `'aq:' + itemKey(tab, name)` | Acquired flag (AQ_TABS only) |
 | `'inc:' + itemKey(tab, name)` | Incarnon Genesis **installed** flag (applied to the weapon) |
 | `'incAcq:' + itemKey(tab, name)` | Incarnon Genesis **acquired** flag (have the adapter, not yet installed) |
+| `'sub:' + itemKey('warframes', name)` | Warframe subsumed into the Helminth (unlocks its ability) |
+| `'helminthLevel'` | Helminth rank 0–15 (absent = 0) |
 | `'arc:' + name` | Arcane copy count |
 | `itemKey('mods', name)` | Mod rank |
 | `aqKey('mods', name)` | Mod owned flag |
@@ -267,6 +270,22 @@ circuit week descending. Since `CIRCUIT_WEEK_NOW` changes weekly, a different su
 top each week. Reuses `.card-circuit`/`.circuit-now` (the same badge class as group headers and
 weapon cards elsewhere) for the week indicator, so the "current week" highlight stays visually
 consistent app-wide.
+
+### Helminth
+
+The `helminth` tab (`renderHelminthPage()`) shows every ability in `HELMINTH_OF_IDS`
+(`data/data-abilities.js`) as a card, greyed out (`.helm-locked`) until unlocked. Two unlock routes:
+
+- **Helminth-native** (`source: "Helminth"`) — unlock when the page's rank slider reaches the
+  entry's `level`. The slider's `oninput` (`setHelminthLevel()`) re-renders only `#helm-cards`
+  (`renderHelminthCards()`), never the slider itself, so dragging isn't interrupted.
+- **Subsumed** — unlock when the source Warframe is marked subsumed. State is per **Warframe**
+  (`subsumedKey(wfName)`), not per ability, so the "Subsumed" button on the Helminth card and the
+  one on the base Warframe card (`buildItem()`, shown when `HELMINTH_SUBSUME_SOURCES.has(name)`) are
+  the same flag via `toggleSubsumed()`. A frame with two abilities (Sirius & Orion) unlocks both.
+
+To add a new subsumable ability, add `"Ability": { id, source: "<Warframe>" }` to `HELMINTH_OF_IDS`
+— the source must match the Warframe's name in `WARFRAMES` exactly. Native abilities also need `level`.
 
 ### Incarnon Evolutions in the Builds page
 
@@ -578,6 +597,7 @@ Offline tools for maintaining data.js:
 | `extract-blueprints.js` / `generate-blueprints-map.js` | Blueprint scraping pipeline |
 | `scrape-incarnon-requirements.js` | (archived) Scrapes incarnon genesis resource costs into `INCARNON_REQUIREMENTS` |
 | `update-incarnon-evolutions.js` | Scrapes each Incarnon Genesis wiki page's Evolutions table into `INCARNON_EVOLUTIONS` (per-page fetch — no wiki Lua module exists for this data) |
+| `update-ability-images.js` | Downloads Helminth ability icons into `Images/abilities/` using each ability's `Icon` from wiki `Module:Ability/data`; also lists wiki-`Subsumable` abilities missing from `HELMINTH_OF_IDS` |
 | `scrape-weapon-mr.js` | Scrapes weapon MR data |
 | `scrape_overframe_ids.js` | Scrapes Overframe item IDs into `OVERFRAME_MAP` |
 | `Import/` | Google Sheets + xlsx import helpers (`sheets-import.gs`, SheetJS) |

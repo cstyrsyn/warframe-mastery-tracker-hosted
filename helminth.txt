@@ -1,0 +1,79 @@
+Airburst, Zephyr
+Astral Shell, Sirius & Orion
+Breach Surge, Wisp
+Brightbonnet, Nokko
+Coil Horizon, Gyre
+Condemn, Harrow
+Dark Verse, Dante
+Defy, Wukong
+Desiccation, Inaros
+Dispensary, Protea
+Eclipse, Mirage
+Empower, Helminth, 0
+Energised Munitions, Helminth, 5
+Ensare, Khora
+Evade, Cyte-09
+Expedite Suffering, Helminth, 9
+Fire Blast, Ember
+Fire Walker, Nezha
+Fractured Blast, Citrine
+Gloom, Sevagoth
+Golden Instinct, Helminth, 15
+Hideous Resistance, Helminth, 12
+Ice Wave, Frost
+Infested Mobility, Helminth, 0
+Jade Stars, Sirius & Orion
+Marked For Death, Helminth, 6
+Master's Summons, Helminth, 0
+Nourish, Grendal
+Null Star, Nova
+Omamori, Koumei
+Ophanim Eyes, Jade
+Parasitic Armor, Helminth, 11
+Perspicacity, Helminth, 3
+Pillage, Hildryn
+Pull, Mag
+Radial Blind, Excalibur
+Reave, Revenant
+Rebuild Shields, Helminth, 2
+Remedium, Harrow
+Roar, Rhino
+Sentient Wrath, Caliban
+Shock, Volt
+Shooting Gallery, Mesa
+Sickening Pulse, Helminth, 14
+Silence, Banshee
+Smite, Oberon
+Spectrorage, Gara
+Tempest Barrage, Hydroid
+Terrify, Nekros
+Tharros Strike, Styanax
+Thermal Sunder, Gauss
+Vial Rush, Lavos
+Voracious Metastatis, Helminth, 13
+Well Of Life, Trinity
+Wrathful Advance, Kullervo
+Xata's Whisper, Xaku
+Aquablades, Yareli
+Banish, Limbo
+Blood Altar, Garuda
+Chyrinka Pillar, Qorvex
+Decoy, Loki
+Elemental Ward, Chroma
+Larva, Nidus
+Lull, Baruuk
+Lycath's Hunt, Voruna
+Mind Control, Nyx
+Molt, Saryn
+Neote, Narin
+Petrify, Atlas
+Pyrotechnics, Temple
+Quiver, Ivara
+Resonator, Octavia
+Rest & Rage, Equinox
+Self Portrait, Follie
+Shuriken, Ash
+Spellbind, Titania
+Tesla Nervos, Vauban
+Warcry, Valkyr
+Wyrd Scythes, Dagath

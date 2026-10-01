@@ -3713,14 +3713,16 @@ function switchTab(tabEl) {
   const isKitgun  = activeTab === 'kitgunBuilder';
   const isBuilds  = activeTab === 'builds';
   const isIncarnons = activeTab === 'incarnons';
+  const isHelminth  = activeTab === 'helminth';
   const isLoadouts = activeTab === 'loadouts';
-  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds || isIncarnons || isLoadouts;
+  const isSpecial = isChart || isSummary || isCl || isDucats || isKitgun || isBuilds || isIncarnons || isHelminth || isLoadouts;
   document.getElementById('summary').classList.toggle('open', isSummary);
   document.getElementById('checklist-view').style.display = isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = isBuilds  ? 'flex'  : 'none';
   document.getElementById('incarnons-view').style.display = isIncarnons ? 'block' : 'none';
+  document.getElementById('helminth-view').style.display  = isHelminth  ? 'block' : 'none';
   document.getElementById('loadouts-view').style.display  = isLoadouts ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = isChart   ? 'block' : 'none';
@@ -4115,7 +4117,11 @@ function buildItem(tab, name, cat, obtain, maxRank, tradable, compFor, listMode)
   const _clClick = incarnonGenesis ? `openChecklistMenu(event,'${tab}','${ename}')` : `toggleChecklist('${tab}','${ename}')`;
   const swapBtn = name === 'Sirius & Orion' ? `<button class="card-addlist" onclick="toggleSiriusOrionImg(this)" title="Switch Sirius / Orion">⇄</button>` : '';
   const buildsBtn = BUILDS_PAGE_TABS.has(tab) ? `<button class="card-builds" onclick="goToBuildsItem('${tab}','${ename}')">Builds</button>` : '';
-  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${mrTag}<div class="card-cat">${esc(cat)}</div>${swapBtn}${buildsBtn}<button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
+  const _isSubsumed = tab === 'warframes' && HELMINTH_SUBSUME_SOURCES.has(name) && !!progress[subsumedKey(name)];
+  const subsumeBtn = tab === 'warframes' && HELMINTH_SUBSUME_SOURCES.has(name)
+    ? `<button class="card-subsumed${_isSubsumed ? ' on' : ''}" onclick="toggleSubsumed('${ename}')" title="${_isSubsumed ? 'Subsumed into the Helminth' : 'Not yet subsumed'}">Subsumed</button>`
+    : '';
+  const badges = `${incarnonTag}${incCircuitTag}${vaultedTag}${circuitTag}${subsumeBtn}${mrTag}<div class="card-cat">${esc(cat)}</div>${swapBtn}${buildsBtn}<button class="card-addlist${_clOn?' on':''}" onclick="${_clClick}" title="Add to Checklist">+</button>`;
   const slider = `<div class="card-row">
     <span class="rank-num">${rank}</span>
     <input class="rank-slider" type="range" min="0" max="${maxRank}"
@@ -4183,6 +4189,7 @@ function render() {
   if (activeTab === 'checklist')     { renderChecklist();     updateTabStat(); return; }
   if (activeTab === 'builds')        { renderBuildsPage();    return; }
   if (activeTab === 'incarnons')     { renderIncarnonsPage(); updateTabStat(); return; }
+  if (activeTab === 'helminth')      { renderHelminthPage();  updateTabStat(); return; }
   if (activeTab === 'loadouts')      { renderLoadoutsPage();  return; }
   if (activeTab === 'ducats')        { renderDucats();        updateTabStat(); return; }
   if (activeTab === 'kitgunBuilder') { renderKitgunBuilder(); updateTabStat(); return; }
@@ -4447,7 +4454,7 @@ function setRank(tab, name, rank) {
 }
 
 function updateTabStat() {
-  if (['starChart','summary','checklist','ducats','kitgunBuilder','builds','incarnons','loadouts'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
+  if (['starChart','summary','checklist','ducats','kitgunBuilder','builds','incarnons','helminth','loadouts'].includes(activeTab)) { document.getElementById('tab-stat').innerHTML = ''; return; }
   if (activeTab === 'mods') {
     let owned = 0, maxed = 0;
     for (const { name, maxRank } of MODS) {
@@ -4606,6 +4613,127 @@ function sumHdr(key, label, rightHtml) {
   <span class="sc-group-title"><span class="grp-arrow">${collapsed ? '▶' : '▼'}</span>${label}</span>
   ${rightHtml ? `<span style="color:var(--text-muted);font-weight:400;font-size:10px">${rightHtml}</span>` : ''}
 </div>`;
+}
+
+// ─────────────────────────────────────────────
+// HELMINTH PAGE
+// ─────────────────────────────────────────────
+// Helminth-native abilities unlock by Helminth rank (the page slider, 0–15); every other ability
+// unlocks by subsuming its source Warframe. Subsume state is stored per Warframe (subsumedKey), so
+// the Helminth page and the "Subsumed" button on Warframe cards share one source of truth — and a
+// frame with two abilities (Sirius & Orion) unlocks both at once.
+const HELMINTH_MAX_LEVEL = 15;
+const HELMINTH_LEVEL_KEY = 'helminthLevel';
+const HELMINTH_SUBSUME_SOURCES = new Set(typeof HELMINTH_OF_IDS !== 'undefined'
+  ? Object.values(HELMINTH_OF_IDS).map(a => a.source).filter(s => s !== 'Helminth')
+  : []);
+let helmFilter = 'all'; // 'all' | 'unlocked' | 'locked'
+
+function subsumedKey(wfName) { return 'sub:' + itemKey('warframes', wfName); }
+// Icons downloaded by dev/update-ability-images.js — keep the filename rule in sync with iconFilename() there.
+function helminthIconPath(name) { return 'Images/abilities/' + name.replace(/[^A-Za-z0-9]/g, '') + '.png'; }
+function getHelminthLevel() {
+  const v = progress[HELMINTH_LEVEL_KEY];
+  return Number.isInteger(v) ? Math.min(Math.max(v, 0), HELMINTH_MAX_LEVEL) : 0;
+}
+function isHelminthAbilityUnlocked(info) {
+  return info.source === 'Helminth'
+    ? getHelminthLevel() >= (info.level ?? 0)
+    : !!progress[subsumedKey(info.source)];
+}
+function toggleSubsumed(wfName) {
+  const k = subsumedKey(wfName);
+  if (progress[k]) delete progress[k];
+  else progress[k] = true;
+  saveProgress();
+  render();
+}
+function setHelminthLevel(el) {
+  const lvl = parseInt(el.value, 10) || 0;
+  el.style.setProperty('--pct', (lvl / HELMINTH_MAX_LEVEL * 100).toFixed(1) + '%');
+  document.getElementById('helm-level-num').textContent = lvl;
+  if (lvl) progress[HELMINTH_LEVEL_KEY] = lvl;
+  else delete progress[HELMINTH_LEVEL_KEY];
+  deferSave();
+  renderHelminthCards(); // cards only — rebuilding the slider mid-drag would drop the drag
+}
+function setHelmFilter(val) {
+  helmFilter = val;
+  renderHelminthPage();
+}
+
+function helminthCardHtml(name, info) {
+  const unlocked = isHelminthAbilityUnlocked(info);
+  const isNative = info.source === 'Helminth';
+  const badge = isNative
+    ? `<span class="card-cat">Rank ${info.level ?? 0}</span>`
+    : `<button class="card-subsumed${unlocked ? ' on' : ''}" onclick="toggleSubsumed('${jsStr(info.source)}')" title="${unlocked ? 'Mark as not subsumed' : 'Mark as subsumed'}">Subsumed</button>`;
+  const source = isNative
+    ? `Unlocks at Helminth Rank ${info.level ?? 0}`
+    : `Subsume <a href="${esc(wikiUrl(info.source))}" target="_blank" rel="noopener">${esc(info.source)}</a>`;
+  return `<div class="card helm-card${unlocked ? '' : ' helm-locked'}">
+    <img class="helm-icon" src="${esc(helminthIconPath(name))}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+    <div class="helm-body">
+      <div class="card-top">
+        <div class="card-name"><a href="${esc(wikiUrl(name))}" target="_blank" rel="noopener">${esc(name)}</a></div>
+        ${badge}
+      </div>
+      <div class="helm-source">${source}</div>
+    </div>
+  </div>`;
+}
+
+function renderHelminthCards() {
+  const el = document.getElementById('helm-cards');
+  if (!el) return;
+  const q = (document.getElementById('search')?.value || '').trim().toLowerCase();
+  const all = Object.entries(typeof HELMINTH_OF_IDS !== 'undefined' ? HELMINTH_OF_IDS : {});
+  const native   = all.filter(([, i]) => i.source === 'Helminth')
+    .sort(([a, ia], [b, ib]) => (ia.level ?? 0) - (ib.level ?? 0) || a.localeCompare(b));
+  const subsumed = all.filter(([, i]) => i.source !== 'Helminth')
+    .sort(([a], [b]) => a.localeCompare(b));
+
+  let unlockedTotal = 0;
+  const section = (title, entries) => {
+    const unlocked = entries.filter(([, i]) => isHelminthAbilityUnlocked(i)).length;
+    unlockedTotal += unlocked;
+    const visible = entries.filter(([name, i]) => {
+      if (q && !name.toLowerCase().includes(q) && !i.source.toLowerCase().includes(q)) return false;
+      if (helmFilter === 'unlocked') return isHelminthAbilityUnlocked(i);
+      if (helmFilter === 'locked')   return !isHelminthAbilityUnlocked(i);
+      return true;
+    });
+    if (!visible.length) return '';
+    return `<div class="helm-section-hdr">${title}<span class="helm-section-count">${unlocked}/${entries.length} unlocked</span></div>
+      <div class="helm-grid">${visible.map(([name, info]) => helminthCardHtml(name, info)).join('')}</div>`;
+  };
+  const html = section('Helminth Abilities', native) + section('Subsumed Abilities', subsumed);
+  el.innerHTML = html || `<div class="empty">No Helminth abilities match your filters.</div>`;
+  const countEl = document.getElementById('helm-unlocked-count');
+  if (countEl) countEl.innerHTML = `<b>${unlockedTotal}</b>/${all.length} Unlocked`;
+}
+
+function renderHelminthPage() {
+  const el = document.getElementById('helminth-view');
+  const lvl = getHelminthLevel();
+  const pct = (lvl / HELMINTH_MAX_LEVEL * 100).toFixed(1);
+  el.innerHTML = `<div class="inc-summary">
+    <div class="helm-level">
+      <span class="helm-level-lbl">Helminth Rank</span>
+      <span class="rank-num" id="helm-level-num">${lvl}</span>
+      <input class="rank-slider" type="range" min="0" max="${HELMINTH_MAX_LEVEL}" value="${lvl}"
+        style="--pct:${pct}%" oninput="setHelminthLevel(this)" onchange="setHelminthLevel(this)">
+      <span class="rank-max">${HELMINTH_MAX_LEVEL}</span>
+    </div>
+    <span id="helm-unlocked-count"></span>
+    <div class="inc-filters">
+      <button class="filt-btn${helmFilter === 'all' ? ' on' : ''}" onclick="setHelmFilter('all')">All</button>
+      <button class="filt-btn${helmFilter === 'unlocked' ? ' on' : ''}" onclick="setHelmFilter('unlocked')">Unlocked</button>
+      <button class="filt-btn${helmFilter === 'locked' ? ' on' : ''}" onclick="setHelmFilter('locked')">Locked</button>
+    </div>
+  </div>
+  <div id="helm-cards"></div>`;
+  renderHelminthCards();
 }
 
 // ─────────────────────────────────────────────
@@ -6901,14 +7029,16 @@ if (_savedTab && document.querySelector(`.tab[data-tab="${_savedTab}"]`)) {
   const _isKitgun  = activeTab === 'kitgunBuilder';
   const _isBuilds  = activeTab === 'builds';
   const _isIncarnons = activeTab === 'incarnons';
+  const _isHelminth  = activeTab === 'helminth';
   const _isLoadouts = activeTab === 'loadouts';
-  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds || _isIncarnons || _isLoadouts;
+  const _isSpecial = _isChart || _isSummary || _isCl || _isDucats || _isKitgun || _isBuilds || _isIncarnons || _isHelminth || _isLoadouts;
   document.getElementById('summary').classList.toggle('open', _isSummary);
   document.getElementById('checklist-view').style.display = _isCl     ? 'block' : 'none';
   document.getElementById('ducats-view').style.display    = _isDucats  ? 'block' : 'none';
   document.getElementById('kitgun-view').style.display    = _isKitgun  ? 'block' : 'none';
   document.getElementById('builds-view').style.display    = _isBuilds  ? 'flex'  : 'none';
   document.getElementById('incarnons-view').style.display = _isIncarnons ? 'block' : 'none';
+  document.getElementById('helminth-view').style.display  = _isHelminth  ? 'block' : 'none';
   document.getElementById('loadouts-view').style.display  = _isLoadouts ? 'flex'  : 'none';
   document.getElementById('grid').style.display     = _isSpecial ? 'none' : 'grid';
   document.getElementById('sc').style.display       = _isChart   ? 'block' : 'none';

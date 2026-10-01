@@ -985,6 +985,38 @@ body.topbar-mode .sidebar-divider { display: none; }
 .inc-toggle--inst:hover { background: rgba(160,100,220,0.22); }
 .inc-toggle--inst.on { background: rgba(160,100,220,0.32); border-color: rgba(160,100,220,0.88); color: #d0a8f0; }
 
+/* ── HELMINTH ── */
+#helminth-view { display: none; padding: 16px; max-width: 1300px; margin: 0 auto; }
+.helm-level { display: flex; align-items: center; gap: 8px; flex: 1 1 260px; max-width: 420px; }
+.helm-level-lbl { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.helm-section-hdr {
+  display: flex; align-items: baseline; gap: 8px; margin: 18px 0 8px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim);
+}
+.helm-section-hdr:first-child { margin-top: 0; }
+.helm-section-count { font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--text-muted); }
+.helm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.helm-card { display: flex; align-items: center; gap: 10px; }
+.helm-icon { width: 36px; height: 36px; flex-shrink: 0; object-fit: contain; }
+.helm-body { flex: 1; min-width: 0; }
+.helm-card .card-top { margin-bottom: 5px; }
+.helm-source { font-size: 10px; color: var(--text-muted); }
+.helm-source a { color: var(--text-dim); text-decoration: none; }
+.helm-source a:hover { text-decoration: underline; }
+.card.helm-locked { opacity: 0.4; filter: grayscale(1); }
+.card.helm-locked:hover { opacity: 0.65; }
+/* Subsumed toggle — shared by base Warframe cards and Helminth ability cards */
+.card-subsumed {
+  font-size: 8px; padding: 2px 5px; border-radius: 3px;
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+  text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;
+  white-space: nowrap; flex-shrink: 0; cursor: pointer; font-family: inherit;
+}
+.card-subsumed:hover { color: #a8c860; border-color: rgba(140,180,60,0.60); }
+.card-subsumed.on { background: rgba(140,180,60,0.28); color: #a8c860; border-color: rgba(140,180,60,0.80); }
+.card-subsumed.on:hover { background: rgba(140,180,60,0.38); }
+
 /* ── CHECKLIST ── */
 #checklist-view { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; }
 .cl-layout { display: grid; grid-template-columns: 1fr minmax(400px, 500px); gap: 16px; align-items: start; }
@@ -1576,6 +1608,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div class="tab" data-tab="arcanes">Arcanes</div>
   <div class="tab" data-tab="checklist">Checklist</div>
   <div class="tab" data-tab="incarnons">Incarnons</div>
+  <div class="tab" data-tab="helminth">Helminth</div>
   <div class="tab" data-tab="builds">Builds</div>
   <div class="tab" data-tab="loadouts">Loadouts</div>
   <div class="tab" data-tab="kitgunBuilder">Kitgun/Zaw Builder</div>
@@ -1595,6 +1628,7 @@ body.topbar-mode .sidebar-divider { display: none; }
   <div id="sc"></div>
   <div id="checklist-view"></div>
   <div id="incarnons-view"></div>
+  <div id="helminth-view"></div>
   <div id="ducats-view"></div>
   <div id="kitgun-view"></div>
   <div id="builds-view">
