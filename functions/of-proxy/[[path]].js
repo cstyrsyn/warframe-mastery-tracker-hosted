@@ -1,14 +1,15 @@
-const CORS = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-};
-
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: CORS });
-}
+// Same-origin proxy for the Overframe builds API. Only the two endpoints the app uses are allowed,
+// and the response is always served as JSON so upstream content can never render as a page on our origin.
+// No CORS headers: the app calls this from its own origin, and other sites shouldn't use it.
+const ALLOWED_PATH = /^builds(\/\d+)?$/; // builds/?item_id=… (list) and builds/<id>/ (detail)
 
 export async function onRequestGet({ request, params }) {
-  const path     = params.path ? params.path.join('/') : '';
+  const segments = (params.path || []).filter(Boolean);
+  const path     = segments.join('/');
+  if (!ALLOWED_PATH.test(path)) {
+    return new Response('{"error":"not found"}', { status: 404, headers: jsonHeaders() });
+  }
+
   const qs       = new URL(request.url).search;
   const upstream = `https://overframe.gg/api/v1/${path}/${qs}`;
 
@@ -20,11 +21,12 @@ export async function onRequestGet({ request, params }) {
     },
   });
 
-  return new Response(res.body, {
-    status:  res.status,
-    headers: {
-      'Content-Type': res.headers.get('Content-Type') || 'application/json',
-      ...CORS,
-    },
-  });
+  return new Response(res.body, { status: res.status, headers: jsonHeaders() });
+}
+
+function jsonHeaders() {
+  return {
+    'Content-Type':           'application/json; charset=utf-8',
+    'X-Content-Type-Options': 'nosniff',
+  };
 }

@@ -11,6 +11,7 @@ try {
         autoRefreshToken:   true,
         persistSession:     true,
         detectSessionInUrl: true,
+        flowType:           'pkce', // OAuth returns a one-time ?code= instead of tokens in the URL
       },
     });
   }
@@ -2201,7 +2202,7 @@ function blpRenderOFList() {
     const dateFmt = rawDate
       ? new Date(rawDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
       : '';
-    return `<div class="blp-of-build" onclick="blpLoadOFBuild(${b.id})">
+    return `<div class="blp-of-build" onclick="blpLoadOFBuild(${Number(b.id) || 0})">
       <div class="blp-of-build-title">${esc(b.title)}</div>
       <div class="blp-of-build-meta">
         <span class="blp-of-score">▲ ${b.score.toLocaleString()}</span>
@@ -4278,8 +4279,13 @@ function esc(s) {
 }
 // Escapes a value for use as a single-quoted JS string inside an HTML attribute.
 // Handles: backslash, single-quote, control chars (break JS), double-quote (breaks HTML attribute).
+// '&' must be escaped first — the browser decodes entities in the attribute before the JS runs,
+// so an unescaped '&#39;' would turn back into a quote and break out of the string.
 function jsStr(s) {
   return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     .replace(/\\/g, '\\\\')
     .replace(/'/g, "\\'")
     .replace(/\r/g, '\\r')
@@ -5739,12 +5745,7 @@ function applySave(bundle) {
     checklistItems = new Set(Array.isArray(bundle.checklist) ? bundle.checklist : []);
     checklistOwned = (bundle.checklistOwned && typeof bundle.checklistOwned === 'object' && !Array.isArray(bundle.checklistOwned))
                      ? bundle.checklistOwned : {};
-    const VALID_CUSTOM_TABS = new Set(ADD_TABS.map(([v]) => v));
-    customItems    = (Array.isArray(bundle.customItems) ? bundle.customItems : []).filter(it =>
-      it && typeof it === 'object' && !Array.isArray(it) &&
-      typeof it.name === 'string' && it.name.trim() &&
-      typeof it.tab === 'string' && VALID_CUSTOM_TABS.has(it.tab)
-    );
+    customItems    = sanitizeCustomItems(bundle.customItems);
     conflictingCustomItems = [];
     customItems = _applyCustomItems(customItems, true);
     if (Array.isArray(bundle.modularBuilds)) {
@@ -6310,13 +6311,33 @@ const ADD_TABS = [
 ];
 
 function loadCustomItems() {
-  try { conflictingCustomItems = JSON.parse(localStorage.getItem(CONFLICT_LS_KEY) || '[]'); }
+  try { conflictingCustomItems = sanitizeCustomItems(JSON.parse(localStorage.getItem(CONFLICT_LS_KEY) || '[]')); }
   catch { conflictingCustomItems = []; }
-  try { customItems = JSON.parse(localStorage.getItem(CUSTOM_LS_KEY) || '[]'); }
+  try { customItems = sanitizeCustomItems(JSON.parse(localStorage.getItem(CUSTOM_LS_KEY) || '[]')); }
   catch { customItems = []; }
   const prevCount = conflictingCustomItems.length;
   customItems = _applyCustomItems(customItems);
   if (conflictingCustomItems.length > prevCount) saveCustomItems();
+}
+
+// Custom items arrive from localStorage, JSON import and the cloud — rebuild each one with only
+// known fields of the right type. maxRank is interpolated raw into HTML/JS, so it must be an integer.
+function sanitizeCustomItems(raw) {
+  if (!Array.isArray(raw)) return [];
+  const validTabs = new Set(ADD_TABS.map(([v]) => v));
+  const str = v => (typeof v === 'string' ? v : '');
+  return raw
+    .filter(it => it && typeof it === 'object' && !Array.isArray(it) &&
+      typeof it.name === 'string' && it.name.trim() &&
+      typeof it.tab === 'string' && validTabs.has(it.tab))
+    .map(it => {
+      const maxRank = Number(it.maxRank);
+      return {
+        tab: it.tab, name: it.name, cat: str(it.cat), obtain: str(it.obtain),
+        maxRank: Number.isInteger(maxRank) && maxRank >= 0 && maxRank <= 100 ? maxRank : 30,
+        tradable: !!it.tradable, compFor: str(it.compFor),
+      };
+    });
 }
 
 function _mergeCustomItem(it) {
@@ -6615,12 +6636,21 @@ async function logout() {
   localStorage.removeItem(CUSTOM_LS_KEY);
   localStorage.removeItem(CONFLICT_LS_KEY);
   localStorage.removeItem(INC_WISHLIST_KEY);
+  localStorage.removeItem(MY_BUILDS_KEY);
+  localStorage.removeItem(MY_LOADOUTS_KEY);
+  localStorage.removeItem(MOD_BUILDS_KEY);
+  localStorage.removeItem(MOD_OWNED_KEY);
+  localStorage.removeItem(LS_KEY + '-backup');
   localStorage.removeItem('wf-cloud-ts');
   progress = {};
   customItems = [];
   conflictingCustomItems = [];
+  _lpLoadoutId = null;
   loadChecklist();
   loadIncWishlist();
+  loadMyBuilds();
+  loadMyLoadouts();
+  loadModularBuilds();
   updateAuthUI();
   updateHeader();
   render();
@@ -6656,9 +6686,7 @@ async function loadFromCloud() {
 
     if (Array.isArray(data.custom_items)) {
       conflictingCustomItems = [];
-      customItems = _applyCustomItems(
-        data.custom_items.filter(it => it && typeof it.name === 'string' && it.name.trim())
-      );
+      customItems = _applyCustomItems(sanitizeCustomItems(data.custom_items));
       localStorage.setItem(CUSTOM_LS_KEY, JSON.stringify(customItems));
     }
 

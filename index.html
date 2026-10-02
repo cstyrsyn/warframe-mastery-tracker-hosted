@@ -1754,7 +1754,8 @@ body.topbar-mode #tabs .tabtext { padding: 0 14px; border-left: none; border-bot
   </div>
 </div>
 
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+  integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
 <!-- Add Item Modal -->
 <div id="add-overlay">
   <div id="add-modal">
@@ -1824,7 +1825,10 @@ body.topbar-mode #tabs .tabtext { padding: 0 14px; border-left: none; border-bot
 
 <script src="weapon-mr.js"></script>
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Pinned with SRI: this script can read the session token. To upgrade, change the version and
+     regenerate the hash: curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
+  integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
 <script src="app.js"></script>
 <script src="layout.js"></script>
 
