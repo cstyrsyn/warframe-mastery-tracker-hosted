@@ -26,7 +26,7 @@ Open `index.html` via `localhost` and the app routes API calls through it automa
 
 ## Deployment
 
-Static site, no build step. Deploy `index.html`, `app.js`, `data/`, `weapon-mr.js`, and `functions/` to any static host. Cloudflare Pages is recommended — it picks up `functions/of-proxy/` as a Pages Function automatically.
+Cloudflare Pages settings: **build command** `npm run build`, **build output directory** `dist`, and the `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` environment variables. `build.js` copies only the files listed in its `PUBLIC_FILES` allowlist into `dist/` and generates `config.js` there, so `dev/`, docs and CI config are never served. If the page starts loading a new file, add it to `PUBLIC_FILES`. Pages picks up `functions/of-proxy/` from the repo root as a Pages Function automatically.
 
 ## Data maintenance
 
