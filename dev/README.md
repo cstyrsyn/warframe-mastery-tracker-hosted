@@ -26,7 +26,7 @@ Open `index.html` via `localhost` and the app routes API calls through it automa
 
 ## Deployment
 
-Cloudflare Pages settings: **build command** `npm run build`, **build output directory** `dist`, and the `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` environment variables. `build.js` copies only the files listed in its `PUBLIC_FILES` allowlist into `dist/` and generates `config.js` there, so `dev/`, docs and CI config are never served. If the page starts loading a new file, add it to `PUBLIC_FILES`. Pages picks up `functions/of-proxy/` from the repo root as a Pages Function automatically.
+Cloudflare Pages settings: **build command** `node build.js`, **build output directory** `dist`, **root directory** empty (repo root), and the `SUPABASE_URL` / `SUPABASE_PUBLISHABLE_KEY` environment variables. `build.js` copies only the files listed in its `PUBLIC_FILES` allowlist into `dist/` and generates `config.js` there, so `dev/`, docs and CI config are never served. If the page starts loading a new file, add it to `PUBLIC_FILES`. Pages picks up `functions/of-proxy/` from the repo root as a Pages Function automatically.
 
 ## Data maintenance
 

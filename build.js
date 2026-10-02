@@ -1,5 +1,5 @@
 // Builds the deployable site into dist/ for Cloudflare Pages.
-// Run automatically by Cloudflare Pages (build command: npm run build, output directory: dist).
+// Run automatically by Cloudflare Pages (build command: node build.js, build output: dist, root directory: empty).
 // Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in Pages → Settings → Environment variables.
 //
 // Only the files in PUBLIC_FILES are deployed — everything else in the repo (dev/, docs, CI config)
