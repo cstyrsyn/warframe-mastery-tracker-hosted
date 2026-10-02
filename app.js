@@ -5793,8 +5793,6 @@ function openExport() {
   document.getElementById('modal-act').textContent = 'Copy to Clipboard';
   document.getElementById('modal-msg').textContent = '';
   document.getElementById('modal-file-row').style.display = 'none';
-  document.getElementById('modal-sheets-row').style.display = 'none';
-  document.getElementById('modal-sheets-help').style.display = 'none';
   document.getElementById('modal-save-file').style.display = '';
   document.getElementById('overlay').classList.add('open');
 }
@@ -5802,7 +5800,7 @@ function openExport() {
 function openImport() {
   modalMode = 'import';
   document.getElementById('modal-title').textContent = 'Import Save';
-  document.getElementById('modal-desc').textContent = 'Choose a file, fetch from Google Sheets, or paste JSON below.';
+  document.getElementById('modal-desc').textContent = 'Choose a file or paste JSON below.';
   document.getElementById('modal-ta').value = '';
   document.getElementById('modal-ta').readOnly = false;
   document.getElementById('modal-act').textContent = 'Import';
@@ -5810,10 +5808,6 @@ function openImport() {
   document.getElementById('modal-file-row').style.display = 'flex';
   document.getElementById('modal-file-name').textContent = 'JSON or .xlsx checklist · or paste below';
   document.getElementById('modal-file-input').value = '';
-  document.getElementById('modal-sheets-row').style.display = 'flex';
-  document.getElementById('modal-sheets-url').value = sessionStorage.getItem('wf-sheets-url') || '';
-  document.getElementById('modal-sheets-help').style.display = 'none';
-  document.getElementById('sheets-help-link').textContent = 'Setup ▸';
   document.getElementById('modal-save-file').style.display = 'none';
   document.getElementById('overlay').classList.add('open');
 }
@@ -6184,100 +6178,6 @@ function undoImport() {
   }
 }
 
-function toggleSheetsHelp(e) {
-  e.preventDefault();
-  const h = document.getElementById('modal-sheets-help');
-  const open = h.style.display !== 'none';
-  h.style.display = open ? 'none' : 'block';
-  document.getElementById('sheets-help-link').textContent = open ? 'Setup ▸' : 'Setup ▴';
-}
-
-function testSheetsUrl() {
-  const rawUrl = document.getElementById('modal-sheets-url').value.trim();
-  if (!rawUrl) { alert('Paste the Apps Script URL first.'); return; }
-  try {
-    if (new URL(rawUrl).hostname !== 'script.google.com') throw new Error();
-  } catch {
-    alert('URL must be a Google Apps Script URL (script.google.com).');
-    return;
-  }
-  window.open(rawUrl.split('?')[0] + '?callback=test', '_blank');
-}
-
-function fetchFromSheets() {
-  const rawUrl = document.getElementById('modal-sheets-url').value.trim();
-  const msg    = document.getElementById('modal-msg');
-  if (!rawUrl) { msg.style.color = 'var(--red)'; msg.textContent = 'Paste the Apps Script URL above first.'; return; }
-  try {
-    if (new URL(rawUrl).hostname !== 'script.google.com') throw new Error();
-  } catch {
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'URL must be a Google Apps Script URL (script.google.com).';
-    return;
-  }
-  sessionStorage.setItem('wf-sheets-url', rawUrl);
-  msg.style.color = 'var(--text-muted)';
-  msg.textContent = 'Fetching from Google Sheets…';
-
-  // JSONP: a <script> tag bypasses CORS restrictions on Apps Script URLs.
-  const cbName = '_wfSheets_' + crypto.randomUUID().replace(/-/g, '');
-  let script;
-
-  const cleanup = () => {
-    delete window[cbName];
-    if (script && script.parentNode) script.parentNode.removeChild(script);
-  };
-
-  const timer = setTimeout(() => {
-    cleanup();
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'Timed out. Script loaded but returned no data — re-deploy the Apps Script as a new version after adding the JSONP code.';
-  }, 30000);
-
-  window[cbName] = parsed => {
-    clearTimeout(timer);
-    cleanup();
-    if (parsed && parsed.error) {
-      msg.style.color = 'var(--red)';
-      msg.textContent = 'Script error: ' + parsed.error;
-      return;
-    }
-    if (typeof parsed !== 'object' || Array.isArray(parsed) || parsed === null) {
-      msg.style.color = 'var(--red)';
-      msg.textContent = 'Invalid data received from Sheets — expected a JSON object.';
-      return;
-    }
-    for (const v of Object.values(parsed)) {
-      if (typeof v !== 'number' && typeof v !== 'boolean') {
-        msg.style.color = 'var(--red)';
-        msg.textContent = 'Unexpected value type in Sheets data — import aborted.';
-        return;
-      }
-    }
-    const sanitized = {};
-    for (const [k, v] of Object.entries(parsed)) {
-      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
-      sanitized[k] = v;
-    }
-    const count = Object.keys(sanitized).length;
-    saveBackupBundle();
-    progress = sanitized;
-    saveProgress(); updateHeader(); render();
-    msg.style.color = 'var(--green)';
-    msg.innerHTML = 'Imported ' + count + ' entries from Google Sheets. <button class="btn" style="font-size:9px;padding:2px 6px;margin-left:6px" onclick="undoImport()">Undo</button>';
-  };
-
-  script = document.createElement('script');
-  script.onerror = () => {
-    clearTimeout(timer);
-    cleanup();
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'Script URL failed to load. Most likely cause: deployment access is set to "Anyone with Google account" instead of "Anyone". Create a new deployment with access set to Anyone (no qualifier), then use the new URL.';
-  };
-  script.src = rawUrl.split('?')[0] + '?callback=' + cbName;
-  document.head.appendChild(script);
-}
-
 function closeModal() { document.getElementById('overlay').classList.remove('open'); }
 function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
 
@@ -6538,6 +6438,12 @@ async function idbSet(key, val) {
     tx.objectStore('kv').put(val, key);
   } catch {}
 }
+async function idbDel(key) {
+  try {
+    const db = await getIDB();
+    db.transaction('kv', 'readwrite').objectStore('kv').delete(key);
+  } catch {}
+}
 
 async function writeBackup() {
   if (!backupHandle) return;
@@ -6629,6 +6535,10 @@ async function login() {
 async function logout() {
   if (!_sb) return;
   await _sb.auth.signOut();
+  // Forget the auto-backup file so the next user's progress isn't written into this user's file
+  backupHandle = null;
+  idbDel('backupHandle');
+  updateBackupBtn();
   localStorage.removeItem(LS_KEY);
   localStorage.removeItem(CL_KEY);
   localStorage.removeItem(CL_OWN_KEY);
@@ -6666,7 +6576,7 @@ async function loadFromCloud() {
       .single();
 
     if (error) { console.warn('[WF Tracker] loadFromCloud query error:', error.code, error.message); return; }
-    if (!data)  { console.warn('[WF Tracker] loadFromCloud: no saved data found for user', currentUser?.id); return; }
+    if (!data)  { console.warn('[WF Tracker] loadFromCloud: no saved data found for this account'); return; }
 
     const localTs = parseInt(localStorage.getItem('wf-cloud-ts') || '0', 10);
     const cloudTs = new Date(data.updated_at).getTime();

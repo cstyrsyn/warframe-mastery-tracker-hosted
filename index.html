@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy"
-  content="base-uri 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net https://cdn.sheetjs.com; script-src-attr 'unsafe-inline'; connect-src 'self' https://*.supabase.co; style-src 'unsafe-inline';">
+  content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js; script-src-attr 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co;">
 <title>Warframe Mastery Tracker</title>
 <style>
   /* Colour sets across the app*/
@@ -1713,25 +1713,6 @@ body.topbar-mode #tabs .tabtext { padding: 0 14px; border-left: none; border-bot
       <button class="btn" id="btn-import-file">Open File…</button>
       <span id="modal-file-name" style="font-size:10px; color:var(--text-muted);">JSON or .xlsx checklist · or paste below</span>
     </div>
-    <div id="modal-sheets-row" style="display:none; margin-bottom:4px; align-items:center; gap:8px; flex-wrap:wrap;">
-      <input type="url" id="modal-sheets-url" placeholder="Google Apps Script URL…"
-        style="flex:1; min-width:180px; background:var(--surface3); border:1px solid var(--border); color:var(--text); border-radius:4px; padding:4px 8px; font-size:11px; outline:none;">
-      <button class="btn" id="btn-fetch-sheets">Fetch from Sheets</button>
-      <button class="btn" id="btn-test-sheets" style="font-size:10px;padding:3px 8px;" title="Open the script URL in a new tab to verify it returns data">Test ↗</button>
-      <a id="sheets-help-link" href="#"
-        style="font-size:10px; color:var(--text-muted); text-decoration:none; white-space:nowrap;">Setup ▸</a>
-    </div>
-    <div id="modal-sheets-help" style="display:none; font-size:10px; color:var(--text-dim); line-height:1.7; margin-bottom:8px; padding:8px 10px; background:var(--surface3); border-radius:4px; border:1px solid var(--border-soft);">
-      <strong style="color:var(--text-muted);">One-time Google Sheet setup:</strong><br>
-      1. Open your sheet &rarr; <em>Extensions &rarr; Apps Script</em><br>
-      2. Paste the code from <code style="font-size:9px;color:var(--gold-dim);">Import/sheets-import.gs</code> and save<br>
-      3. <em>Deploy &rarr; New deployment &rarr; Web app</em><br>
-      &nbsp;&nbsp;&nbsp;Execute as: <em>Me</em><br>
-      &nbsp;&nbsp;&nbsp;Who has access: <strong style="color:var(--gold-dim);">Anyone</strong> &mdash; <em>not</em> &ldquo;Anyone with Google account&rdquo;<br>
-      4. Authorise when prompted, copy the web app URL, paste above.<br>
-      5. Use <strong>Test ↗</strong> to verify &mdash; you should see text starting with <code style="font-size:9px;color:var(--gold-dim);">test({</code><br>
-      <span style="color:var(--text-muted);margin-top:4px;display:block;">Already deployed? Re-deploy as a new version after any code or access-level changes.</span>
-    </div>
     <textarea id="modal-ta" spellcheck="false"></textarea>
     <div id="modal-foot">
       <span id="modal-msg"></span>
@@ -1825,8 +1806,9 @@ body.topbar-mode #tabs .tabtext { padding: 0 14px; border-left: none; border-bot
 
 <script src="weapon-mr.js"></script>
 <script src="config.js"></script>
-<!-- Pinned with SRI: this script can read the session token. To upgrade, change the version and
-     regenerate the hash: curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
+<!-- Pinned with SRI: this script can read the session token. To upgrade, change the version here
+     AND in the CSP script-src at the top of this file, and regenerate the hash:
+     curl -sL <url> | openssl dgst -sha384 -binary | openssl base64 -A -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"
   integrity="sha384-Rj26LVGvoeRVR6+mwQmFfcR3QOBEwT+ZmuCWpuiqeTzJpCs0ER4ITAWGb4Hiy3Ok" crossorigin="anonymous"></script>
 <script src="app.js"></script>

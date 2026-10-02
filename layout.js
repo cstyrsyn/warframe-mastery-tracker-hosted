@@ -155,9 +155,6 @@ function toggleFilterRow(){
   on('overlay',          'click',  function(e){ overlayClick(e); });
   on('modal-file-input', 'change', function(e){ handleFileSelect(e); });
   on('btn-import-file',  'click',  function(){ openImportFile(); });
-  on('btn-fetch-sheets', 'click',  function(){ fetchFromSheets(); });
-  on('btn-test-sheets',  'click',  function(){ testSheetsUrl(); });
-  on('sheets-help-link', 'click',  function(e){ toggleSheetsHelp(e); });
   on('btn-close-modal',  'click',  function(){ closeModal(); });
   on('modal-save-file',  'click',  function(){ saveProgressToFile(); });
 

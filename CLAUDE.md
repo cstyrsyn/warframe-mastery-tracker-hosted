@@ -20,7 +20,7 @@ Warframe mastery tracker, hosted version with Supabase cloud sync.
 | `data.js` | **Original monolith — kept as reference, not loaded by index.html** |
 | `relics.js` | Relic drop data |
 | `weapon-mr.js` | Extra weapon MR data |
-| `build.js` | Build/bundle script |
+| `build.js` | Cloudflare Pages build: copies the `PUBLIC_FILES` allowlist into `dist/`, generates `config.js`, narrows the CSP `connect-src` to the real Supabase project. **A new file the page loads must be added to `PUBLIC_FILES`** |
 | `config.js` | Supabase credentials — **gitignored**, see `config.example.js` |
 | `config.example.js` | Template for config.js |
 | `dev/` | Scraper scripts, data generators, Overframe proxy server |
@@ -559,7 +559,7 @@ also isn't included there today.
 
 ### Import/Export
 - `openImport()` / `openExport()` — JSON export/import via modal textarea
-- `handleFileSelect(event)` — also accepts `.xlsx` / `.xlsm` (SheetJS) and triggers `fetchFromSheets()` for Google Sheets
+- `handleFileSelect(event)` — also accepts `.xlsx` / `.xlsm` (SheetJS). (The Google Sheets JSONP import was removed — it executed arbitrary Apps Script code and was blocked by the CSP anyway.)
 - `setBackupFile()` — opens a file-picker to choose the auto-backup destination
 
 ## Status Filter Values
@@ -625,6 +625,18 @@ Instead, save the value and update only the dependent pieces in place. Existing 
 (patch text/classes on the card/row). Re-rendering a *sibling* list is fine (the Builds-page search
 boxes rebuild `#blp-of-results`, `#blp-dd-N`, `#blp-ability-opts-N`, never the box itself). Full
 re-renders belong in `onchange`/click handlers, where losing focus doesn't matter.
+
+## ⚠ Security constraints
+
+- **CSP** (`<meta>` in `index.html`): `script-src` lists the two CDN scripts by exact URL, and `img-src`
+  is `'self' data:`. Upgrading supabase-js or SheetJS means changing the version in the `<script>` tag
+  **and** the CSP, and regenerating the `integrity` hash. Any new external host (images, fetches) must
+  be added to the CSP or it will be blocked. `_headers` adds `frame-ancestors 'none'` and other headers.
+- **Inline handlers**: strings interpolated into `onclick="fn('${...}')"` must go through `jsStr()`;
+  text and attributes through `esc()`. Numbers from saved/imported data must be coerced (`Number()`,
+  or validated as in `sanitizeCustomItems()`) — never interpolate them raw.
+- **Imported / cloud data is untrusted**: Import JSON and the Supabase row can contain anything, so
+  sanitize on load (`sanitizeCustomItems`, `sanitizeMyBuilds`, `sanitizeMyLoadouts`).
 
 ## ⚠ UI text size (CSS zoom)
 

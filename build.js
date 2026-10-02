@@ -38,6 +38,22 @@ for (const file of PUBLIC_FILES) {
   fs.cpSync(file, path.join(OUT, file), { recursive: true });
 }
 
+// Narrow the CSP's connect-src from any Supabase project to this one, so a script injected into the
+// page can't send data to an attacker's own Supabase project. Only the deployed copy is changed.
+let sbOrigin;
+try { sbOrigin = new URL(url).origin; } catch {}
+if (!sbOrigin || !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(sbOrigin)) {
+  console.error(`SUPABASE_URL must look like https://<project>.supabase.co (got ${url})`);
+  process.exit(1);
+}
+const indexPath = path.join(OUT, 'index.html');
+const html      = fs.readFileSync(indexPath, 'utf8');
+if (!html.includes('https://*.supabase.co')) {
+  console.error('index.html CSP no longer contains https://*.supabase.co — update build.js');
+  process.exit(1);
+}
+fs.writeFileSync(indexPath, html.replace('https://*.supabase.co', sbOrigin));
+
 fs.writeFileSync(path.join(OUT, 'config.js'), `window.WF_CONFIG = {
   supabaseUrl:            ${JSON.stringify(url)},
   supabasePublishableKey: ${JSON.stringify(key)},
